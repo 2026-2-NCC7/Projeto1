@@ -16,7 +16,9 @@ import {
   ChevronDown,
   X,
   Briefcase,
-  Sparkles
+  Sparkles,
+  Sun,
+  Moon
 } from 'lucide-react';
 
 type LoginTab = 'profissional' | 'empresa' | 'admin';
@@ -32,7 +34,7 @@ interface AccountCredential {
 }
 
 export const PersonaSelectorView: React.FC<{ onEnterApp: () => void }> = ({ onEnterApp }) => {
-  const { login, commercialConfig, vacancies, companies } = useApp();
+  const { theme, toggleTheme, login, commercialConfig, vacancies, companies } = useApp();
 
   const accounts: AccountCredential[] = [
     {
@@ -164,69 +166,85 @@ export const PersonaSelectorView: React.FC<{ onEnterApp: () => void }> = ({ onEn
             <a href="#para-empresas" className="hover:text-white transition-colors">Para Empresas</a>
           </nav>
 
-          {/* ÍCONE DE LOGIN COM LISTA SUSPENSA (COMO NOS SITES REAIS) */}
-          <div className="relative">
+          {/* ALTERNADOR DE TEMA + ÍCONE DE LOGIN COM LISTA SUSPENSA */}
+          <div className="flex items-center gap-2.5">
             <button
               type="button"
-              onClick={() => setShowAccountDropdown(!showAccountDropdown)}
-              className="flex items-center gap-2 px-3.5 py-2 rounded-base bg-white/10 hover:bg-white/15 border border-white/15 text-xs font-bold text-white transition-all"
-              title="Acessar minha conta"
+              onClick={toggleTheme}
+              className="w-9 h-9 rounded-base bg-white/10 hover:bg-white/15 border border-white/15 flex items-center justify-center text-white transition-all"
+              title={theme === 'dark' ? 'Ativar Modo Claro' : 'Ativar Modo Escuro'}
+              aria-label="Alternar tema claro/escuro"
             >
-              <div className="w-6 h-6 rounded-full bg-primary flex items-center justify-center">
-                <User className="w-3.5 h-3.5 text-white" />
-              </div>
-              <span>Entrar</span>
-              <ChevronDown className="w-3.5 h-3.5 text-brandNavySub" />
+              {theme === 'dark' ? (
+                <Sun className="w-4 h-4 text-brandOrange" />
+              ) : (
+                <Moon className="w-4 h-4 text-brandNavySub" />
+              )}
             </button>
 
-            {/* LISTA SUSPENSA DE ACESSO */}
-            {showAccountDropdown && (
-              <div className="absolute right-0 mt-2 w-64 bg-white text-foreground rounded-base border border-border shadow-xl py-2 z-50">
-                <div className="px-3.5 py-1.5 border-b border-border">
-                  <span className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">
-                    Selecione seu Portal de Acesso
-                  </span>
+            <div className="relative">
+              <button
+                type="button"
+                onClick={() => setShowAccountDropdown(!showAccountDropdown)}
+                className="flex items-center gap-2 px-3.5 py-2 rounded-base bg-white/10 hover:bg-white/15 border border-white/15 text-xs font-bold text-white transition-all"
+                title="Acessar minha conta"
+              >
+                <div className="w-6 h-6 rounded-full bg-primary flex items-center justify-center">
+                  <User className="w-3.5 h-3.5 text-white" />
                 </div>
+                <span>Entrar</span>
+                <ChevronDown className="w-3.5 h-3.5 text-brandNavySub" />
+              </button>
 
-                <button
-                  type="button"
-                  onClick={() => openLoginForPortal('profissional', 'candidato-lucas')}
-                  className="w-full px-3.5 py-2.5 text-left hover:bg-secondary/60 flex items-center gap-2.5 transition-colors"
-                >
-                  <User className="w-4 h-4 text-primary shrink-0" />
-                  <div>
-                    <strong className="text-xs font-bold text-foreground block">Profissional & Comunidade</strong>
-                    <span className="text-[10px] text-muted-foreground">Candidatos e membros da rede</span>
+              {/* LISTA SUSPENSA DE ACESSO */}
+              {showAccountDropdown && (
+                <div className="absolute right-0 mt-2 w-64 bg-white text-foreground rounded-base border border-border shadow-xl py-2 z-50">
+                  <div className="px-3.5 py-1.5 border-b border-border">
+                    <span className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">
+                      Selecione seu Portal de Acesso
+                    </span>
                   </div>
-                </button>
 
-                <button
-                  type="button"
-                  onClick={() => openLoginForPortal('empresa', 'empresa-orion')}
-                  className="w-full px-3.5 py-2.5 text-left hover:bg-secondary/60 flex items-center gap-2.5 transition-colors"
-                >
-                  <Building2 className="w-4 h-4 text-brandOrange shrink-0" />
-                  <div>
-                    <strong className="text-xs font-bold text-foreground block">Portal da Empresa (B2B)</strong>
-                    <span className="text-[10px] text-muted-foreground">Recrutadores, vagas e NFS-e</span>
-                  </div>
-                </button>
-
-                <div className="border-t border-border mt-1 pt-1">
                   <button
                     type="button"
-                    onClick={() => openLoginForPortal('admin', 'admin-qitech')}
-                    className="w-full px-3.5 py-2 text-left hover:bg-secondary/60 flex items-center gap-2.5 transition-colors"
+                    onClick={() => openLoginForPortal('profissional', 'candidato-lucas')}
+                    className="w-full px-3.5 py-2.5 text-left hover:bg-secondary/60 flex items-center gap-2.5 transition-colors"
                   >
-                    <ShieldCheck className="w-4 h-4 text-gray-800 shrink-0" />
+                    <User className="w-4 h-4 text-primary shrink-0" />
                     <div>
-                      <strong className="text-xs font-bold text-foreground block">Administração Q.I. Tech</strong>
-                      <span className="text-[10px] text-muted-foreground">Governança, preços e LGPD</span>
+                      <strong className="text-xs font-bold text-foreground block">Profissional & Comunidade</strong>
+                      <span className="text-[10px] text-muted-foreground">Candidatos e membros da rede</span>
                     </div>
                   </button>
+
+                  <button
+                    type="button"
+                    onClick={() => openLoginForPortal('empresa', 'empresa-orion')}
+                    className="w-full px-3.5 py-2.5 text-left hover:bg-secondary/60 flex items-center gap-2.5 transition-colors"
+                  >
+                    <Building2 className="w-4 h-4 text-brandOrange shrink-0" />
+                    <div>
+                      <strong className="text-xs font-bold text-foreground block">Portal da Empresa (B2B)</strong>
+                      <span className="text-[10px] text-muted-foreground">Recrutadores, vagas e NFS-e</span>
+                    </div>
+                  </button>
+
+                  <div className="border-t border-border mt-1 pt-1">
+                    <button
+                      type="button"
+                      onClick={() => openLoginForPortal('admin', 'admin-qitech')}
+                      className="w-full px-3.5 py-2 text-left hover:bg-secondary/60 flex items-center gap-2.5 transition-colors"
+                    >
+                      <ShieldCheck className="w-4 h-4 text-gray-800 shrink-0" />
+                      <div>
+                        <strong className="text-xs font-bold text-foreground block">Administração Q.I. Tech</strong>
+                        <span className="text-[10px] text-muted-foreground">Governança, preços e LGPD</span>
+                      </div>
+                    </button>
+                  </div>
                 </div>
-              </div>
-            )}
+              )}
+            </div>
           </div>
 
         </div>

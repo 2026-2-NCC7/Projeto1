@@ -1,5 +1,6 @@
 /** @type {import('tailwindcss').Config} */
 export default {
+  darkMode: 'class',
   content: [
     "./index.html",
     "./src/**/*.{js,ts,jsx,tsx}",
@@ -7,32 +8,32 @@ export default {
   theme: {
     extend: {
       colors: {
-        background: '#F2F8F9',
-        foreground: '#0C1D23',
-        card: '#FFFFFF',
+        background: 'rgb(var(--background) / <alpha-value>)',
+        foreground: 'rgb(var(--foreground) / <alpha-value>)',
+        card: 'rgb(var(--card) / <alpha-value>)',
         primary: {
-          DEFAULT: '#007585',
-          foreground: '#FCFCFC',
-          dark: '#003E48',
+          DEFAULT: 'rgb(var(--primary) / <alpha-value>)',
+          foreground: 'rgb(var(--primary-foreground) / <alpha-value>)',
+          dark: 'rgb(var(--primary-dark) / <alpha-value>)',
         },
         secondary: {
-          DEFAULT: '#E0EEEF',
-          foreground: '#0C1D23',
+          DEFAULT: 'rgb(var(--secondary) / <alpha-value>)',
+          foreground: 'rgb(var(--secondary-foreground) / <alpha-value>)',
         },
         muted: {
-          DEFAULT: '#E6ECEF',
-          foreground: '#54676D',
+          DEFAULT: 'rgb(var(--muted) / <alpha-value>)',
+          foreground: 'rgb(var(--muted-foreground) / <alpha-value>)',
         },
         accent: {
-          DEFAULT: '#CEF0ED',
-          foreground: '#003E48',
+          DEFAULT: 'rgb(var(--accent) / <alpha-value>)',
+          foreground: 'rgb(var(--accent-foreground) / <alpha-value>)',
         },
         destructive: {
-          DEFAULT: '#DF2321',
-          foreground: '#FCFCFC',
+          DEFAULT: 'rgb(var(--destructive) / <alpha-value>)',
+          foreground: 'rgb(var(--destructive-foreground) / <alpha-value>)',
         },
-        border: '#CDDADE',
-        input: '#CDDADE',
+        border: 'rgb(var(--border) / <alpha-value>)',
+        input: 'rgb(var(--input) / <alpha-value>)',
         brandOrange: '#F4763B',
         brandNavy: '#00222F',
         brandNavyText: '#F5F9FA',

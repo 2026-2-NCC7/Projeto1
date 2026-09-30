@@ -1,13 +1,13 @@
 import React, { useState } from 'react';
 import { useApp, ActivePersona } from '../../context/AppContext';
-import { Bell, Search, User, LogOut, ChevronDown, Check } from 'lucide-react';
+import { Bell, Search, User, LogOut, ChevronDown, Check, Sun, Moon } from 'lucide-react';
 
 interface HeaderProps {
   currentViewTitle: string;
 }
 
 export const Header: React.FC<HeaderProps> = ({ currentViewTitle }) => {
-  const { activePersona, setActivePersona, candidates, notifications, markNotificationAsRead, logout } = useApp();
+  const { theme, toggleTheme, activePersona, setActivePersona, candidates, notifications, markNotificationAsRead, logout } = useApp();
   const [showNotifications, setShowNotifications] = useState(false);
   const [showUserMenu, setShowUserMenu] = useState(false);
 
@@ -50,7 +50,7 @@ export const Header: React.FC<HeaderProps> = ({ currentViewTitle }) => {
   const unreadCount = myNotifications.filter(n => !n.read).length;
 
   return (
-    <header className="sticky top-0 z-30 h-16 bg-white border-b border-border shadow-xs">
+    <header className="sticky top-0 z-30 h-16 bg-card border-b border-border shadow-xs">
       <div className="max-w-[1440px] mx-auto h-full px-4 flex items-center justify-between gap-4">
         
         {/* Marca e Seção Atual */}
@@ -75,14 +75,29 @@ export const Header: React.FC<HeaderProps> = ({ currentViewTitle }) => {
             <input
               type="text"
               placeholder="Pesquisar vagas, habilidades ou especialistas..."
-              className="w-full h-9 pl-9 pr-3 text-xs bg-background border border-border rounded-base focus:outline-none focus:ring-1 focus:ring-primary"
+              className="w-full h-9 pl-9 pr-3 text-xs bg-background border border-border rounded-base text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-primary"
             />
           </div>
         </div>
 
-        {/* Notificações e Ícone de Conta com Lista Suspensa */}
-        <div className="flex items-center gap-3">
+        {/* Alternador de Tema, Notificações e Ícone de Conta com Lista Suspensa */}
+        <div className="flex items-center gap-2.5">
           
+          {/* Botão Alternar Modo Escuro / Claro */}
+          <button
+            type="button"
+            onClick={toggleTheme}
+            className="w-9 h-9 rounded-base border border-border flex items-center justify-center hover:bg-secondary text-foreground transition-colors"
+            title={theme === 'dark' ? 'Ativar Modo Claro' : 'Ativar Modo Escuro'}
+            aria-label="Alternar tema claro/escuro"
+          >
+            {theme === 'dark' ? (
+              <Sun className="w-4 h-4 text-brandOrange" />
+            ) : (
+              <Moon className="w-4 h-4 text-muted-foreground" />
+            )}
+          </button>
+
           {/* Sino de Notificações */}
           <div className="relative">
             <button
@@ -90,7 +105,7 @@ export const Header: React.FC<HeaderProps> = ({ currentViewTitle }) => {
                 setShowNotifications(!showNotifications);
                 setShowUserMenu(false);
               }}
-              className="w-9 h-9 rounded-base border border-border flex items-center justify-center hover:bg-secondary text-foreground relative"
+              className="w-9 h-9 rounded-base border border-border flex items-center justify-center hover:bg-secondary text-foreground relative transition-colors"
               title="Notificações"
             >
               <Bell className="w-4 h-4 text-muted-foreground" />
@@ -102,7 +117,7 @@ export const Header: React.FC<HeaderProps> = ({ currentViewTitle }) => {
             </button>
 
             {showNotifications && (
-              <div className="absolute right-0 mt-2 w-80 bg-white border border-border rounded-base shadow-lg p-3 z-50">
+              <div className="absolute right-0 mt-2 w-80 bg-card border border-border rounded-base shadow-lg p-3 z-50">
                 <div className="flex items-center justify-between pb-2 border-b border-border mb-2">
                   <span className="font-heading font-bold text-xs text-foreground">Notificações</span>
                   <span className="text-[10px] text-muted-foreground">{myNotifications.length} recente(s)</span>

@@ -3,6 +3,46 @@
 @tailwind utilities;
 
 @layer base {
+  :root {
+    --background: 242 248 249;
+    --foreground: 12 29 35;
+    --card: 255 255 255;
+    --primary: 0 117 133;
+    --primary-foreground: 252 252 252;
+    --primary-dark: 0 62 72;
+    --secondary: 224 238 239;
+    --secondary-foreground: 12 29 35;
+    --muted: 230 236 239;
+    --muted-foreground: 84 103 109;
+    --accent: 206 240 237;
+    --accent-foreground: 0 62 72;
+    --destructive: 223 35 33;
+    --destructive-foreground: 252 252 252;
+    --border: 205 218 222;
+    --input: 205 218 222;
+    color-scheme: light;
+  }
+
+  .dark {
+    --background: 9 20 26;
+    --foreground: 236 246 248;
+    --card: 15 32 42;
+    --primary: 14 165 183;
+    --primary-foreground: 252 252 252;
+    --primary-dark: 0 117 133;
+    --secondary: 23 47 61;
+    --secondary-foreground: 236 246 248;
+    --muted: 20 41 54;
+    --muted-foreground: 150 178 186;
+    --accent: 22 62 72;
+    --accent-foreground: 206 240 237;
+    --destructive: 239 68 68;
+    --destructive-foreground: 252 252 252;
+    --border: 33 63 80;
+    --input: 33 63 80;
+    color-scheme: dark;
+  }
+
   * {
     letter-spacing: 0;
   }
@@ -10,10 +50,81 @@
     font-family: 'Space Grotesk', sans-serif;
   }
   body {
-    background-color: #F2F8F9;
-    color: #0C1D23;
+    background-color: rgb(var(--background));
+    color: rgb(var(--foreground));
     font-family: 'DM Sans', sans-serif;
+    transition: background-color 0.2s ease, color 0.2s ease;
   }
+}
+
+/* Adaptação automática de superfícies e alertas no modo escuro */
+.dark .bg-white {
+  background-color: rgb(var(--card));
+}
+
+.dark .hover\:bg-white:hover {
+  background-color: rgb(var(--secondary));
+}
+
+.dark .bg-emerald-50 {
+  background-color: rgba(16, 185, 129, 0.12);
+}
+
+.dark .bg-emerald-100 {
+  background-color: rgba(16, 185, 129, 0.2);
+}
+
+.dark .text-emerald-700,
+.dark .text-emerald-800,
+.dark .text-emerald-900 {
+  color: #6ee7b7;
+}
+
+.dark .border-emerald-200,
+.dark .border-emerald-300 {
+  border-color: rgba(16, 185, 129, 0.35);
+}
+
+.dark .bg-amber-50 {
+  background-color: rgba(245, 158, 11, 0.12);
+}
+
+.dark .bg-amber-100 {
+  background-color: rgba(245, 158, 11, 0.2);
+}
+
+.dark .text-amber-700,
+.dark .text-amber-800,
+.dark .text-amber-900 {
+  color: #fcd34d;
+}
+
+.dark .border-amber-200,
+.dark .border-amber-300 {
+  border-color: rgba(245, 158, 11, 0.35);
+}
+
+.dark .bg-red-50 {
+  background-color: rgba(239, 68, 68, 0.12);
+}
+
+.dark .bg-red-100 {
+  background-color: rgba(239, 68, 68, 0.2);
+}
+
+.dark .text-red-700,
+.dark .text-red-800 {
+  color: #fca5a5;
+}
+
+.dark .bg-gray-100,
+.dark .bg-gray-200 {
+  background-color: rgb(var(--secondary));
+}
+
+.dark .text-gray-700,
+.dark .text-gray-800 {
+  color: rgb(var(--foreground));
 }
 
 /* Custom scrollbar para listas e modais */
@@ -22,12 +133,12 @@
   height: 6px;
 }
 ::-webkit-scrollbar-track {
-  background: #E6ECEF;
+  background: rgb(var(--muted));
 }
 ::-webkit-scrollbar-thumb {
-  background: #CDDADE;
+  background: rgb(var(--border));
   border-radius: 3px;
 }
 ::-webkit-scrollbar-thumb:hover {
-  background: #007585;
+  background: rgb(var(--primary));
 }

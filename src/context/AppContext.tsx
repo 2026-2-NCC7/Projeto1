@@ -51,6 +51,8 @@ export type ActivePersona =
   | 'admin-qitech';
 
 interface AppContextType {
+  theme: 'light' | 'dark';
+  toggleTheme: () => void;
   activePersona: ActivePersona;
   setActivePersona: (persona: ActivePersona) => void;
   isAuthenticated: boolean;
@@ -124,12 +126,35 @@ interface AppContextType {
 }
 
 const STORAGE_KEY = 'QITECH_PROD_STATE_V3';
+const THEME_STORAGE_KEY = 'QITECH_THEME';
 
 const AppContext = createContext<AppContextType | undefined>(undefined);
 
 export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
+  const [theme, setTheme] = useState<'light' | 'dark'>(() => {
+    const saved = localStorage.getItem(THEME_STORAGE_KEY);
+    if (saved === 'dark' || saved === 'light') return saved;
+    if (typeof window !== 'undefined' && window.matchMedia?.('(prefers-color-scheme: dark)').matches) {
+      return 'dark';
+    }
+    return 'light';
+  });
   const [activePersona, setActivePersona] = useState<ActivePersona>('candidato-lucas');
   const [isAuthenticated, setIsAuthenticated] = useState<boolean>(false);
+
+  useEffect(() => {
+    const root = document.documentElement;
+    if (theme === 'dark') {
+      root.classList.add('dark');
+    } else {
+      root.classList.remove('dark');
+    }
+    localStorage.setItem(THEME_STORAGE_KEY, theme);
+  }, [theme]);
+
+  const toggleTheme = () => {
+    setTheme(prev => (prev === 'dark' ? 'light' : 'dark'));
+  };
   
   // Estados mockados
   const [candidates, setCandidates] = useState<Record<string, CandidateProfile>>({
@@ -1029,6 +1054,8 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
 
   return (
     <AppContext.Provider value={{
+      theme,
+      toggleTheme,
       activePersona,
       setActivePersona,
       isAuthenticated,
