@@ -36,10 +36,9 @@ const SKILL_CATALOG_SAMPLES = [
 ];
 
 export const CandidateProfileView: React.FC = () => {
-  const { activePersona, candidates, updateCandidateProfile, addCandidateSkill, removeCandidateSkill, suggestNewSkill, joinCommunity } = useApp();
+  const { currentCandidateId, candidates, updateCandidateProfile, addCandidateSkill, removeCandidateSkill, suggestNewSkill, joinCommunity } = useApp();
   
-  const currentCandidateId = activePersona === 'candidato-marina' ? 'cand-marina' : 'cand-lucas';
-  const profile = candidates[currentCandidateId];
+  const profile = candidates[currentCandidateId] || candidates['cand-lucas'];
 
   // Estados locais para edição rápida de skill
   const [selectedSkillName, setSelectedSkillName] = useState(SKILL_CATALOG_SAMPLES[0].name);

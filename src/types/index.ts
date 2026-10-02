@@ -4,6 +4,49 @@ export type WorkContractType = 'CLT' | 'PJ' | 'Projeto';
 export type WorkModality = 'Remoto' | 'Híbrido' | 'Presencial';
 export type Availability = 'Imediata' | '15 dias' | '30 dias' | 'A combinar';
 export type VisibilityState = 'Ativo' | 'Discreto' | 'Pausado';
+export type UserRole = 'profissional' | 'empresa' | 'admin';
+
+export interface RegisteredUser {
+  id: string;
+  role: UserRole;
+  name: string;
+  email: string;
+  password: string;
+  createdAt: string;
+  status: 'ativo' | 'onboarding_pendente';
+  // Campos exclusivos de Empresa
+  companyName?: string;
+  cnpj?: string;
+  companyId?: string;
+  // Campos exclusivos de Profissional
+  technicalArea?: string;
+  seniority?: Seniority;
+  candidateId?: string;
+  onboardingCompleted?: boolean;
+  // Vínculo opcional com persona demo
+  isDemo?: boolean;
+  personaId?: string;
+}
+
+export interface UserSession {
+  userId: string;
+  role: UserRole;
+  email: string;
+  loginAt: string;
+}
+
+export interface ProfessionalOnboardingData {
+  headline: string;
+  seniority: Seniority;
+  hardSkills: string[];
+  salaryMin: number;
+  salaryMax: number;
+  modality: WorkModality;
+  city: string;
+  state: string;
+  availability: Availability;
+}
+
 
 export interface CandidateSkill {
   id: string;

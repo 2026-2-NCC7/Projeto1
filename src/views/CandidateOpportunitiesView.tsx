@@ -3,9 +3,7 @@ import { useApp } from '../context/AppContext';
 import { Sparkles, Building2, CheckCircle, ArrowRight } from 'lucide-react';
 
 export const CandidateOpportunitiesView: React.FC<{ onNavigateToProcess: () => void }> = ({ onNavigateToProcess }) => {
-  const { activePersona, vacancies, selectionProcesses, companies } = useApp();
-
-  const currentCandidateId = activePersona === 'candidato-marina' ? 'cand-marina' : 'cand-lucas';
+  const { currentCandidateId, vacancies, selectionProcesses, companies } = useApp();
   
   // Vagas que possuem processo com este candidato
   const myProcesses = selectionProcesses.filter(p => p.candidateId === currentCandidateId);

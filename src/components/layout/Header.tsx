@@ -1,52 +1,70 @@
 import React, { useState } from 'react';
 import { useApp, ActivePersona } from '../../context/AppContext';
-import { Bell, Search, User, LogOut, ChevronDown, Check, Sun, Moon } from 'lucide-react';
+import { Bell, Search, User, LogOut, ChevronDown, Check, Sun, Moon, PlayCircle } from 'lucide-react';
 
 interface HeaderProps {
   currentViewTitle: string;
 }
 
 export const Header: React.FC<HeaderProps> = ({ currentViewTitle }) => {
-  const { theme, toggleTheme, activePersona, setActivePersona, candidates, notifications, markNotificationAsRead, logout } = useApp();
+  const {
+    theme,
+    toggleTheme,
+    activePersona,
+    setActivePersona,
+    currentUser,
+    session,
+    currentCandidateId,
+    currentCompany,
+    candidates,
+    notifications,
+    markNotificationAsRead,
+    logout
+  } = useApp();
   const [showNotifications, setShowNotifications] = useState(false);
   const [showUserMenu, setShowUserMenu] = useState(false);
 
-  const accounts: Array<{ id: ActivePersona; name: string; badge: string }> = [
-    { id: 'candidato-lucas', name: 'Lucas Almeida', badge: 'Profissional' },
-    { id: 'candidato-marina', name: 'Marina Costa', badge: 'Profissional Sênior' },
-    { id: 'comunidade-rafael', name: 'Rafael Mendes', badge: 'Comunidade' },
-    { id: 'empresa-orion', name: 'Orion Tech Solutions', badge: 'Empresa B2B' },
-    { id: 'admin-qitech', name: 'Governança Q.I. Tech', badge: 'Admin' }
+  const demoAccounts: Array<{ id: ActivePersona; name: string; badge: string }> = [
+    { id: 'candidato-lucas', name: 'Lucas Almeida', badge: 'Profissional (Demo)' },
+    { id: 'candidato-marina', name: 'Marina Costa', badge: 'Profissional Sênior (Demo)' },
+    { id: 'comunidade-rafael', name: 'Rafael Mendes', badge: 'Comunidade (Demo)' },
+    { id: 'empresa-orion', name: 'Orion Tech Solutions', badge: 'Empresa B2B (Demo)' },
+    { id: 'admin-qitech', name: 'Governança Q.I. Tech', badge: 'Admin (Demo)' }
   ];
 
-  let userDisplayName = 'Lucas Almeida';
-  let userAvatar = 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150&auto=format&fit=crop&q=80';
+  let userDisplayName = currentUser?.name || 'Lucas Almeida';
+  let userAvatar = '';
   let userBadge = 'Profissional';
-  let currentUserId = 'user-lucas';
+  let currentUserId = currentUser?.id || 'user-lucas';
 
-  if (activePersona === 'candidato-marina') {
-    userDisplayName = candidates['cand-marina']?.name || 'Marina Costa';
-    userAvatar = candidates['cand-marina']?.avatar || '';
-    userBadge = 'Profissional Sênior';
-    currentUserId = 'user-marina';
-  } else if (activePersona === 'empresa-orion') {
-    userDisplayName = 'Orion Tech Solutions';
-    userAvatar = 'https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=150&auto=format&fit=crop&q=80';
+  if (session?.role === 'empresa' || activePersona === 'empresa-orion') {
+    userDisplayName = currentCompany?.name || currentUser?.companyName || 'Orion Tech Solutions';
+    userAvatar = currentUser?.isDemo
+      ? 'https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=150&auto=format&fit=crop&q=80'
+      : '';
     userBadge = 'Empresa B2B';
-    currentUserId = 'user-orion';
+    currentUserId = currentUser?.id || 'user-orion';
+  } else if (session?.role === 'admin' || activePersona === 'admin-qitech') {
+    userDisplayName = currentUser?.name || 'Governança Q.I. Tech';
+    userAvatar = '';
+    userBadge = 'Admin';
+    currentUserId = currentUser?.id || 'user-admin';
   } else if (activePersona === 'comunidade-rafael') {
     userDisplayName = 'Rafael Mendes';
     userAvatar = 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150&auto=format&fit=crop&q=80';
     userBadge = 'Comunidade';
     currentUserId = 'user-rafael-externo';
-  } else if (activePersona === 'admin-qitech') {
-    userDisplayName = 'Governança Q.I. Tech';
-    userAvatar = '';
-    userBadge = 'Admin';
-    currentUserId = 'user-admin';
+  } else {
+    const cand = candidates[currentCandidateId];
+    userDisplayName = cand?.name || currentUser?.name || 'Profissional';
+    userAvatar = cand?.avatar || '';
+    userBadge = cand?.seniority ? `Profissional ${cand.seniority}` : 'Profissional';
+    currentUserId = currentUser?.id || 'user-lucas';
   }
 
-  const myNotifications = notifications.filter(n => n.recipientUserId === currentUserId);
+  const myNotifications = notifications.filter(
+    n => n.recipientUserId === currentUserId || (session?.role === 'empresa' && n.recipientUserId === 'user-orion')
+  );
   const unreadCount = myNotifications.filter(n => !n.read).length;
 
   return (
@@ -147,7 +165,7 @@ export const Header: React.FC<HeaderProps> = ({ currentViewTitle }) => {
             )}
           </div>
 
-          {/* Menu Suspenso de Conta no Ícone do Usuário */}
+          {/* Menu Suspenso de Sessão do Usuário */}
           <div className="relative pl-2 border-l border-border">
             <button
               type="button"
@@ -169,7 +187,7 @@ export const Header: React.FC<HeaderProps> = ({ currentViewTitle }) => {
                 </div>
               )}
               <div className="hidden sm:block text-left">
-                <span className="text-xs font-bold text-foreground block leading-tight truncate max-w-[135px]">
+                <span className="text-xs font-bold text-foreground block leading-tight truncate max-w-[145px]">
                   {userDisplayName}
                 </span>
                 <span className="text-[10px] text-primary font-semibold block">
@@ -181,14 +199,29 @@ export const Header: React.FC<HeaderProps> = ({ currentViewTitle }) => {
 
             {showUserMenu && (
               <div className="absolute right-0 mt-2 w-64 bg-white border border-border rounded-base shadow-xl py-2 z-50">
-                <div className="px-3.5 py-1.5 border-b border-border">
-                  <span className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">
-                    Alternar Conta Ativa
+                {/* Dados da Sessão Atual */}
+                <div className="px-3.5 py-2 border-b border-border bg-background/50">
+                  <span className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground block">
+                    Sessão Autenticada
+                  </span>
+                  <strong className="text-xs font-bold text-foreground block truncate mt-0.5">
+                    {userDisplayName}
+                  </strong>
+                  <span className="text-[10px] text-muted-foreground block truncate">
+                    {session?.email || currentUser?.email}
                   </span>
                 </div>
 
-                {accounts.map(acc => {
-                  const isCurrent = acc.id === activePersona;
+                {/* Atalho de Demonstração para alternar personas seedadas */}
+                <div className="px-3.5 py-1.5 border-b border-border flex items-center gap-1">
+                  <PlayCircle className="w-3 h-3 text-brandOrange" />
+                  <span className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">
+                    Acesso de Demonstração
+                  </span>
+                </div>
+
+                {demoAccounts.map(acc => {
+                  const isCurrent = acc.id === activePersona && Boolean(currentUser?.isDemo);
                   return (
                     <button
                       key={acc.id}
@@ -197,7 +230,7 @@ export const Header: React.FC<HeaderProps> = ({ currentViewTitle }) => {
                         setActivePersona(acc.id);
                         setShowUserMenu(false);
                       }}
-                      className={`w-full px-3.5 py-2 text-left flex items-center justify-between text-xs hover:bg-secondary/60 transition-colors ${
+                      className={`w-full px-3.5 py-1.5 text-left flex items-center justify-between text-xs hover:bg-secondary/60 transition-colors ${
                         isCurrent ? 'bg-secondary/40 font-bold text-primary' : 'text-foreground'
                       }`}
                     >
@@ -215,11 +248,12 @@ export const Header: React.FC<HeaderProps> = ({ currentViewTitle }) => {
                     type="button"
                     onClick={() => {
                       setShowUserMenu(false);
+                      window.location.hash = '';
                       logout();
                     }}
                     className="w-full px-3.5 py-2 text-left text-xs font-bold text-destructive hover:bg-destructive/10 flex items-center gap-2 transition-colors"
                   >
-                    <LogOut className="w-3.5 h-3.5" /> Sair para o Site Inicial
+                    <LogOut className="w-3.5 h-3.5" /> Encerrar Sessão (Sair)
                   </button>
                 </div>
               </div>

@@ -14,8 +14,81 @@ import {
   RewardTransaction,
   CompanyInvoice,
   CommercialConfig,
-  ModerationReport
+  ModerationReport,
+  RegisteredUser
 } from '../types';
+
+export const SEED_DEMO_USERS: RegisteredUser[] = [
+  {
+    id: 'user-lucas',
+    role: 'profissional',
+    name: 'Lucas Almeida',
+    email: 'lucas@qitech.com.br',
+    password: '123456',
+    createdAt: '2026-09-01T10:00:00Z',
+    status: 'ativo',
+    technicalArea: 'Frontend',
+    seniority: 'Pleno',
+    candidateId: 'cand-lucas',
+    onboardingCompleted: true,
+    isDemo: true,
+    personaId: 'candidato-lucas'
+  },
+  {
+    id: 'user-marina',
+    role: 'profissional',
+    name: 'Marina Costa',
+    email: 'marina@qitech.com.br',
+    password: '123456',
+    createdAt: '2026-09-01T10:00:00Z',
+    status: 'ativo',
+    technicalArea: 'Dados/IA',
+    seniority: 'Sênior',
+    candidateId: 'cand-marina',
+    onboardingCompleted: true,
+    isDemo: true,
+    personaId: 'candidato-marina'
+  },
+  {
+    id: 'user-orion',
+    role: 'empresa',
+    name: 'Orion Tech Solutions',
+    companyName: 'Orion Tech Solutions',
+    cnpj: '45.123.890/0001-99',
+    email: 'recrutamento@oriontech.com.br',
+    password: '123456',
+    createdAt: '2026-09-01T10:00:00Z',
+    status: 'ativo',
+    companyId: 'comp-orion',
+    isDemo: true,
+    personaId: 'empresa-orion'
+  },
+  {
+    id: 'user-admin',
+    role: 'admin',
+    name: 'Governança Q.I. Tech',
+    email: 'admin@qitech.com.br',
+    password: '123456',
+    createdAt: '2026-09-01T10:00:00Z',
+    status: 'ativo',
+    isDemo: true,
+    personaId: 'admin-qitech'
+  },
+  {
+    id: 'user-rafael-externo',
+    role: 'profissional',
+    name: 'Rafael Mendes',
+    email: 'rafael@comunidade.com.br',
+    password: '123456',
+    createdAt: '2026-09-01T10:00:00Z',
+    status: 'ativo',
+    technicalArea: 'DevOps/Cloud',
+    seniority: 'Sênior',
+    onboardingCompleted: true,
+    isDemo: true,
+    personaId: 'comunidade-rafael'
+  }
+];
 
 export const SEED_COMPANIES: Company[] = [
   {

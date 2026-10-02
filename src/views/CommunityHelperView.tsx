@@ -5,15 +5,16 @@ import { Search, UserPlus, Check, Sparkles, Award } from 'lucide-react';
 const QUICK_TOPICS = ['React', 'TypeScript', 'Python', 'AWS', 'Docker', 'Spark', 'SQL'];
 
 export const CommunityHelperView: React.FC = () => {
-  const { communityProfiles, candidates, connections, connectToUser, activePersona } = useApp();
+  const { communityProfiles, candidates, connections, connectToUser, activePersona, currentUser } = useApp();
   const [searchSkill, setSearchSkill] = useState('');
 
   const currentUserId =
-    activePersona === 'comunidade-rafael'
+    currentUser?.id ||
+    (activePersona === 'comunidade-rafael'
       ? 'user-rafael-externo'
       : activePersona === 'candidato-marina'
       ? 'user-marina'
-      : 'user-lucas';
+      : 'user-lucas');
 
   const myProfile = communityProfiles[currentUserId] || communityProfiles['user-lucas'];
   const mySkillsLower = (myProfile?.skills || []).map(s => s.toLowerCase());

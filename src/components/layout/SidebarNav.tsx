@@ -5,6 +5,7 @@ import {
   Briefcase, 
   Sparkles, 
   Layers, 
+  Award,
   Share2, 
   ShieldCheck, 
   Users, 
@@ -17,12 +18,16 @@ interface SidebarNavProps {
 }
 
 export const SidebarNav: React.FC<SidebarNavProps> = ({ currentTab, setCurrentTab }) => {
-  const { activePersona, rewardBalance, companyCredits } = useApp();
+  const { activePersona, session, rewardBalance, companyCredits } = useApp();
 
-  const isCandidate = activePersona === 'candidato-lucas' || activePersona === 'candidato-marina';
-  const isCompany = activePersona === 'empresa-orion';
   const isCommunityExternal = activePersona === 'comunidade-rafael';
-  const isAdmin = activePersona === 'admin-qitech';
+  const isCompany = session?.role === 'empresa' || activePersona === 'empresa-orion';
+  const isAdmin = session?.role === 'admin' || activePersona === 'admin-qitech';
+  const isCandidate =
+    !isCompany &&
+    !isAdmin &&
+    !isCommunityExternal &&
+    (session?.role === 'profissional' || activePersona === 'candidato-lucas' || activePersona === 'candidato-marina');
 
   return (
     <aside className="w-full lg:w-[230px] shrink-0 space-y-4">
@@ -64,12 +69,21 @@ export const SidebarNav: React.FC<SidebarNavProps> = ({ currentTab, setCurrentTa
 
             <button
               onClick={() => setCurrentTab('candidato-processos')}
-              className={`w-full flex items-center justify-between px-3 py-2 rounded-base text-xs font-semibold transition-all ${
+              className={`w-full flex items-center gap-2.5 px-3 py-2 rounded-base text-xs font-semibold transition-all ${
                 currentTab === 'candidato-processos' ? 'bg-secondary text-primary font-bold' : 'text-muted-foreground hover:bg-background hover:text-foreground'
               }`}
             >
+              <Layers className="w-4 h-4" /> Meus Processos
+            </button>
+
+            <button
+              onClick={() => setCurrentTab('candidato-estalecas')}
+              className={`w-full flex items-center justify-between px-3 py-2 rounded-base text-xs font-semibold transition-all ${
+                currentTab === 'candidato-estalecas' ? 'bg-secondary text-primary font-bold' : 'text-muted-foreground hover:bg-background hover:text-foreground'
+              }`}
+            >
               <span className="flex items-center gap-2.5">
-                <Layers className="w-4 h-4" /> Processos & Estalecas
+                <Award className="w-4 h-4 text-brandOrange" /> Estalecas & Indicações
               </span>
               <span className="text-[10px] bg-brandOrange/15 text-brandOrange font-bold px-1.5 py-0.5 rounded">
                 {rewardBalance} 🪙

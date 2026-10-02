@@ -20,9 +20,14 @@ import {
   ModerationReport,
   Seniority,
   WorkModality,
-  WorkContractType
+  WorkContractType,
+  RegisteredUser,
+  UserSession,
+  UserRole,
+  ProfessionalOnboardingData
 } from '../types';
 import { 
+  SEED_DEMO_USERS,
   SEED_COMPANIES, 
   SEED_VACANCIES, 
   SEED_CANDIDATE_LUCAS, 
@@ -48,7 +53,31 @@ export type ActivePersona =
   | 'candidato-marina'
   | 'empresa-orion'
   | 'comunidade-rafael'
-  | 'admin-qitech';
+  | 'admin-qitech'
+  | string;
+
+export interface RegisterProfessionalInput {
+  name: string;
+  email: string;
+  password: string;
+  confirmPassword: string;
+  technicalArea: string;
+  seniority: Seniority;
+}
+
+export interface RegisterCompanyInput {
+  companyName: string;
+  cnpj: string;
+  email: string;
+  password: string;
+  confirmPassword: string;
+}
+
+export interface AuthResult {
+  success: boolean;
+  error?: string;
+  user?: RegisteredUser;
+}
 
 interface AppContextType {
   theme: 'light' | 'dark';
@@ -56,7 +85,18 @@ interface AppContextType {
   activePersona: ActivePersona;
   setActivePersona: (persona: ActivePersona) => void;
   isAuthenticated: boolean;
+  session: UserSession | null;
+  currentUser: RegisteredUser | null;
+  registeredUsers: RegisteredUser[];
+  demoUsers: RegisteredUser[];
+  currentCandidateId: string;
+  currentCompany: Company;
+  needsOnboarding: boolean;
   login: (persona: ActivePersona) => void;
+  loginWithCredentials: (email: string, password: string, expectedRole?: UserRole) => AuthResult;
+  registerProfessional: (input: RegisterProfessionalInput) => AuthResult;
+  registerCompany: (input: RegisterCompanyInput) => AuthResult;
+  completeProfessionalOnboarding: (data: ProfessionalOnboardingData) => void;
   logout: () => void;
   // Dados
   candidates: Record<string, CandidateProfile>;
@@ -126,7 +166,12 @@ interface AppContextType {
 }
 
 const STORAGE_KEY = 'QITECH_PROD_STATE_V3';
+const USERS_STORAGE_KEY = 'QITECH_USERS_V1';
+const SESSION_STORAGE_KEY = 'QITECH_SESSION_V1';
 const THEME_STORAGE_KEY = 'QITECH_THEME';
+
+const normalizeCnpj = (cnpj: string) => cnpj.replace(/\D/g, '');
+const isValidEmailFormat = (email: string) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim());
 
 const AppContext = createContext<AppContextType | undefined>(undefined);
 
@@ -139,8 +184,69 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
     }
     return 'light';
   });
-  const [activePersona, setActivePersona] = useState<ActivePersona>('candidato-lucas');
-  const [isAuthenticated, setIsAuthenticated] = useState<boolean>(false);
+
+  // Coleção separada de usuários cadastrados: QITECH_USERS_V1
+  const [registeredUsers, setRegisteredUsers] = useState<RegisteredUser[]>(() => {
+    try {
+      const raw = localStorage.getItem(USERS_STORAGE_KEY);
+      if (raw) {
+        const parsed = JSON.parse(raw);
+        if (Array.isArray(parsed)) return parsed;
+      }
+    } catch (err) {
+      console.error('Falha ao carregar QITECH_USERS_V1:', err);
+    }
+    return [];
+  });
+
+  // Sessão separada: QITECH_SESSION_V1
+  const [session, setSession] = useState<UserSession | null>(() => {
+    try {
+      const raw = localStorage.getItem(SESSION_STORAGE_KEY);
+      if (raw) {
+        const parsed = JSON.parse(raw);
+        if (parsed && parsed.userId && parsed.role && parsed.email) {
+          return {
+            userId: parsed.userId,
+            role: parsed.role,
+            email: parsed.email,
+            loginAt: parsed.loginAt || new Date().toISOString()
+          };
+        }
+      }
+    } catch (err) {
+      console.error('Falha ao carregar QITECH_SESSION_V1:', err);
+    }
+    return null;
+  });
+
+  const allKnownUsers = [...SEED_DEMO_USERS, ...registeredUsers];
+  const currentUser = session
+    ? allKnownUsers.find(u => u.id === session.userId || u.email.toLowerCase() === session.email.toLowerCase()) || null
+    : null;
+
+  const isAuthenticated = Boolean(session && currentUser);
+
+  const [activePersona, setActivePersonaState] = useState<ActivePersona>(() => {
+    if (currentUser?.personaId) return currentUser.personaId;
+    if (currentUser?.role === 'empresa') return 'empresa-orion';
+    if (currentUser?.role === 'admin') return 'admin-qitech';
+    return 'candidato-lucas';
+  });
+
+  useEffect(() => {
+    if (currentUser) {
+      if (currentUser.personaId) {
+        setActivePersonaState(currentUser.personaId);
+      } else if (currentUser.role === 'empresa') {
+        setActivePersonaState('empresa-orion');
+      } else if (currentUser.role === 'admin') {
+        setActivePersonaState('admin-qitech');
+      } else {
+        setActivePersonaState(`candidato-${currentUser.id}`);
+      }
+    }
+  }, [currentUser?.id, currentUser?.role, currentUser?.personaId]);
 
   useEffect(() => {
     const root = document.documentElement;
@@ -155,13 +261,18 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
   const toggleTheme = () => {
     setTheme(prev => (prev === 'dark' ? 'light' : 'dark'));
   };
-  
-  // Estados mockados
+
+  // Persistir QITECH_USERS_V1 separadamente
+  useEffect(() => {
+    localStorage.setItem(USERS_STORAGE_KEY, JSON.stringify(registeredUsers));
+  }, [registeredUsers]);
+
+  // Estados mockados de negócio (QITECH_PROD_STATE_V3)
   const [candidates, setCandidates] = useState<Record<string, CandidateProfile>>({
     'cand-lucas': SEED_CANDIDATE_LUCAS,
     'cand-marina': SEED_CANDIDATE_MARINA
   });
-  const [companies] = useState<Company[]>(SEED_COMPANIES);
+  const [companies, setCompanies] = useState<Company[]>(SEED_COMPANIES);
   const [vacancies, setVacancies] = useState<Vacancy[]>(SEED_VACANCIES);
   const [interviews, setInterviews] = useState<Record<string, AIInterviewSession>>({
     'cand-lucas': SEED_INTERVIEW_LUCAS,
@@ -187,19 +298,347 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
   const [commercialConfig, setCommercialConfig] = useState<CommercialConfig>(SEED_COMMERCIAL_CONFIG);
   const [moderationReports, setModerationReports] = useState<ModerationReport[]>(SEED_MODERATION_REPORTS);
 
+  // Identifica o candidato ativo (suporta contas demo e novos profissionais cadastrados)
+  const currentCandidateId =
+    currentUser?.candidateId ||
+    (activePersona === 'candidato-marina'
+      ? 'cand-marina'
+      : activePersona === 'comunidade-rafael' && candidates['cand-rafael']
+      ? 'cand-rafael'
+      : 'cand-lucas');
+
+  // Identifica a empresa ativa (suporta Orion Tech demo e novas empresas cadastradas)
+  const currentCompany: Company =
+    (currentUser?.companyId ? companies.find(c => c.id === currentUser.companyId) : undefined) ||
+    (currentUser?.role === 'empresa'
+      ? {
+          id: currentUser.companyId || `comp-${currentUser.id}`,
+          name: currentUser.companyName || currentUser.name,
+          cnpj: currentUser.cnpj || '00.000.000/0001-00',
+          about: 'Empresa parceira registrada na plataforma Q.I. Tech.',
+          city: 'São Paulo',
+          state: 'SP',
+          website: 'https://empresa.com.br'
+        }
+      : SEED_COMPANIES[0]);
+
+  const needsOnboarding = Boolean(
+    isAuthenticated &&
+    currentUser?.role === 'profissional' &&
+    currentUser.onboardingCompleted === false
+  );
+
   // Calcula o saldo de Estalecas Q.I. do candidato ativo
-  const currentCandIdForReward = activePersona === 'candidato-marina' ? 'cand-marina' : 'cand-lucas';
   const rewardBalance = rewardTransactions
-    .filter(t => t.candidateId === currentCandIdForReward)
+    .filter(t => t.candidateId === currentCandidateId)
     .reduce((acc, tx) => (tx.type === 'credito' ? acc + tx.amount : acc - tx.amount), 0);
 
+  const saveSession = (user: RegisteredUser) => {
+    const newSession: UserSession = {
+      userId: user.id,
+      role: user.role,
+      email: user.email,
+      loginAt: new Date().toISOString()
+    };
+    localStorage.setItem(SESSION_STORAGE_KEY, JSON.stringify(newSession));
+    setSession(newSession);
+    if (user.personaId) {
+      setActivePersonaState(user.personaId);
+    } else if (user.role === 'empresa') {
+      setActivePersonaState('empresa-orion');
+    } else if (user.role === 'admin') {
+      setActivePersonaState('admin-qitech');
+    } else {
+      setActivePersonaState(`candidato-${user.id}`);
+    }
+  };
+
+  const setActivePersona = (persona: ActivePersona) => {
+    const demoTarget = SEED_DEMO_USERS.find(u => u.personaId === persona);
+    if (demoTarget) {
+      saveSession(demoTarget);
+    } else {
+      setActivePersonaState(persona);
+    }
+  };
+
   const login = (persona: ActivePersona) => {
-    setActivePersona(persona);
-    setIsAuthenticated(true);
+    const demoTarget = SEED_DEMO_USERS.find(u => u.personaId === persona);
+    if (demoTarget) {
+      saveSession(demoTarget);
+    }
+  };
+
+  const loginWithCredentials = (email: string, password: string, _expectedRole?: UserRole): AuthResult => {
+    const cleanEmail = email.trim().toLowerCase();
+    if (!cleanEmail) {
+      return { success: false, error: 'Informe seu endereço de e-mail.' };
+    }
+    if (!isValidEmailFormat(cleanEmail)) {
+      return { success: false, error: 'Informe um endereço de e-mail válido.' };
+    }
+    if (!password) {
+      return { success: false, error: 'Informe sua senha para continuar.' };
+    }
+
+    const matchedUser = [...SEED_DEMO_USERS, ...registeredUsers].find(
+      u => u.email.trim().toLowerCase() === cleanEmail
+    );
+
+    if (!matchedUser) {
+      return { success: false, error: 'Nenhuma conta encontrada com este e-mail.' };
+    }
+
+    if (matchedUser.password !== password) {
+      return { success: false, error: 'Senha incorreta. Verifique suas credenciais e tente novamente.' };
+    }
+
+    saveSession(matchedUser);
+    return { success: true, user: matchedUser };
+  };
+
+  const registerProfessional = (input: RegisterProfessionalInput): AuthResult => {
+    const name = input.name.trim();
+    const email = input.email.trim().toLowerCase();
+    const { password, confirmPassword, technicalArea, seniority } = input;
+
+    if (!name || !email || !password || !confirmPassword || !technicalArea.trim() || !seniority) {
+      return { success: false, error: 'Preencha todos os campos obrigatórios para criar sua conta profissional.' };
+    }
+    if (!isValidEmailFormat(email)) {
+      return { success: false, error: 'Formato de e-mail inválido. Digite um e-mail válido (ex: nome@dominio.com).' };
+    }
+    if (password.length < 6) {
+      return { success: false, error: 'A senha deve possuir no mínimo 6 caracteres.' };
+    }
+    if (password !== confirmPassword) {
+      return { success: false, error: 'A confirmação de senha não coincide com a senha informada.' };
+    }
+
+    const emailExists = [...SEED_DEMO_USERS, ...registeredUsers].some(
+      u => u.email.trim().toLowerCase() === email
+    );
+    if (emailExists) {
+      return { success: false, error: 'Este endereço de e-mail já está cadastrado na plataforma.' };
+    }
+
+    const userId = `user-${Date.now()}`;
+    const candidateId = `cand-${userId}`;
+
+    const newUser: RegisteredUser = {
+      id: userId,
+      role: 'profissional',
+      name,
+      email,
+      password,
+      createdAt: new Date().toISOString(),
+      status: 'onboarding_pendente',
+      technicalArea: technicalArea.trim(),
+      seniority,
+      candidateId,
+      onboardingCompleted: false
+    };
+
+    const initialProfile: CandidateProfile = {
+      id: candidateId,
+      userId,
+      name,
+      avatar: `https://ui-avatars.com/api/?name=${encodeURIComponent(name)}&background=006A7A&color=fff&bold=true`,
+      headline: `Especialista em ${technicalArea.trim()} (${seniority})`,
+      city: 'São Paulo',
+      state: 'SP',
+      about: `Profissional de tecnologia com atuação na vertical de ${technicalArea.trim()} e senioridade ${seniority}.`,
+      seniority,
+      experiences: [],
+      projects: [],
+      education: [],
+      certifications: [],
+      languages: [{ language: 'Português', level: 'Nativo' }],
+      githubUrl: '',
+      linkedinUrl: '',
+      email,
+      phone: '',
+      salaryMin: seniority === 'Sênior' ? 14000 : seniority === 'Pleno' ? 8500 : 4500,
+      salaryMax: seniority === 'Sênior' ? 19000 : seniority === 'Pleno' ? 11500 : 6500,
+      contractTypes: ['CLT', 'PJ'],
+      modalities: ['Remoto', 'Híbrido'],
+      locationPreference: 'Remoto ou Híbrido',
+      availability: 'Imediata',
+      visibility: 'Ativo',
+      isCommunityMember: false,
+      skills: []
+    };
+
+    setRegisteredUsers(prev => [...prev, newUser]);
+    setCandidates(prev => ({ ...prev, [candidateId]: initialProfile }));
+    saveSession(newUser);
+
+    return { success: true, user: newUser };
+  };
+
+  const registerCompany = (input: RegisterCompanyInput): AuthResult => {
+    const companyName = input.companyName.trim();
+    const cnpj = input.cnpj.trim();
+    const email = input.email.trim().toLowerCase();
+    const { password, confirmPassword } = input;
+
+    if (!companyName || !cnpj || !email || !password || !confirmPassword) {
+      return { success: false, error: 'Preencha todos os campos obrigatórios para cadastrar a empresa.' };
+    }
+    if (!isValidEmailFormat(email)) {
+      return { success: false, error: 'Formato de e-mail corporativo inválido.' };
+    }
+    const cleanCnpj = normalizeCnpj(cnpj);
+    if (cleanCnpj.length < 14) {
+      return { success: false, error: 'Informe um CNPJ válido com 14 dígitos.' };
+    }
+    if (password.length < 6) {
+      return { success: false, error: 'A senha deve possuir no mínimo 6 caracteres.' };
+    }
+    if (password !== confirmPassword) {
+      return { success: false, error: 'A confirmação de senha não coincide com a senha informada.' };
+    }
+
+    const emailExists = [...SEED_DEMO_USERS, ...registeredUsers].some(
+      u => u.email.trim().toLowerCase() === email
+    );
+    if (emailExists) {
+      return { success: false, error: 'Este e-mail corporativo já está cadastrado na plataforma.' };
+    }
+
+    const cnpjExistsInUsers = [...SEED_DEMO_USERS, ...registeredUsers].some(
+      u => u.cnpj && normalizeCnpj(u.cnpj) === cleanCnpj
+    );
+    const cnpjExistsInCompanies = companies.some(
+      c => normalizeCnpj(c.cnpj) === cleanCnpj
+    );
+    if (cnpjExistsInUsers || cnpjExistsInCompanies) {
+      return { success: false, error: 'Este CNPJ já está cadastrado em outra conta corporativa.' };
+    }
+
+    const userId = `user-comp-${Date.now()}`;
+    const companyId = `comp-${Date.now()}`;
+
+    const newUser: RegisteredUser = {
+      id: userId,
+      role: 'empresa',
+      name: companyName,
+      companyName,
+      cnpj,
+      email,
+      password,
+      createdAt: new Date().toISOString(),
+      status: 'ativo',
+      companyId
+    };
+
+    const newCompany: Company = {
+      id: companyId,
+      name: companyName,
+      cnpj,
+      about: `${companyName} — conta corporativa registrada na Q.I. Tech.`,
+      city: 'São Paulo',
+      state: 'SP',
+      website: ''
+    };
+
+    setRegisteredUsers(prev => [...prev, newUser]);
+    setCompanies(prev => [...prev, newCompany]);
+    saveSession(newUser);
+
+    return { success: true, user: newUser };
+  };
+
+  const completeProfessionalOnboarding = (data: ProfessionalOnboardingData) => {
+    if (!currentUser || !currentUser.candidateId) return;
+    const candidateId = currentUser.candidateId;
+
+    const mappedSkills: CandidateSkill[] = data.hardSkills.map((skName, idx) => ({
+      id: `sk-onb-${Date.now()}-${idx}`,
+      name: skName,
+      category: currentUser.technicalArea || 'Tecnologia',
+      mastery: data.seniority === 'Sênior' ? 'Avançado' : data.seniority === 'Pleno' ? 'Intermediário' : 'Básico',
+      years: data.seniority === 'Sênior' ? 5 : data.seniority === 'Pleno' ? 3 : 1,
+      months: 0
+    }));
+
+    setCandidates(prev => {
+      const existing = prev[candidateId];
+      if (!existing) return prev;
+      return {
+        ...prev,
+        [candidateId]: {
+          ...existing,
+          headline: data.headline.trim(),
+          seniority: data.seniority,
+          skills: mappedSkills,
+          salaryMin: data.salaryMin,
+          salaryMax: data.salaryMax,
+          modalities: [data.modality],
+          city: data.city.trim() || 'São Paulo',
+          state: data.state.trim().toUpperCase() || 'SP',
+          locationPreference: `${data.city.trim() || 'São Paulo'}/${data.state.trim().toUpperCase() || 'SP'} (${data.modality})`,
+          availability: data.availability
+        }
+      };
+    });
+
+    setRegisteredUsers(prev =>
+      prev.map(u =>
+        u.id === currentUser.id
+          ? { ...u, seniority: data.seniority, status: 'ativo', onboardingCompleted: true }
+          : u
+      )
+    );
+
+    // Gera matches iniciais com as vagas abertas para que o novo profissional já visualize oportunidades
+    const hasExistingProcs = selectionProcesses.some(p => p.candidateId === candidateId);
+    if (!hasExistingProcs && vacancies.length > 0) {
+      const candSkillsLower = data.hardSkills.map(s => s.toLowerCase());
+      const generatedProcs: SelectionProcess[] = vacancies.map((vac) => {
+        const matched = vac.mandatorySkills.filter(req =>
+          candSkillsLower.some(cs => cs.includes(req.toLowerCase()) || req.toLowerCase().includes(cs))
+        );
+        const ratio = vac.mandatorySkills.length > 0 ? matched.length / vac.mandatorySkills.length : 0.7;
+        const score = Math.min(96, Math.max(74, Math.round(75 + ratio * 20)));
+        return {
+          id: `proc-onb-${vac.id}-${candidateId}`,
+          vacancyId: vac.id,
+          candidateId,
+          currentStage: 'convite_enviado',
+          doubleOptInStatus: 'aguardando',
+          accessGranted: false,
+          demonstrativeScore: score,
+          matchExplanation: `Match identificado após seu onboarding para "${vac.title}": alinhamento com senioridade (${data.seniority}), modalidade (${data.modality}), pretensão salarial (R$ ${data.salaryMin.toLocaleString('pt-BR')} - R$ ${data.salaryMax.toLocaleString('pt-BR')}) e hard skills informadas (${data.hardSkills.join(', ')}).`,
+          updatedAt: new Date().toISOString(),
+          unlockedFreeGrant: false
+        };
+      });
+      setSelectionProcesses(prev => [...generatedProcs, ...prev]);
+    }
+
+    // Concede bônus inicial de onboarding em Estalecas Q.I.
+    const bonusTx: RewardTransaction = {
+      id: `tx-onb-${Date.now()}`,
+      candidateId,
+      description: 'Bônus de Boas-Vindas — Onboarding Profissional Concluído',
+      amount: 50,
+      type: 'credito',
+      createdAt: new Date().toISOString()
+    };
+    setRewardTransactions(prev => [bonusTx, ...prev]);
+
+    addNotification(
+      currentUser.id,
+      'Perfil Técnico Configurado com Sucesso!',
+      'Seu onboarding foi concluído e você recebeu +50 Estalecas Q.I. de boas-vindas. Confira as vagas compatíveis!',
+      'sistema'
+    );
   };
 
   const logout = () => {
-    setIsAuthenticated(false);
+    localStorage.removeItem(SESSION_STORAGE_KEY);
+    setSession(null);
   };
 
   // Carregar do localStorage e sincronizar entre abas
@@ -209,6 +648,7 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
       try {
         const parsed = JSON.parse(raw);
         if (parsed.candidates) setCandidates(parsed.candidates);
+        if (parsed.companies) setCompanies(parsed.companies);
         if (parsed.vacancies) setVacancies(parsed.vacancies);
         if (parsed.interviews) setInterviews(parsed.interviews);
         if (parsed.selectionProcesses) setSelectionProcesses(parsed.selectionProcesses);
@@ -236,6 +676,24 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
       if (e.key === STORAGE_KEY && e.newValue) {
         loadFromStorage(e.newValue);
       }
+      if (e.key === USERS_STORAGE_KEY && e.newValue) {
+        try {
+          setRegisteredUsers(JSON.parse(e.newValue));
+        } catch (err) {
+          console.error(err);
+        }
+      }
+      if (e.key === SESSION_STORAGE_KEY) {
+        if (e.newValue) {
+          try {
+            setSession(JSON.parse(e.newValue));
+          } catch (err) {
+            console.error(err);
+          }
+        } else {
+          setSession(null);
+        }
+      }
     };
     window.addEventListener('storage', handleStorageChange);
     return () => window.removeEventListener('storage', handleStorageChange);
@@ -245,6 +703,7 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
   useEffect(() => {
     const dataToSave = {
       candidates,
+      companies,
       vacancies,
       interviews,
       selectionProcesses,
@@ -263,7 +722,7 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
       moderationReports
     };
     localStorage.setItem(STORAGE_KEY, JSON.stringify(dataToSave));
-  }, [candidates, vacancies, interviews, selectionProcesses, communityProfiles, posts, comments, connections, notifications, auditLogs, customSkillsPending, referrals, rewardTransactions, companyCredits, companyInvoices, commercialConfig, moderationReports]);
+  }, [candidates, companies, vacancies, interviews, selectionProcesses, communityProfiles, posts, comments, connections, notifications, auditLogs, customSkillsPending, referrals, rewardTransactions, companyCredits, companyInvoices, commercialConfig, moderationReports]);
 
   const addAudit = (action: string, details: string, actor: string) => {
     const newLog: AuditLog = {
@@ -332,7 +791,7 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
 
   const suggestNewSkill = (skillName: string) => {
     if (!skillName.trim()) return;
-    const candName = activePersona === 'candidato-marina' ? 'Marina' : 'Lucas';
+    const candName = currentUser?.name || (activePersona === 'candidato-marina' ? 'Marina' : 'Lucas');
     const label = `${skillName.trim()} (sugerida por ${candName})`;
     setCustomSkillsPending(prev => [...prev, label]);
     addAudit('NEW_SKILL_SUGGESTED', `Nova habilidade sugerida para revisão: "${skillName.trim()}"`, candName);
@@ -414,7 +873,7 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
     if (isFreeCourtesy) {
       const courtesyInvoice: CompanyInvoice = {
         id: `inv-free-${Date.now()}`,
-        companyId: 'comp-orion',
+        companyId: vac?.companyId || 'comp-orion',
         description: `1º Candidato Grátis no Match Express — ${cand?.name} (${vac?.title})`,
         amountBrl: 0,
         creditsAdded: 0,
@@ -546,10 +1005,12 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
   // Funções Empresa
   const createVacancy = (newVacancy: Omit<Vacancy, 'id' | 'companyId' | 'createdAt'>) => {
     const vacId = `vac-${Date.now()}`;
+    const activeCompId = currentCompany?.id || 'comp-orion';
+    const activeCompName = currentCompany?.name || 'Orion Tech Solutions';
     const created: Vacancy = {
       ...newVacancy,
       id: vacId,
-      companyId: 'comp-orion',
+      companyId: activeCompId,
       createdAt: new Date().toISOString()
     };
     setVacancies(prev => [created, ...prev]);
@@ -579,10 +1040,10 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
     });
 
     setSelectionProcesses(prev => [...newProcesses, ...prev]);
-    addAudit('VACANCY_CREATED', `Nova vaga publicada: "${created.title}" (${created.isUrgentMatchExpress ? 'Match Express Ativo' : 'Vaga Padrão'}) com faixa salarial transparente R$ ${created.salaryMin} - R$ ${created.salaryMax}`, 'Orion Tech Solutions');
+    addAudit('VACANCY_CREATED', `Nova vaga publicada: "${created.title}" (${created.isUrgentMatchExpress ? 'Match Express Ativo' : 'Vaga Padrão'}) com faixa salarial transparente R$ ${created.salaryMin} - R$ ${created.salaryMax}`, activeCompName);
 
     allCands.forEach(c => {
-      addNotification(c.userId, `Novo Convite de Vaga (${created.isUrgentMatchExpress ? 'Match Express' : 'Match Compatível'})`, `A Orion Tech Solutions publicou a vaga "${created.title}" compatível com seu perfil. Confirme o Double Opt-In se desejar liberar seu contato.`, 'vaga');
+      addNotification(c.userId, `Novo Convite de Vaga (${created.isUrgentMatchExpress ? 'Match Express' : 'Match Compatível'})`, `A ${activeCompName} publicou a vaga "${created.title}" compatível com seu perfil. Confirme o Double Opt-In se desejar liberar seu contato.`, 'vaga');
     });
   };
 
@@ -592,13 +1053,14 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
 
     const cand = candidates[proc.candidateId];
     const vac = vacancies.find(v => v.id === proc.vacancyId);
+    const activeCompName = currentCompany?.name || 'Orion Tech Solutions';
 
     if (method === 'credit') {
       if (companyCredits <= 0) return false;
       setCompanyCredits(prev => prev - 1);
       const newInv: CompanyInvoice = {
         id: `inv-${Date.now()}`,
-        companyId: 'comp-orion',
+        companyId: currentCompany?.id || 'comp-orion',
         description: `Desbloqueio de Perfil Adicional (1 Crédito) — ${cand?.name} (${vac?.title})`,
         amountBrl: 0,
         creditsAdded: -1,
@@ -611,7 +1073,7 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
       const nfseNum = `NFS-e 2026/00${Math.floor(1000 + Math.random() * 8999)}-SP`;
       const newInv: CompanyInvoice = {
         id: `inv-${Date.now()}`,
-        companyId: 'comp-orion',
+        companyId: currentCompany?.id || 'comp-orion',
         description: `Compra Avulsa de Desbloqueio — ${cand?.name} (${vac?.title})`,
         amountBrl: commercialConfig.singleUnlockPriceBrl,
         creditsAdded: 0,
@@ -634,17 +1096,18 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
       return p;
     }));
 
-    addAudit('CANDIDATE_ACCESS_GRANTED_PAID', `Empresa desbloqueou perfil de ${cand?.name} na vaga "${vac?.title}" (${method === 'credit' ? '1 Crédito Consumido' : `Compra Avulsa R$ ${commercialConfig.singleUnlockPriceBrl}`})`, 'Orion Tech Solutions');
-    addNotification(cand?.userId || '', 'Empresa Acessou Seus Contatos', `A Orion Tech Solutions desbloqueou seus canais de contato para a vaga "${vac?.title}".`, 'processo');
+    addAudit('CANDIDATE_ACCESS_GRANTED_PAID', `Empresa desbloqueou perfil de ${cand?.name} na vaga "${vac?.title}" (${method === 'credit' ? '1 Crédito Consumido' : `Compra Avulsa R$ ${commercialConfig.singleUnlockPriceBrl}`})`, activeCompName);
+    addNotification(cand?.userId || '', 'Empresa Acessou Seus Contatos', `A ${activeCompName} desbloqueou seus canais de contato para a vaga "${vac?.title}".`, 'processo');
     return true;
   };
 
   const buyCompanyCreditPackage = (creditsCount: number, priceBrl: number, packageLabel: string) => {
     setCompanyCredits(prev => prev + creditsCount);
     const nfseNum = `NFS-e 2026/00${Math.floor(1000 + Math.random() * 8999)}-SP`;
+    const activeCompName = currentCompany?.name || 'Orion Tech Solutions';
     const newInv: CompanyInvoice = {
       id: `inv-pkg-${Date.now()}`,
-      companyId: 'comp-orion',
+      companyId: currentCompany?.id || 'comp-orion',
       description: `${packageLabel} (+${creditsCount} Créditos de Desbloqueio)`,
       amountBrl: priceBrl,
       creditsAdded: creditsCount,
@@ -653,8 +1116,8 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
       createdAt: new Date().toISOString()
     };
     setCompanyInvoices(prev => [newInv, ...prev]);
-    addAudit('COMPANY_PACKAGE_PURCHASED', `Aquisição de ${packageLabel} (R$ ${priceBrl}) com emissão assíncrona da ${nfseNum}`, 'Orion Tech Solutions');
-    addNotification('user-orion', 'Pacote de Créditos Ativado + NFS-e Emitida', `Foram adicionados +${creditsCount} créditos corporativos. Nota fiscal ${nfseNum} disponível no painel.`, 'sistema');
+    addAudit('COMPANY_PACKAGE_PURCHASED', `Aquisição de ${packageLabel} (R$ ${priceBrl}) com emissão assíncrona da ${nfseNum}`, activeCompName);
+    addNotification(currentUser?.id || 'user-orion', 'Pacote de Créditos Ativado + NFS-e Emitida', `Foram adicionados +${creditsCount} créditos corporativos. Nota fiscal ${nfseNum} disponível no painel.`, 'sistema');
   };
 
   const updateProcessStage = (processId: string, nextStage: SelectionStage) => {
@@ -662,6 +1125,7 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
     if (!proc) return;
     const cand = candidates[proc.candidateId];
     const vac = vacancies.find(v => v.id === proc.vacancyId);
+    const activeCompName = currentCompany?.name || 'Orion Tech Solutions';
 
     setSelectionProcesses(prev => prev.map(p => {
       if (p.id === processId) {
@@ -674,7 +1138,7 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
       return p;
     }));
 
-    addAudit('SELECTION_STAGE_UPDATED', `Etapa do processo alterada para: ${nextStage} (Vaga: ${vac?.title})`, 'Orion Tech Solutions');
+    addAudit('SELECTION_STAGE_UPDATED', `Etapa do processo alterada para: ${nextStage} (Vaga: ${vac?.title})`, activeCompName);
     
     const stageTitles: Record<SelectionStage, string> = {
       match_identificado: 'Match identificado',
@@ -698,9 +1162,10 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
     const proc = selectionProcesses.find(p => p.id === processId);
     const cand = proc ? candidates[proc.candidateId] : null;
     const vac = proc ? vacancies.find(v => v.id === proc.vacancyId) : null;
+    const activeCompName = currentCompany?.name || 'Orion Tech Solutions';
     
     if (cand?.userId && vac) {
-      addNotification(cand.userId, '🎉 Parabéns! Você foi aprovado no processo seletivo', `A empresa Orion Tech Solutions marcou você como aprovado para a vaga de ${vac.title}.`, 'processo');
+      addNotification(cand.userId, '🎉 Parabéns! Você foi aprovado no processo seletivo', `A empresa ${activeCompName} marcou você como aprovado para a vaga de ${vac.title}.`, 'processo');
     }
   };
 
@@ -731,33 +1196,46 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
       }
       return p;
     }));
-    addAudit('MATCH_FEEDBACK_LOGGED', `Feedback positivo de aderência registrado para auditoria interna`, 'Orion Tech Solutions');
+    addAudit('MATCH_FEEDBACK_LOGGED', `Feedback positivo de aderência registrado para auditoria interna`, currentCompany?.name || 'Orion Tech Solutions');
   };
 
   // Funções Comunidade
-  const createPost = (content: string, type: 'post' | 'pergunta', tags: string[]) => {
-    let author = {
-      id: 'user-lucas',
-      name: 'Lucas Almeida',
-      headline: 'Front-end Engineer',
-      avatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150&auto=format&fit=crop&q=80'
-    };
-
+  const getActiveCommunityAuthor = () => {
     if (activePersona === 'comunidade-rafael') {
-      author = {
+      return {
         id: 'user-rafael-externo',
         name: 'Rafael Mendes (Membro Externo)',
         headline: 'DevOps & Cloud Practitioner',
         avatar: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150&auto=format&fit=crop&q=80'
       };
-    } else if (activePersona === 'candidato-marina') {
-      author = {
+    }
+    if (activePersona === 'candidato-marina') {
+      return {
         id: 'user-marina',
         name: 'Marina Costa',
         headline: 'Senior Data Engineer',
         avatar: 'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=150&auto=format&fit=crop&q=80'
       };
     }
+    if (currentUser && !currentUser.isDemo) {
+      const cand = candidates[currentCandidateId];
+      return {
+        id: currentUser.id,
+        name: currentUser.name,
+        headline: cand?.headline || `${currentUser.technicalArea || 'Tecnologia'} (${currentUser.seniority || 'Pleno'})`,
+        avatar: cand?.avatar || `https://ui-avatars.com/api/?name=${encodeURIComponent(currentUser.name)}&background=006A7A&color=fff&bold=true`
+      };
+    }
+    return {
+      id: 'user-lucas',
+      name: 'Lucas Almeida',
+      headline: 'Front-end Engineer',
+      avatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150&auto=format&fit=crop&q=80'
+    };
+  };
+
+  const createPost = (content: string, type: 'post' | 'pergunta', tags: string[]) => {
+    const author = getActiveCommunityAuthor();
 
     const newPost: CommunityPost = {
       id: `post-${Date.now()}`,
@@ -780,26 +1258,14 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
   };
 
   const createComment = (postId: string, content: string) => {
-    let authorName = 'Lucas Almeida';
-    let authorAvatar = 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150&auto=format&fit=crop&q=80';
-    let authorId = 'user-lucas';
-
-    if (activePersona === 'comunidade-rafael') {
-      authorName = 'Rafael Mendes';
-      authorAvatar = 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150&auto=format&fit=crop&q=80';
-      authorId = 'user-rafael-externo';
-    } else if (activePersona === 'candidato-marina') {
-      authorName = 'Marina Costa';
-      authorAvatar = 'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=150&auto=format&fit=crop&q=80';
-      authorId = 'user-marina';
-    }
+    const author = getActiveCommunityAuthor();
 
     const newComment: PostComment = {
       id: `comm-c-${Date.now()}`,
       postId,
-      authorId,
-      authorName,
-      authorAvatar,
+      authorId: author.id,
+      authorName: author.name,
+      authorAvatar: author.avatar,
       content,
       createdAt: new Date().toISOString()
     };
@@ -814,7 +1280,7 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
   };
 
   const toggleLikePost = (postId: string) => {
-    const currentUserId = activePersona === 'comunidade-rafael' ? 'user-rafael-externo' : activePersona === 'candidato-marina' ? 'user-marina' : 'user-lucas';
+    const currentUserId = getActiveCommunityAuthor().id;
     setPosts(prev => prev.map(p => {
       if (p.id === postId) {
         const hasLiked = p.likedBy.includes(currentUserId);
@@ -829,7 +1295,7 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
   };
 
   const toggleSavePost = (postId: string) => {
-    const currentUserId = activePersona === 'comunidade-rafael' ? 'user-rafael-externo' : activePersona === 'candidato-marina' ? 'user-marina' : 'user-lucas';
+    const currentUserId = getActiveCommunityAuthor().id;
     setPosts(prev => prev.map(p => {
       if (p.id === postId) {
         const hasSaved = p.savedBy.includes(currentUserId);
@@ -843,7 +1309,7 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
   };
 
   const connectToUser = (targetUserId: string) => {
-    const currentUserId = activePersona === 'comunidade-rafael' ? 'user-rafael-externo' : activePersona === 'candidato-marina' ? 'user-marina' : 'user-lucas';
+    const currentUserId = getActiveCommunityAuthor().id;
     const exists = connections.some(c => 
       (c.userAId === currentUserId && c.userBId === targetUserId) ||
       (c.userAId === targetUserId && c.userBId === currentUserId)
@@ -865,7 +1331,7 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
   const reportPost = (postId: string, reason: string) => {
     const post = posts.find(p => p.id === postId);
     if (!post) return;
-    const reporter = activePersona === 'comunidade-rafael' ? 'Rafael Mendes' : activePersona === 'candidato-marina' ? 'Marina Costa' : 'Lucas Almeida';
+    const reporter = getActiveCommunityAuthor().name;
     const newReport: ModerationReport = {
       id: `rep-${Date.now()}`,
       postId: post.id,
@@ -1026,6 +1492,7 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
       'cand-lucas': SEED_CANDIDATE_LUCAS,
       'cand-marina': SEED_CANDIDATE_MARINA
     });
+    setCompanies(SEED_COMPANIES);
     setVacancies(SEED_VACANCIES);
     setInterviews({
       'cand-lucas': SEED_INTERVIEW_LUCAS,
@@ -1059,7 +1526,18 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
       activePersona,
       setActivePersona,
       isAuthenticated,
+      session,
+      currentUser,
+      registeredUsers,
+      demoUsers: SEED_DEMO_USERS,
+      currentCandidateId,
+      currentCompany,
+      needsOnboarding,
       login,
+      loginWithCredentials,
+      registerProfessional,
+      registerCompany,
+      completeProfessionalOnboarding,
       logout,
       candidates,
       companies,
