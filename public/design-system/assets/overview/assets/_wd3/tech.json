@@ -1,0 +1,77 @@
+{
+ "builders": [
+  "aura (aura-html)"
+ ],
+ "libraries": [
+  {
+   "name": "gsap",
+   "version": "3.12.5",
+   "sources": [
+    "página",
+    "https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js",
+    "https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"
+   ]
+  },
+  {
+   "name": "gsap/ScrollTrigger",
+   "version": null,
+   "sources": [
+    "página"
+   ]
+  },
+  {
+   "name": "lenis",
+   "version": "1.1.18",
+   "sources": [
+    "página",
+    "https://cdn.jsdelivr.net/npm/lenis@1.1.18/dist/lenis.min.js"
+   ]
+  },
+  {
+   "name": "tailwindcss (Play CDN)",
+   "version": "3.4.17",
+   "sources": [
+    "https://cdn.tailwindcss.com/3.4.17"
+   ]
+  },
+  {
+   "name": "three",
+   "version": "r160",
+   "sources": [
+    "página",
+    "https://cdn.jsdelivr.net/npm/three@0.160.1/build/three.module.js"
+   ]
+  }
+ ],
+ "runtime": {
+  "contexts": {
+   "webgl": 2,
+   "2d": 47,
+   "webgl2": 1
+  },
+  "wasm": 0,
+  "workers": 0,
+  "webgpu": false,
+  "shadowRoots": 0,
+  "canvases": 9
+ },
+ "cssFeatures": [
+  "scroll-driven animations",
+  "@property"
+ ],
+ "fonts": {
+  "families": [
+   "Inter Tight"
+  ],
+  "sources": [
+   "google fonts"
+  ]
+ },
+ "videos": [],
+ "files": {
+  "text": 3,
+  "application": 4,
+  "font": 3,
+  "image": 2
+ }
+}
