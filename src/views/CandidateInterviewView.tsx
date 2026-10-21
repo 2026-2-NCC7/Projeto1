@@ -3,10 +3,9 @@ import { useApp } from '../context/AppContext';
 import { Sparkles, CheckCircle2, AlertCircle, RefreshCw, Send } from 'lucide-react';
 
 export const CandidateInterviewView: React.FC = () => {
-  const { activePersona, candidates, interviews, submitInterviewAnswers, contestInterview, retakeInterview } = useApp();
+  const { currentCandidateId, candidates, interviews, submitInterviewAnswers, contestInterview, retakeInterview } = useApp();
   
-  const currentCandidateId = activePersona === 'candidato-marina' ? 'cand-marina' : 'cand-lucas';
-  const profile = candidates[currentCandidateId];
+  const profile = candidates[currentCandidateId] || candidates['cand-lucas'];
   const interviewSession = interviews[currentCandidateId];
 
   // 5 perguntas pré-definidas para cada candidato conforme o perfil técnico e sênior

@@ -26,6 +26,7 @@ export const CommunityFeedView: React.FC = () => {
     connectToUser, 
     connections, 
     activePersona,
+    currentUser,
     reportPost,
     migrateExternalToCandidate
   } = useApp();
@@ -38,11 +39,12 @@ export const CommunityFeedView: React.FC = () => {
   const [reportedPostId, setReportedPostId] = useState<string | null>(null);
 
   const currentUserId =
-    activePersona === 'comunidade-rafael'
+    currentUser?.id ||
+    (activePersona === 'comunidade-rafael'
       ? 'user-rafael-externo'
       : activePersona === 'candidato-marina'
       ? 'user-marina'
-      : 'user-lucas';
+      : 'user-lucas');
 
   const myProfile = communityProfiles[currentUserId] || communityProfiles['user-lucas'];
   const mySkillsLower = (myProfile?.skills || []).map(s => s.toLowerCase());

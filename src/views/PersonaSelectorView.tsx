@@ -1,5 +1,6 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useApp, ActivePersona } from '../context/AppContext';
+import { Seniority } from '../types';
 import { 
   ShieldCheck, 
   ArrowRight, 
@@ -8,141 +9,223 @@ import {
   Mail,
   KeyRound,
   LogIn,
+  UserPlus,
   Building2,
   User,
   Zap,
   Award,
   Users,
-  ChevronDown,
   X,
   Briefcase,
   Sparkles,
   Sun,
-  Moon
+  Moon,
+  AlertCircle,
+  PlayCircle
 } from 'lucide-react';
 
-type LoginTab = 'profissional' | 'empresa' | 'admin';
+type SignupTab = 'profissional' | 'empresa' | 'admin';
 
-interface AccountCredential {
+interface DemoAccountOption {
   id: ActivePersona;
-  tab: LoginTab;
   name: string;
-  role: string;
+  roleLabel: string;
+  badge: string;
   email: string;
-  cnpj?: string;
-  password: string;
+  description: string;
 }
 
-export const PersonaSelectorView: React.FC<{ onEnterApp: () => void }> = ({ onEnterApp }) => {
-  const { theme, toggleTheme, login, commercialConfig, vacancies, companies } = useApp();
+const TECHNICAL_AREAS = [
+  'Frontend',
+  'Backend / APIs',
+  'Full-Stack',
+  'Dados / IA',
+  'DevOps / Cloud',
+  'Mobile',
+  'QA / Testes',
+  'Segurança da Informação'
+];
 
-  const accounts: AccountCredential[] = [
+export const PersonaSelectorView: React.FC<{ onEnterApp: () => void; initialAuthNotice?: string }> = ({
+  onEnterApp,
+  initialAuthNotice
+}) => {
+  const {
+    theme,
+    toggleTheme,
+    login,
+    loginWithCredentials,
+    registerProfessional,
+    registerCompany,
+    commercialConfig,
+    vacancies,
+    companies
+  } = useApp();
+
+  const demoAccounts: DemoAccountOption[] = [
     {
       id: 'candidato-lucas',
-      tab: 'profissional',
       name: 'Lucas Almeida',
-      role: 'Desenvolvedor Front-end Pleno',
+      roleLabel: 'Desenvolvedor Front-end Pleno',
+      badge: 'Profissional',
       email: 'lucas@qitech.com.br',
-      password: '123456'
+      description: 'Candidato com match de 91% aguardando confirmação de Double Opt-In no Match Express.'
     },
     {
       id: 'candidato-marina',
-      tab: 'profissional',
       name: 'Marina Costa',
-      role: 'Engenheira de Dados Sênior',
+      roleLabel: 'Engenheira de Dados Sênior',
+      badge: 'Profissional',
       email: 'marina@qitech.com.br',
-      password: '123456'
-    },
-    {
-      id: 'comunidade-rafael',
-      tab: 'profissional',
-      name: 'Rafael Mendes',
-      role: 'DevOps & Cloud Engineer (Comunidade)',
-      email: 'rafael@comunidade.com.br',
-      password: '123456'
+      description: 'Candidata sênior com Double Opt-In aceito, entrevista IA concluída e participação ativa na comunidade.'
     },
     {
       id: 'empresa-orion',
-      tab: 'empresa',
       name: 'Orion Tech Solutions',
-      role: 'Cliente Corporativo B2B',
+      roleLabel: 'Cliente Corporativo B2B',
+      badge: 'Empresa',
       email: 'recrutamento@oriontech.com.br',
-      cnpj: '45.123.890/0001-99',
-      password: '123456'
+      description: 'Painel corporativo com vagas ativas, Match Express, desbloqueio de perfis e faturamento NFS-e.'
     },
     {
       id: 'admin-qitech',
-      tab: 'admin',
       name: 'Governança Q.I. Tech',
-      role: 'Backoffice & Operações',
+      roleLabel: 'Backoffice & Operações',
+      badge: 'Admin',
       email: 'admin@qitech.com.br',
-      password: '123456'
+      description: 'Painel administrativo com parâmetros comerciais, curadoria de skills, moderação e trilha LGPD.'
+    },
+    {
+      id: 'comunidade-rafael',
+      name: 'Rafael Mendes',
+      roleLabel: 'DevOps & Cloud Engineer',
+      badge: 'Comunidade',
+      email: 'rafael@comunidade.com.br',
+      description: 'Membro externo da comunidade técnica com opção de migração voluntária para candidato.'
     }
   ];
 
-  // Controle do Menu Suspenso no Ícone de Login e do Modal de Autenticação
-  const [showAccountDropdown, setShowAccountDropdown] = useState(false);
-  const [showLoginModal, setShowLoginModal] = useState(false);
-  const [activeLoginTab, setActiveLoginTab] = useState<LoginTab>('profissional');
-  const [selectedAccountId, setSelectedAccountId] = useState<ActivePersona>('candidato-lucas');
-  const [emailInput, setEmailInput] = useState('lucas@qitech.com.br');
-  const [cnpjInput, setCnpjInput] = useState('45.123.890/0001-99');
-  const [passwordInput, setPasswordInput] = useState('123456');
-  const [errorMsg, setErrorMsg] = useState('');
+  // Modais: 'login' | 'signup' | 'demo' | null
+  const [activeModal, setActiveModal] = useState<'login' | 'signup' | 'demo' | null>(null);
+  const [authNotice, setAuthNotice] = useState<string>(initialAuthNotice || '');
 
-  const openLoginForPortal = (tab: LoginTab, defaultAccount?: ActivePersona) => {
-    setShowAccountDropdown(false);
-    setActiveLoginTab(tab);
-    setErrorMsg('');
-    const targetAcc = defaultAccount
-      ? accounts.find(a => a.id === defaultAccount)
-      : accounts.find(a => a.tab === tab);
-    if (targetAcc) {
-      setSelectedAccountId(targetAcc.id);
-      setEmailInput(targetAcc.email);
-      if (targetAcc.cnpj) setCnpjInput(targetAcc.cnpj);
-      setPasswordInput(targetAcc.password);
+  useEffect(() => {
+    if (initialAuthNotice) {
+      setAuthNotice(initialAuthNotice);
+      setActiveModal('login');
     }
-    setShowLoginModal(true);
+  }, [initialAuthNotice]);
+
+  // Estado do Modal de Login ("Entrar")
+  const [loginEmail, setLoginEmail] = useState('');
+  const [loginPassword, setLoginPassword] = useState('');
+  const [loginError, setLoginError] = useState('');
+
+  // Estado do Modal de Cadastro ("Criar conta")
+  const [signupRole, setSignupRole] = useState<SignupTab>('profissional');
+  // Campos Profissional
+  const [profName, setProfName] = useState('');
+  const [profEmail, setProfEmail] = useState('');
+  const [profPassword, setProfPassword] = useState('');
+  const [profConfirmPassword, setProfConfirmPassword] = useState('');
+  const [profArea, setProfArea] = useState('Frontend');
+  const [profSeniority, setProfSeniority] = useState<Seniority>('Pleno');
+  // Campos Empresa
+  const [compName, setCompName] = useState('');
+  const [compCnpj, setCompCnpj] = useState('');
+  const [compEmail, setCompEmail] = useState('');
+  const [compPassword, setCompPassword] = useState('');
+  const [compConfirmPassword, setCompConfirmPassword] = useState('');
+  const [signupError, setSignupError] = useState('');
+
+  // Estado do Modal de Acesso de Demonstração
+  const [selectedDemoPersona, setSelectedDemoPersona] = useState<ActivePersona>('candidato-lucas');
+
+  const openLoginModal = () => {
+    setLoginError('');
+    setActiveModal('login');
   };
 
-  const handleSelectAccountFromDropdown = (accountId: ActivePersona) => {
-    const acc = accounts.find(a => a.id === accountId);
-    if (!acc) return;
-    setSelectedAccountId(acc.id);
-    setActiveLoginTab(acc.tab);
-    setEmailInput(acc.email);
-    if (acc.cnpj) setCnpjInput(acc.cnpj);
-    setPasswordInput(acc.password);
-    setErrorMsg('');
+  const openSignupModal = (defaultRole: SignupTab = 'profissional') => {
+    setSignupRole(defaultRole);
+    setSignupError('');
+    setActiveModal('signup');
   };
 
-  const handleFormLogin = (e: React.FormEvent) => {
+  const openDemoModal = (defaultPersona: ActivePersona = 'candidato-lucas') => {
+    setSelectedDemoPersona(defaultPersona);
+    setActiveModal('demo');
+  };
+
+  const handleLoginSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    const matched = accounts.find(
-      a => a.email.toLowerCase() === emailInput.trim().toLowerCase()
-    );
-    if (!matched) {
-      setErrorMsg('E-mail não encontrado. Selecione uma conta cadastrada na lista acima.');
+    setLoginError('');
+    const res = loginWithCredentials(loginEmail, loginPassword);
+    if (!res.success) {
+      setLoginError(res.error || 'Falha ao autenticar.');
       return;
     }
-    if (!passwordInput.trim()) {
-      setErrorMsg('Digite sua senha para continuar.');
-      return;
-    }
-    setShowLoginModal(false);
-    login(matched.id);
+    setActiveModal(null);
+    setAuthNotice('');
     onEnterApp();
   };
 
-  const filteredAccounts = accounts.filter(a => a.tab === activeLoginTab);
+  const handleSignupSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    setSignupError('');
+
+    if (signupRole === 'admin') {
+      setSignupError('O perfil Admin não permite auto-cadastro. Utilize o Acesso de Demonstração para entrar como Governança Q.I. Tech.');
+      return;
+    }
+
+    if (signupRole === 'profissional') {
+      const res = registerProfessional({
+        name: profName,
+        email: profEmail,
+        password: profPassword,
+        confirmPassword: profConfirmPassword,
+        technicalArea: profArea,
+        seniority: profSeniority
+      });
+      if (!res.success) {
+        setSignupError(res.error || 'Erro ao criar conta de profissional.');
+        return;
+      }
+      setActiveModal(null);
+      setAuthNotice('');
+      onEnterApp();
+    } else if (signupRole === 'empresa') {
+      const res = registerCompany({
+        companyName: compName,
+        cnpj: compCnpj,
+        email: compEmail,
+        password: compPassword,
+        confirmPassword: compConfirmPassword
+      });
+      if (!res.success) {
+        setSignupError(res.error || 'Erro ao criar conta corporativa.');
+        return;
+      }
+      setActiveModal(null);
+      setAuthNotice('');
+      onEnterApp();
+    }
+  };
+
+  const handleEnterDemo = () => {
+    login(selectedDemoPersona);
+    setActiveModal(null);
+    setAuthNotice('');
+    onEnterApp();
+  };
 
   return (
     <div className="min-h-screen bg-background flex flex-col justify-between">
       
-      {/* BARRA DE NAVEGAÇÃO COMERCIAL COM ÍCONE DE LOGIN NO TOPO DIREITO */}
+      {/* BARRA DE NAVEGAÇÃO COMERCIAL */}
       <header className="sticky top-0 z-40 bg-brandNavy text-white border-b border-white/10">
-        <div className="max-w-[1320px] mx-auto h-16 px-4 sm:px-8 flex items-center justify-between">
+        <div className="max-w-[1320px] mx-auto h-16 px-4 sm:px-8 flex items-center justify-between gap-3">
           
           {/* Logo Comercial */}
           <div className="flex items-center gap-3">
@@ -160,14 +243,14 @@ export const PersonaSelectorView: React.FC<{ onEnterApp: () => void }> = ({ onEn
           </div>
 
           {/* Links de Navegação do Site */}
-          <nav className="hidden md:flex items-center gap-7 text-xs font-semibold text-brandNavySub">
+          <nav className="hidden lg:flex items-center gap-7 text-xs font-semibold text-brandNavySub">
             <a href="#solucoes" className="hover:text-white transition-colors">Soluções</a>
             <a href="#vagas" className="hover:text-white transition-colors">Vagas Abertas</a>
             <a href="#para-empresas" className="hover:text-white transition-colors">Para Empresas</a>
           </nav>
 
-          {/* ALTERNADOR DE TEMA + ÍCONE DE LOGIN COM LISTA SUSPENSA */}
-          <div className="flex items-center gap-2.5">
+          {/* AÇÕES DE AUTENTICAÇÃO: ACESSO DE DEMONSTRAÇÃO | ENTRAR | CRIAR CONTA */}
+          <div className="flex items-center gap-2">
             <button
               type="button"
               onClick={toggleTheme}
@@ -182,73 +265,52 @@ export const PersonaSelectorView: React.FC<{ onEnterApp: () => void }> = ({ onEn
               )}
             </button>
 
-            <div className="relative">
-              <button
-                type="button"
-                onClick={() => setShowAccountDropdown(!showAccountDropdown)}
-                className="flex items-center gap-2 px-3.5 py-2 rounded-base bg-white/10 hover:bg-white/15 border border-white/15 text-xs font-bold text-white transition-all"
-                title="Acessar minha conta"
-              >
-                <div className="w-6 h-6 rounded-full bg-primary flex items-center justify-center">
-                  <User className="w-3.5 h-3.5 text-white" />
-                </div>
-                <span>Entrar</span>
-                <ChevronDown className="w-3.5 h-3.5 text-brandNavySub" />
-              </button>
+            <button
+              type="button"
+              onClick={() => openDemoModal('candidato-lucas')}
+              className="hidden sm:flex items-center gap-1.5 px-3 py-2 rounded-base bg-white/5 hover:bg-white/10 border border-white/15 text-[11px] font-semibold text-brandNavySub hover:text-white transition-all"
+              title="Acessar contas seedadas de demonstração"
+            >
+              <PlayCircle className="w-3.5 h-3.5 text-brandOrange" />
+              <span>Acesso de demonstração</span>
+            </button>
 
-              {/* LISTA SUSPENSA DE ACESSO */}
-              {showAccountDropdown && (
-                <div className="absolute right-0 mt-2 w-64 bg-white text-foreground rounded-base border border-border shadow-xl py-2 z-50">
-                  <div className="px-3.5 py-1.5 border-b border-border">
-                    <span className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">
-                      Selecione seu Portal de Acesso
-                    </span>
-                  </div>
+            <button
+              type="button"
+              onClick={openLoginModal}
+              className="flex items-center gap-1.5 px-3.5 py-2 rounded-base bg-white/10 hover:bg-white/15 border border-white/20 text-xs font-bold text-white transition-all"
+            >
+              <LogIn className="w-3.5 h-3.5 text-[#4AD6E8]" />
+              <span>Entrar</span>
+            </button>
 
-                  <button
-                    type="button"
-                    onClick={() => openLoginForPortal('profissional', 'candidato-lucas')}
-                    className="w-full px-3.5 py-2.5 text-left hover:bg-secondary/60 flex items-center gap-2.5 transition-colors"
-                  >
-                    <User className="w-4 h-4 text-primary shrink-0" />
-                    <div>
-                      <strong className="text-xs font-bold text-foreground block">Profissional & Comunidade</strong>
-                      <span className="text-[10px] text-muted-foreground">Candidatos e membros da rede</span>
-                    </div>
-                  </button>
-
-                  <button
-                    type="button"
-                    onClick={() => openLoginForPortal('empresa', 'empresa-orion')}
-                    className="w-full px-3.5 py-2.5 text-left hover:bg-secondary/60 flex items-center gap-2.5 transition-colors"
-                  >
-                    <Building2 className="w-4 h-4 text-brandOrange shrink-0" />
-                    <div>
-                      <strong className="text-xs font-bold text-foreground block">Portal da Empresa (B2B)</strong>
-                      <span className="text-[10px] text-muted-foreground">Recrutadores, vagas e NFS-e</span>
-                    </div>
-                  </button>
-
-                  <div className="border-t border-border mt-1 pt-1">
-                    <button
-                      type="button"
-                      onClick={() => openLoginForPortal('admin', 'admin-qitech')}
-                      className="w-full px-3.5 py-2 text-left hover:bg-secondary/60 flex items-center gap-2.5 transition-colors"
-                    >
-                      <ShieldCheck className="w-4 h-4 text-gray-800 shrink-0" />
-                      <div>
-                        <strong className="text-xs font-bold text-foreground block">Administração Q.I. Tech</strong>
-                        <span className="text-[10px] text-muted-foreground">Governança, preços e LGPD</span>
-                      </div>
-                    </button>
-                  </div>
-                </div>
-              )}
-            </div>
+            <button
+              type="button"
+              onClick={() => openSignupModal('profissional')}
+              className="flex items-center gap-1.5 px-3.5 py-2 rounded-base bg-brandOrange hover:opacity-95 text-xs font-bold text-white shadow-xs transition-all"
+            >
+              <UserPlus className="w-3.5 h-3.5" />
+              <span>Criar conta</span>
+            </button>
           </div>
 
         </div>
       </header>
+
+      {/* AVISO DE ROTA PROTEGIDA SE REDIRECIONADO */}
+      {authNotice && (
+        <div className="bg-brandOrange/15 border-b border-brandOrange/30 px-4 py-2.5 text-center text-xs font-semibold text-foreground flex items-center justify-center gap-2">
+          <AlertCircle className="w-4 h-4 text-brandOrange shrink-0" />
+          <span>{authNotice}</span>
+          <button
+            type="button"
+            onClick={openLoginModal}
+            className="underline font-bold text-primary ml-1"
+          >
+            Fazer login agora
+          </button>
+        </div>
+      )}
 
       {/* HERO COMERCIAL */}
       <section className="bg-brandNavy text-white py-14 sm:py-20 border-b border-white/10">
@@ -267,22 +329,36 @@ export const PersonaSelectorView: React.FC<{ onEnterApp: () => void }> = ({ onEn
               Conectamos empresas a talentos de tecnologia pré-validados por IA com proteção de dados via Double Opt-In e indicações recompensadas na comunidade.
             </p>
 
-            <div className="flex flex-wrap items-center gap-3 pt-2">
-              <button
-                type="button"
-                onClick={() => openLoginForPortal('empresa', 'empresa-orion')}
-                className="px-5 py-3 rounded-base bg-brandOrange hover:opacity-95 text-white text-xs sm:text-sm font-bold flex items-center gap-2 shadow-md transition-all"
-              >
-                Contratar Talentos (1º Grátis) <ArrowRight className="w-4 h-4" />
-              </button>
+            {/* Ações Principais + Acesso de Demonstração Separado Visualmente */}
+            <div className="space-y-3 pt-2">
+              <div className="flex flex-wrap items-center gap-3">
+                <button
+                  type="button"
+                  onClick={() => openSignupModal('profissional')}
+                  className="px-5 py-3 rounded-base bg-brandOrange hover:opacity-95 text-white text-xs sm:text-sm font-bold flex items-center gap-2 shadow-md transition-all"
+                >
+                  <UserPlus className="w-4 h-4" /> Criar conta <ArrowRight className="w-4 h-4" />
+                </button>
 
-              <button
-                type="button"
-                onClick={() => openLoginForPortal('profissional', 'candidato-lucas')}
-                className="px-5 py-3 rounded-base bg-white/10 hover:bg-white/15 border border-white/20 text-white text-xs sm:text-sm font-bold flex items-center gap-2 transition-all"
-              >
-                Sou Profissional de Tecnologia
-              </button>
+                <button
+                  type="button"
+                  onClick={openLoginModal}
+                  className="px-5 py-3 rounded-base bg-white/10 hover:bg-white/15 border border-white/20 text-white text-xs sm:text-sm font-bold flex items-center gap-2 transition-all"
+                >
+                  <LogIn className="w-4 h-4 text-[#4AD6E8]" /> Entrar na minha conta
+                </button>
+              </div>
+
+              <div className="pt-1 flex items-center gap-2 text-xs text-brandNavySub">
+                <span>Avaliando o MVP?</span>
+                <button
+                  type="button"
+                  onClick={() => openDemoModal('candidato-lucas')}
+                  className="inline-flex items-center gap-1.5 font-bold text-[#4AD6E8] hover:underline"
+                >
+                  <PlayCircle className="w-3.5 h-3.5" /> Acesso de demonstração (Contas Seedadas)
+                </button>
+              </div>
             </div>
           </div>
 
@@ -318,7 +394,7 @@ export const PersonaSelectorView: React.FC<{ onEnterApp: () => void }> = ({ onEn
         </div>
       </section>
 
-      {/* OS 3 PILARES DO ECOSSISTEMA (TEXTO COMERCIAL DIRETO E TÍTULOS CLAROS) */}
+      {/* OS 3 PILARES DO ECOSSISTEMA */}
       <section id="solucoes" className="py-14 max-w-[1320px] mx-auto px-4 sm:px-8 space-y-8">
         <div className="text-center max-w-2xl mx-auto space-y-2">
           <h2 className="text-xl sm:text-2xl font-heading font-bold text-foreground">
@@ -345,10 +421,10 @@ export const PersonaSelectorView: React.FC<{ onEnterApp: () => void }> = ({ onEn
             </div>
             <button
               type="button"
-              onClick={() => openLoginForPortal('empresa', 'empresa-orion')}
+              onClick={() => openSignupModal('empresa')}
               className="text-xs font-bold text-primary hover:underline flex items-center gap-1 pt-2"
             >
-              Acessar Portal Corporativo <ArrowRight className="w-3.5 h-3.5" />
+              Criar Conta Corporativa <ArrowRight className="w-3.5 h-3.5" />
             </button>
           </div>
 
@@ -367,10 +443,10 @@ export const PersonaSelectorView: React.FC<{ onEnterApp: () => void }> = ({ onEn
             </div>
             <button
               type="button"
-              onClick={() => openLoginForPortal('profissional', 'candidato-lucas')}
+              onClick={() => openSignupModal('profissional')}
               className="text-xs font-bold text-primary hover:underline flex items-center gap-1 pt-2"
             >
-              Ver Carteira & Recompensas <ArrowRight className="w-3.5 h-3.5" />
+              Cadastrar Perfil Profissional <ArrowRight className="w-3.5 h-3.5" />
             </button>
           </div>
 
@@ -389,7 +465,7 @@ export const PersonaSelectorView: React.FC<{ onEnterApp: () => void }> = ({ onEn
             </div>
             <button
               type="button"
-              onClick={() => openLoginForPortal('profissional', 'comunidade-rafael')}
+              onClick={() => openDemoModal('comunidade-rafael')}
               className="text-xs font-bold text-primary hover:underline flex items-center gap-1 pt-2"
             >
               Explorar Comunidade Técnica <ArrowRight className="w-3.5 h-3.5" />
@@ -412,7 +488,7 @@ export const PersonaSelectorView: React.FC<{ onEnterApp: () => void }> = ({ onEn
             </div>
             <button
               type="button"
-              onClick={() => openLoginForPortal('profissional', 'candidato-lucas')}
+              onClick={openLoginModal}
               className="text-xs font-bold text-primary hover:underline flex items-center gap-1"
             >
               Entrar como candidato <ArrowRight className="w-3.5 h-3.5" />
@@ -457,7 +533,7 @@ export const PersonaSelectorView: React.FC<{ onEnterApp: () => void }> = ({ onEn
                     </div>
                     <button
                       type="button"
-                      onClick={() => openLoginForPortal('profissional', 'candidato-lucas')}
+                      onClick={openLoginModal}
                       className="px-3.5 py-1.5 rounded-base bg-primary hover:bg-primary-dark text-white text-xs font-bold transition-all"
                     >
                       Ver Compatibilidade
@@ -481,13 +557,22 @@ export const PersonaSelectorView: React.FC<{ onEnterApp: () => void }> = ({ onEn
               Publique sua vaga com Match Express, receba o 1º candidato confirmado gratuitamente e desbloqueie novos perfis apenas quando quiser (R$ {commercialConfig.singleUnlockPriceBrl} avulso ou pacote de 5 créditos por R$ {commercialConfig.package5PriceBrl}).
             </p>
           </div>
-          <button
-            type="button"
-            onClick={() => openLoginForPortal('empresa', 'empresa-orion')}
-            className="px-5 py-3 rounded-base bg-brandOrange hover:opacity-95 text-white text-xs sm:text-sm font-bold flex items-center gap-2 shrink-0 shadow-md"
-          >
-            <Building2 className="w-4 h-4" /> Acessar Conta Empresa
-          </button>
+          <div className="flex flex-wrap items-center gap-3 shrink-0">
+            <button
+              type="button"
+              onClick={() => openSignupModal('empresa')}
+              className="px-5 py-3 rounded-base bg-brandOrange hover:opacity-95 text-white text-xs sm:text-sm font-bold flex items-center gap-2 shadow-md"
+            >
+              <Building2 className="w-4 h-4" /> Criar Conta Empresa
+            </button>
+            <button
+              type="button"
+              onClick={() => openDemoModal('empresa-orion')}
+              className="px-4 py-3 rounded-base bg-white/10 hover:bg-white/15 border border-white/20 text-white text-xs font-bold flex items-center gap-1.5"
+            >
+              <PlayCircle className="w-4 h-4 text-brandOrange" /> Ver Demo Empresa
+            </button>
+          </div>
         </div>
       </section>
 
@@ -506,21 +591,22 @@ export const PersonaSelectorView: React.FC<{ onEnterApp: () => void }> = ({ onEn
             <span>Termos Corporativos</span>
             <button
               type="button"
-              onClick={() => openLoginForPortal('admin', 'admin-qitech')}
+              onClick={() => openDemoModal('admin-qitech')}
               className="hover:text-primary font-semibold"
             >
-              Backoffice
+              Acesso de Demonstração
             </button>
           </div>
         </div>
       </footer>
 
-      {/* MODAL DE LOGIN (SÓ ABRE QUANDO O USUÁRIO CLICA NO ÍCONE DE LOGIN OU BOTÃO DE ENTRADA) */}
-      {showLoginModal && (
+      {/* ===================================================================== */}
+      {/* 1. MODAL DE LOGIN ("ENTRAR")                                           */}
+      {/* ===================================================================== */}
+      {activeModal === 'login' && (
         <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-center justify-center p-4 animate-fadeIn">
           <div className="bg-white rounded-base border border-border max-w-md w-full p-6 shadow-2xl space-y-5">
             
-            {/* Topo do Modal */}
             <div className="flex items-center justify-between border-b border-border pb-3">
               <div className="flex items-center gap-2.5">
                 <div className="w-8 h-8 rounded-base bg-primary flex items-center justify-center font-heading font-bold text-white text-sm">
@@ -529,93 +615,32 @@ export const PersonaSelectorView: React.FC<{ onEnterApp: () => void }> = ({ onEn
                 <div>
                   <h3 className="font-heading font-bold text-sm text-foreground">Entrar na Q.I. Tech</h3>
                   <span className="text-[11px] text-muted-foreground block">
-                    Autenticação segura por perfil
+                    Acesse sua conta de Profissional, Empresa ou Governança
                   </span>
                 </div>
               </div>
               <button
                 type="button"
-                onClick={() => setShowLoginModal(false)}
+                onClick={() => setActiveModal(null)}
                 className="p-1 rounded hover:bg-background text-muted-foreground hover:text-foreground"
               >
                 <X className="w-4 h-4" />
               </button>
             </div>
 
-            {/* Abas de Tipo de Conta */}
-            <div className="grid grid-cols-3 gap-1.5 bg-background p-1 rounded-base border border-border">
-              <button
-                type="button"
-                onClick={() => openLoginForPortal('profissional')}
-                className={`py-2 px-2 rounded text-[11px] font-bold flex items-center justify-center gap-1 transition-all ${
-                  activeLoginTab === 'profissional' ? 'bg-primary text-white shadow-xs' : 'text-muted-foreground hover:text-foreground'
-                }`}
-              >
-                <User className="w-3.5 h-3.5" /> Profissional
-              </button>
-              <button
-                type="button"
-                onClick={() => openLoginForPortal('empresa')}
-                className={`py-2 px-2 rounded text-[11px] font-bold flex items-center justify-center gap-1 transition-all ${
-                  activeLoginTab === 'empresa' ? 'bg-brandOrange text-white shadow-xs' : 'text-muted-foreground hover:text-foreground'
-                }`}
-              >
-                <Building2 className="w-3.5 h-3.5" /> Empresa
-              </button>
-              <button
-                type="button"
-                onClick={() => openLoginForPortal('admin')}
-                className={`py-2 px-2 rounded text-[11px] font-bold flex items-center justify-center gap-1 transition-all ${
-                  activeLoginTab === 'admin' ? 'bg-gray-900 text-white shadow-xs' : 'text-muted-foreground hover:text-foreground'
-                }`}
-              >
-                <ShieldCheck className="w-3.5 h-3.5" /> Admin
-              </button>
-            </div>
-
-            {/* Lista Suspensa de Contas Registradas para Preenchimento Rápido */}
-            <div className="space-y-1">
-              <label className="block text-[11px] font-bold text-muted-foreground uppercase tracking-wider">
-                Selecionar Conta Cadastrada
-              </label>
-              <select
-                value={selectedAccountId}
-                onChange={(e) => handleSelectAccountFromDropdown(e.target.value as ActivePersona)}
-                className="w-full h-9 px-3 text-xs bg-secondary/40 border border-border rounded-base font-semibold text-foreground focus:outline-none focus:ring-1 focus:ring-primary"
-              >
-                {filteredAccounts.map(acc => (
-                  <option key={acc.id} value={acc.id}>
-                    {acc.name} — {acc.role} ({acc.email})
-                  </option>
-                ))}
-              </select>
-            </div>
-
-            {/* Formulário de Credenciais */}
-            <form onSubmit={handleFormLogin} className="space-y-3.5">
-              {activeLoginTab === 'empresa' && (
-                <div>
-                  <label className="block text-xs font-semibold text-foreground mb-1">CNPJ Corporativo</label>
-                  <input
-                    type="text"
-                    value={cnpjInput}
-                    onChange={(e) => setCnpjInput(e.target.value)}
-                    className="w-full h-9 px-3 text-xs bg-background border border-border rounded-base font-mono text-foreground focus:outline-none focus:ring-1 focus:ring-primary"
-                  />
-                </div>
-              )}
-
+            <form onSubmit={handleLoginSubmit} className="space-y-3.5">
               <div>
                 <label className="block text-xs font-semibold text-foreground mb-1">E-mail</label>
                 <div className="relative">
                   <Mail className="w-4 h-4 text-muted-foreground absolute left-3 top-2.5" />
                   <input
                     type="email"
-                    value={emailInput}
+                    value={loginEmail}
                     onChange={(e) => {
-                      setEmailInput(e.target.value);
-                      setErrorMsg('');
+                      setLoginEmail(e.target.value);
+                      setLoginError('');
                     }}
+                    placeholder="seu.email@dominio.com.br"
                     className="w-full h-9 pl-9 pr-3 text-xs bg-background border border-border rounded-base text-foreground focus:outline-none focus:ring-1 focus:ring-primary"
                   />
                 </div>
@@ -627,33 +652,431 @@ export const PersonaSelectorView: React.FC<{ onEnterApp: () => void }> = ({ onEn
                   <KeyRound className="w-4 h-4 text-muted-foreground absolute left-3 top-2.5" />
                   <input
                     type="password"
-                    value={passwordInput}
+                    value={loginPassword}
                     onChange={(e) => {
-                      setPasswordInput(e.target.value);
-                      setErrorMsg('');
+                      setLoginPassword(e.target.value);
+                      setLoginError('');
                     }}
+                    placeholder="Digite sua senha"
                     className="w-full h-9 pl-9 pr-3 text-xs bg-background border border-border rounded-base text-foreground focus:outline-none focus:ring-1 focus:ring-primary"
                   />
                 </div>
               </div>
 
-              {errorMsg && (
-                <p className="text-xs text-destructive font-medium">{errorMsg}</p>
+              {loginError && (
+                <div className="p-2.5 rounded-base bg-destructive/10 border border-destructive/30 text-destructive text-xs flex items-center gap-1.5 font-medium">
+                  <AlertCircle className="w-4 h-4 shrink-0" />
+                  <span>{loginError}</span>
+                </div>
               )}
 
               <button
                 type="submit"
-                className={`w-full h-10 font-bold text-xs rounded-base flex items-center justify-center gap-2 text-white shadow-sm transition-all ${
-                  activeLoginTab === 'empresa'
-                    ? 'bg-brandOrange hover:opacity-95'
-                    : activeLoginTab === 'admin'
-                    ? 'bg-gray-900 hover:bg-black'
-                    : 'bg-primary hover:bg-primary-dark'
-                }`}
+                className="w-full h-10 font-bold text-xs rounded-base flex items-center justify-center gap-2 text-white bg-primary hover:bg-primary-dark shadow-sm transition-all"
               >
                 <LogIn className="w-4 h-4" /> Entrar na Plataforma
               </button>
             </form>
+
+            <div className="pt-3 border-t border-border flex flex-col gap-2 text-xs">
+              <div className="flex items-center justify-between text-muted-foreground">
+                <span>Ainda não possui cadastro?</span>
+                <button
+                  type="button"
+                  onClick={() => openSignupModal('profissional')}
+                  className="font-bold text-primary hover:underline"
+                >
+                  Criar conta gratuita
+                </button>
+              </div>
+              <div className="flex items-center justify-between text-muted-foreground">
+                <span>Deseja testar com dados populados?</span>
+                <button
+                  type="button"
+                  onClick={() => openDemoModal('candidato-lucas')}
+                  className="font-bold text-brandOrange hover:underline flex items-center gap-1"
+                >
+                  <PlayCircle className="w-3.5 h-3.5" /> Acesso de demonstração
+                </button>
+              </div>
+            </div>
+
+          </div>
+        </div>
+      )}
+
+      {/* ===================================================================== */}
+      {/* 2. MODAL DE CADASTRO ("CRIAR CONTA")                                   */}
+      {/* ===================================================================== */}
+      {activeModal === 'signup' && (
+        <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-center justify-center p-4 animate-fadeIn">
+          <div className="bg-white rounded-base border border-border max-w-lg w-full p-6 shadow-2xl space-y-5 max-h-[92vh] overflow-y-auto">
+            
+            <div className="flex items-center justify-between border-b border-border pb-3">
+              <div className="flex items-center gap-2.5">
+                <div className="w-8 h-8 rounded-base bg-brandOrange flex items-center justify-center font-heading font-bold text-white text-sm">
+                  Q
+                </div>
+                <div>
+                  <h3 className="font-heading font-bold text-sm text-foreground">Criar Conta na Q.I. Tech</h3>
+                  <span className="text-[11px] text-muted-foreground block">
+                    Selecione seu perfil para iniciar
+                  </span>
+                </div>
+              </div>
+              <button
+                type="button"
+                onClick={() => setActiveModal(null)}
+                className="p-1 rounded hover:bg-background text-muted-foreground hover:text-foreground"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+
+            {/* Seletor de Perfil no Cadastro */}
+            <div className="grid grid-cols-3 gap-1.5 bg-background p-1 rounded-base border border-border">
+              <button
+                type="button"
+                onClick={() => {
+                  setSignupRole('profissional');
+                  setSignupError('');
+                }}
+                className={`py-2 px-2 rounded text-[11px] font-bold flex items-center justify-center gap-1 transition-all ${
+                  signupRole === 'profissional' ? 'bg-primary text-white shadow-xs' : 'text-muted-foreground hover:text-foreground'
+                }`}
+              >
+                <User className="w-3.5 h-3.5" /> Profissional
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  setSignupRole('empresa');
+                  setSignupError('');
+                }}
+                className={`py-2 px-2 rounded text-[11px] font-bold flex items-center justify-center gap-1 transition-all ${
+                  signupRole === 'empresa' ? 'bg-brandOrange text-white shadow-xs' : 'text-muted-foreground hover:text-foreground'
+                }`}
+              >
+                <Building2 className="w-3.5 h-3.5" /> Empresa
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  setSignupRole('admin');
+                  setSignupError('');
+                }}
+                className={`py-2 px-2 rounded text-[11px] font-bold flex items-center justify-center gap-1 transition-all ${
+                  signupRole === 'admin' ? 'bg-gray-900 text-white shadow-xs' : 'text-muted-foreground hover:text-foreground'
+                }`}
+              >
+                <ShieldCheck className="w-3.5 h-3.5" /> Admin
+              </button>
+            </div>
+
+            {signupRole === 'admin' ? (
+              <div className="p-4 rounded-base bg-secondary/50 border border-border space-y-3 text-xs">
+                <div className="flex items-center gap-2 text-foreground font-heading font-bold">
+                  <Lock className="w-4 h-4 text-primary" /> Cadastro Restrito — Governança Q.I. Tech
+                </div>
+                <p className="text-muted-foreground leading-relaxed">
+                  Contas de <strong>Admin</strong> são exclusivas para a operação de governança e não permitem auto-cadastro público. Para inspecionar o painel administrativo no MVP, utilize a conta seedada de demonstração.
+                </p>
+                <button
+                  type="button"
+                  onClick={() => openDemoModal('admin-qitech')}
+                  className="w-full h-9 rounded-base bg-primary hover:bg-primary-dark text-white font-bold text-xs flex items-center justify-center gap-1.5 transition-all"
+                >
+                  <PlayCircle className="w-4 h-4" /> Ir para Acesso de Demonstração (Admin)
+                </button>
+              </div>
+            ) : (
+              <form onSubmit={handleSignupSubmit} className="space-y-3.5 text-xs">
+                {signupRole === 'profissional' ? (
+                  <>
+                    <div>
+                      <label className="block font-semibold text-foreground mb-1">Nome Completo *</label>
+                      <input
+                        type="text"
+                        value={profName}
+                        onChange={(e) => {
+                          setProfName(e.target.value);
+                          setSignupError('');
+                        }}
+                        placeholder="Ex: Ana Beatriz Souza"
+                        className="w-full h-9 px-3 bg-background border border-border rounded-base text-foreground focus:outline-none focus:ring-1 focus:ring-primary"
+                      />
+                    </div>
+
+                    <div>
+                      <label className="block font-semibold text-foreground mb-1">E-mail *</label>
+                      <input
+                        type="email"
+                        value={profEmail}
+                        onChange={(e) => {
+                          setProfEmail(e.target.value);
+                          setSignupError('');
+                        }}
+                        placeholder="ana.souza@email.com"
+                        className="w-full h-9 px-3 bg-background border border-border rounded-base text-foreground focus:outline-none focus:ring-1 focus:ring-primary"
+                      />
+                    </div>
+
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                      <div>
+                        <label className="block font-semibold text-foreground mb-1">Área / Vertical Técnica *</label>
+                        <select
+                          value={profArea}
+                          onChange={(e) => setProfArea(e.target.value)}
+                          className="w-full h-9 px-2.5 bg-background border border-border rounded-base text-foreground font-medium"
+                        >
+                          {TECHNICAL_AREAS.map(area => (
+                            <option key={area} value={area}>{area}</option>
+                          ))}
+                        </select>
+                      </div>
+
+                      <div>
+                        <label className="block font-semibold text-foreground mb-1">Senioridade *</label>
+                        <select
+                          value={profSeniority}
+                          onChange={(e) => setProfSeniority(e.target.value as Seniority)}
+                          className="w-full h-9 px-2.5 bg-background border border-border rounded-base text-foreground font-medium"
+                        >
+                          <option value="Júnior">Júnior</option>
+                          <option value="Pleno">Pleno</option>
+                          <option value="Sênior">Sênior</option>
+                        </select>
+                      </div>
+                    </div>
+
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                      <div>
+                        <label className="block font-semibold text-foreground mb-1">Senha (mín. 6 caracteres) *</label>
+                        <input
+                          type="password"
+                          value={profPassword}
+                          onChange={(e) => {
+                            setProfPassword(e.target.value);
+                            setSignupError('');
+                          }}
+                          placeholder="Mínimo 6 caracteres"
+                          className="w-full h-9 px-3 bg-background border border-border rounded-base text-foreground focus:outline-none focus:ring-1 focus:ring-primary"
+                        />
+                      </div>
+
+                      <div>
+                        <label className="block font-semibold text-foreground mb-1">Confirmação de Senha *</label>
+                        <input
+                          type="password"
+                          value={profConfirmPassword}
+                          onChange={(e) => {
+                            setProfConfirmPassword(e.target.value);
+                            setSignupError('');
+                          }}
+                          placeholder="Repita sua senha"
+                          className="w-full h-9 px-3 bg-background border border-border rounded-base text-foreground focus:outline-none focus:ring-1 focus:ring-primary"
+                        />
+                      </div>
+                    </div>
+                  </>
+                ) : (
+                  <>
+                    <div>
+                      <label className="block font-semibold text-foreground mb-1">Nome da Empresa *</label>
+                      <input
+                        type="text"
+                        value={compName}
+                        onChange={(e) => {
+                          setCompName(e.target.value);
+                          setSignupError('');
+                        }}
+                        placeholder="Ex: NovaCloud Tecnologia S.A."
+                        className="w-full h-9 px-3 bg-background border border-border rounded-base text-foreground focus:outline-none focus:ring-1 focus:ring-primary"
+                      />
+                    </div>
+
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                      <div>
+                        <label className="block font-semibold text-foreground mb-1">CNPJ *</label>
+                        <input
+                          type="text"
+                          value={compCnpj}
+                          onChange={(e) => {
+                            setCompCnpj(e.target.value);
+                            setSignupError('');
+                          }}
+                          placeholder="00.000.000/0001-00"
+                          className="w-full h-9 px-3 bg-background border border-border rounded-base font-mono text-foreground focus:outline-none focus:ring-1 focus:ring-primary"
+                        />
+                      </div>
+
+                      <div>
+                        <label className="block font-semibold text-foreground mb-1">E-mail Corporativo *</label>
+                        <input
+                          type="email"
+                          value={compEmail}
+                          onChange={(e) => {
+                            setCompEmail(e.target.value);
+                            setSignupError('');
+                          }}
+                          placeholder="talentos@empresa.com.br"
+                          className="w-full h-9 px-3 bg-background border border-border rounded-base text-foreground focus:outline-none focus:ring-1 focus:ring-primary"
+                        />
+                      </div>
+                    </div>
+
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                      <div>
+                        <label className="block font-semibold text-foreground mb-1">Senha (mín. 6 caracteres) *</label>
+                        <input
+                          type="password"
+                          value={compPassword}
+                          onChange={(e) => {
+                            setCompPassword(e.target.value);
+                            setSignupError('');
+                          }}
+                          placeholder="Mínimo 6 caracteres"
+                          className="w-full h-9 px-3 bg-background border border-border rounded-base text-foreground focus:outline-none focus:ring-1 focus:ring-primary"
+                        />
+                      </div>
+
+                      <div>
+                        <label className="block font-semibold text-foreground mb-1">Confirmação de Senha *</label>
+                        <input
+                          type="password"
+                          value={compConfirmPassword}
+                          onChange={(e) => {
+                            setCompConfirmPassword(e.target.value);
+                            setSignupError('');
+                          }}
+                          placeholder="Repita sua senha"
+                          className="w-full h-9 px-3 bg-background border border-border rounded-base text-foreground focus:outline-none focus:ring-1 focus:ring-primary"
+                        />
+                      </div>
+                    </div>
+                  </>
+                )}
+
+                {signupError && (
+                  <div className="p-2.5 rounded-base bg-destructive/10 border border-destructive/30 text-destructive flex items-center gap-1.5 font-medium">
+                    <AlertCircle className="w-4 h-4 shrink-0" />
+                    <span>{signupError}</span>
+                  </div>
+                )}
+
+                <button
+                  type="submit"
+                  className={`w-full h-10 font-bold text-xs rounded-base flex items-center justify-center gap-2 text-white shadow-sm transition-all ${
+                    signupRole === 'empresa' ? 'bg-brandOrange hover:opacity-95' : 'bg-primary hover:bg-primary-dark'
+                  }`}
+                >
+                  <UserPlus className="w-4 h-4" />
+                  {signupRole === 'empresa'
+                    ? 'Criar Conta Corporativa e Acessar Painel'
+                    : 'Criar Conta Profissional e Configurar Perfil'}
+                </button>
+              </form>
+            )}
+
+            <div className="pt-3 border-t border-border flex items-center justify-between text-xs text-muted-foreground">
+              <span>Já possui uma conta?</span>
+              <button
+                type="button"
+                onClick={openLoginModal}
+                className="font-bold text-primary hover:underline"
+              >
+                Entrar agora
+              </button>
+            </div>
+
+          </div>
+        </div>
+      )}
+
+      {/* ===================================================================== */}
+      {/* 3. MODAL DE ACESSO DE DEMONSTRAÇÃO (CONTAS SEEDADAS)                   */}
+      {/* ===================================================================== */}
+      {activeModal === 'demo' && (
+        <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-center justify-center p-4 animate-fadeIn">
+          <div className="bg-white rounded-base border border-border max-w-lg w-full p-6 shadow-2xl space-y-5 max-h-[92vh] overflow-y-auto">
+            
+            <div className="flex items-center justify-between border-b border-border pb-3">
+              <div className="flex items-center gap-2.5">
+                <div className="w-8 h-8 rounded-base bg-secondary text-primary flex items-center justify-center font-heading font-bold text-sm">
+                  <PlayCircle className="w-5 h-5 text-brandOrange" />
+                </div>
+                <div>
+                  <h3 className="font-heading font-bold text-sm text-foreground">Acesso de Demonstração</h3>
+                  <span className="text-[11px] text-muted-foreground block">
+                    Selecione uma persona pré-configurada para explorar os fluxos do MVP
+                  </span>
+                </div>
+              </div>
+              <button
+                type="button"
+                onClick={() => setActiveModal(null)}
+                className="p-1 rounded hover:bg-background text-muted-foreground hover:text-foreground"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+
+            <div className="space-y-2.5">
+              {demoAccounts.map((acc) => {
+                const isSelected = selectedDemoPersona === acc.id;
+                return (
+                  <div
+                    key={acc.id}
+                    onClick={() => setSelectedDemoPersona(acc.id)}
+                    className={`p-3.5 rounded-base border cursor-pointer transition-all flex items-start justify-between gap-3 ${
+                      isSelected
+                        ? 'border-primary bg-secondary/50 shadow-2xs'
+                        : 'border-border bg-background hover:border-primary/40'
+                    }`}
+                  >
+                    <div className="space-y-1">
+                      <div className="flex items-center gap-2 flex-wrap">
+                        <strong className="text-xs font-bold text-foreground">{acc.name}</strong>
+                        <span className={`text-[10px] font-bold px-2 py-0.5 rounded ${
+                          acc.badge === 'Empresa'
+                            ? 'bg-brandOrange/15 text-brandOrange'
+                            : acc.badge === 'Admin'
+                            ? 'bg-gray-900 text-white'
+                            : 'bg-secondary text-primary'
+                        }`}>
+                          {acc.badge}
+                        </span>
+                        <span className="text-[11px] text-muted-foreground font-medium">
+                          • {acc.roleLabel}
+                        </span>
+                      </div>
+                      <p className="text-[11px] text-muted-foreground leading-relaxed">
+                        {acc.description}
+                      </p>
+                      <span className="text-[10px] text-primary font-mono block">
+                        Conta seedada: {acc.email}
+                      </span>
+                    </div>
+
+                    <div className="shrink-0 pt-0.5">
+                      <div className={`w-4 h-4 rounded-full border flex items-center justify-center ${
+                        isSelected ? 'border-primary bg-primary text-white' : 'border-muted-foreground'
+                      }`}>
+                        {isSelected && <CheckCircle2 className="w-3 h-3" />}
+                      </div>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+
+            <button
+              type="button"
+              onClick={handleEnterDemo}
+              className="w-full h-10 bg-primary hover:bg-primary-dark text-white font-bold text-xs rounded-base flex items-center justify-center gap-2 shadow-sm transition-all"
+            >
+              <LogIn className="w-4 h-4" /> Entrar com Persona Selecionada
+            </button>
 
           </div>
         </div>

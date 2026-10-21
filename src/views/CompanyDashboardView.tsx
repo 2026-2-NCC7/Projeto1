@@ -15,6 +15,8 @@ import {
 
 export const CompanyDashboardView: React.FC<{ onSelectVacancy: (vacancyId: string) => void }> = ({ onSelectVacancy }) => {
   const { 
+    currentCompany,
+    currentUser,
     vacancies, 
     selectionProcesses, 
     companyCredits, 
@@ -37,6 +39,9 @@ export const CompanyDashboardView: React.FC<{ onSelectVacancy: (vacancyId: strin
   const [description, setDescription] = useState('Atuação em squad ágil construindo microsserviços e interfaces escaláveis.');
   const [isUrgentMatchExpress, setIsUrgentMatchExpress] = useState(true);
   const [formError, setFormError] = useState('');
+
+  const myCompanyVacancies = vacancies.filter(v => v.companyId === currentCompany.id);
+  const isNewCompanyWithoutVacancies = myCompanyVacancies.length === 0;
 
   const approvedCount = selectionProcesses.filter(p => p.currentStage === 'aprovado').length;
   const activeProcessesCount = selectionProcesses.filter(p => p.currentStage !== 'recusado' && p.currentStage !== 'aprovado').length;
@@ -89,16 +94,16 @@ export const CompanyDashboardView: React.FC<{ onSelectVacancy: (vacancyId: strin
           <div>
             <div className="flex items-center gap-2 flex-wrap">
               <Building2 className="w-5 h-5 text-primary" />
-              <h2 className="font-heading font-bold text-lg text-foreground">Orion Tech Solutions</h2>
+              <h2 className="font-heading font-bold text-lg text-foreground">{currentCompany.name}</h2>
               <span className="text-[10px] bg-secondary text-primary font-bold px-2 py-0.5 rounded">
-                CNPJ: 45.123.890/0001-99
+                CNPJ: {currentCompany.cnpj}
               </span>
               <span className="text-[10px] bg-emerald-100 text-emerald-800 font-bold px-2 py-0.5 rounded">
                 Conta Corporativa Ativa
               </span>
             </div>
             <p className="text-xs text-muted-foreground mt-1">
-              São Paulo/SP • Gestão de vagas, Match Express e faturamento
+              {currentUser?.email ? `${currentUser.email} • ` : ''}Gestão de vagas, Match Express e faturamento
             </p>
           </div>
 
@@ -110,6 +115,30 @@ export const CompanyDashboardView: React.FC<{ onSelectVacancy: (vacancyId: strin
           </button>
         </div>
       </div>
+
+      {/* CTA DE PÓS-CADASTRO PARA PUBLICAR A PRIMEIRA VAGA */}
+      {isNewCompanyWithoutVacancies && (
+        <div className="bg-brandNavy text-white p-5 rounded-base border border-brandOrange/40 shadow-xs flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+          <div className="space-y-1">
+            <span className="inline-flex items-center gap-1.5 text-[11px] font-bold text-brandOrange bg-white/10 px-2.5 py-0.5 rounded">
+              <Zap className="w-3.5 h-3.5" /> Conta Corporativa Criada com Sucesso
+            </span>
+            <h3 className="font-heading font-bold text-base text-white">
+              Comece agora: publique sua primeira vaga na Q.I. Tech
+            </h3>
+            <p className="text-xs text-brandNavySub max-w-2xl leading-relaxed">
+              Publique sua primeira vaga com transparência salarial e ative o <strong>Match Express</strong> para receber a shortlist automática e desbloquear o <strong>1º candidato confirmado gratuitamente</strong>.
+            </p>
+          </div>
+          <button
+            type="button"
+            onClick={() => setShowNewVacancyModal(true)}
+            className="px-4 py-2.5 bg-brandOrange hover:opacity-95 text-white text-xs font-bold rounded-base flex items-center gap-1.5 shrink-0 shadow-sm transition-all"
+          >
+            <Plus className="w-4 h-4" /> Publicar Minha Primeira Vaga
+          </button>
+        </div>
+      )}
 
       {/* MÉTRICAS DE RECRUTAMENTO & CRÉDITOS */}
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">

@@ -10,16 +10,17 @@ import {
 } from 'lucide-react';
 
 export const CommunityNetworkView: React.FC = () => {
-  const { communityProfiles, candidates, connections, connectToUser, activePersona } = useApp();
+  const { communityProfiles, candidates, connections, connectToUser, activePersona, currentUser } = useApp();
   const [filterDegree, setFilterDegree] = useState<'TODOS' | '1º grau' | '2º grau' | '3º grau'>('TODOS');
   const [searchTerm, setSearchTerm] = useState('');
 
   const currentUserId =
-    activePersona === 'comunidade-rafael'
+    currentUser?.id ||
+    (activePersona === 'comunidade-rafael'
       ? 'user-rafael-externo'
       : activePersona === 'candidato-marina'
       ? 'user-marina'
-      : 'user-lucas';
+      : 'user-lucas');
 
   const myCommProfile = communityProfiles[currentUserId] || communityProfiles['user-lucas'];
   const mySkillsLower = (myCommProfile?.skills || []).map(s => s.toLowerCase());
