@@ -9,15 +9,17 @@ import {
   Share2, 
   ShieldCheck, 
   Users, 
-  Search
+  Search,
+  Brain
 } from 'lucide-react';
 
 interface SidebarNavProps {
   currentTab: string;
   setCurrentTab: (tab: string) => void;
+  onOpenEngineTab?: (tab: string) => void;
 }
 
-export const SidebarNav: React.FC<SidebarNavProps> = ({ currentTab, setCurrentTab }) => {
+export const SidebarNav: React.FC<SidebarNavProps> = ({ currentTab, setCurrentTab, onOpenEngineTab }) => {
   const { activePersona, session, rewardBalance, companyCredits } = useApp();
 
   const isCommunityExternal = activePersona === 'comunidade-rafael';
@@ -205,6 +207,27 @@ export const SidebarNav: React.FC<SidebarNavProps> = ({ currentTab, setCurrentTa
               }`}
             >
               <ShieldCheck className="w-4 h-4" /> Governança & Preços
+            </button>
+          </>
+        )}
+
+        {/* ATALHO PARA O MOTOR DE IA (TCC) */}
+        {onOpenEngineTab && (
+          <>
+            <div className="pt-3 mt-3 border-t border-border px-2 text-[10px] font-bold text-muted-foreground uppercase tracking-wider">
+              Motor IA & Matching
+            </div>
+
+            <button
+              onClick={() => onOpenEngineTab('dashboard')}
+              className="w-full flex items-center justify-between px-3 py-2 rounded-base text-xs font-semibold transition-all bg-[#0B132B]/50 hover:bg-[#060B19] text-[#00E8C6] border border-[#00E8C6]/25 group"
+            >
+              <span className="flex items-center gap-2">
+                <Brain className="w-4 h-4 text-[#00E8C6]" /> Painel do Motor IA
+              </span>
+              <span className="text-[9px] bg-[#00E8C6]/15 text-[#00E8C6] font-bold px-1.5 py-0.5 rounded">
+                TCC
+              </span>
             </button>
           </>
         )}

@@ -153,12 +153,23 @@ export interface Vacancy {
 export interface Company {
   id: string;
   name: string;
-  cnpj: string;
-  about: string;
-  city: string;
-  state: string;
-  website: string;
+  cnpj?: string;
+  about?: string;
+  city?: string;
+  state?: string;
+  website?: string;
+  industry?: string;
+  description?: string;
+  created_at?: string;
 }
+
+// Re-exporta tipos da suíte do Motor IA (excluindo Company que já está unificada acima)
+export type {
+  Candidate, CandidateDeclaredSkill, Skill, InterviewSession, InterviewQuestion,
+  InterviewAnswer, AssessmentReport, ReportVersion, ReportReview, CompetencyAssessment,
+  Job, JobMatchingRanking, CandidateMatchingResult,
+  CandidateComparisonResponse, HealthResponse, AuditEvent
+} from './engine';
 
 export type SelectionStage = 
   | 'match_identificado'

@@ -1,12 +1,13 @@
 import React, { useState } from 'react';
 import { useApp, ActivePersona } from '../../context/AppContext';
-import { Bell, Search, User, LogOut, ChevronDown, Check, Sun, Moon, PlayCircle } from 'lucide-react';
+import { Bell, Search, User, LogOut, ChevronDown, Check, Sun, Moon, PlayCircle, Brain } from 'lucide-react';
 
 interface HeaderProps {
   currentViewTitle: string;
+  onSwitchToEngine?: () => void;
 }
 
-export const Header: React.FC<HeaderProps> = ({ currentViewTitle }) => {
+export const Header: React.FC<HeaderProps> = ({ currentViewTitle, onSwitchToEngine }) => {
   const {
     theme,
     toggleTheme,
@@ -100,6 +101,19 @@ export const Header: React.FC<HeaderProps> = ({ currentViewTitle }) => {
 
         {/* Alternador de Tema, Notificações e Ícone de Conta com Lista Suspensa */}
         <div className="flex items-center gap-2.5">
+
+          {/* Botão de Atalho para o Motor IA (TCC) */}
+          {onSwitchToEngine && (
+            <button
+              type="button"
+              onClick={onSwitchToEngine}
+              className="hidden sm:flex items-center gap-1.5 px-2.5 py-1.5 rounded-base text-xs font-bold bg-[#060B19] text-[#00E8C6] border border-[#00E8C6]/40 hover:bg-[#0B132B] transition-all shadow-xs"
+              title="Abrir o Motor de Inteligência Artificial e Matching do TCC"
+            >
+              <Brain className="w-3.5 h-3.5" />
+              <span>Motor IA (TCC)</span>
+            </button>
+          )}
           
           {/* Botão Alternar Modo Escuro / Claro */}
           <button

@@ -1,9 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import { AppProvider, useApp } from './context/AppContext';
+import { EcosystemTopBar } from './components/EcosystemTopBar';
+import { Navbar } from './components/Navbar';
 import { Header } from './components/layout/Header';
 import { SidebarNav } from './components/layout/SidebarNav';
 
-// Views
+// Views do Portal (Recrutamento Invertido & Comunidade)
 import { PersonaSelectorView } from './views/PersonaSelectorView';
 import { CandidateOnboardingView } from './views/CandidateOnboardingView';
 import { CandidateProfileView } from './views/CandidateProfileView';
@@ -17,6 +19,17 @@ import { CommunityFeedView } from './views/CommunityFeedView';
 import { CommunityNetworkView } from './views/CommunityNetworkView';
 import { CommunityHelperView } from './views/CommunityHelperView';
 import { AdminDashboardView } from './views/AdminDashboardView';
+
+// Páginas do Matchmaker Engine (Motor IA & TCC)
+import { DashboardPage } from './pages/DashboardPage';
+import { CandidateRegistrationPage } from './pages/CandidateRegistrationPage';
+import { InterviewSessionPage } from './pages/InterviewSessionPage';
+import { ProcessingMonitorPage } from './pages/ProcessingMonitorPage';
+import { CompetencyReportPage } from './pages/CompetencyReportPage';
+import { ReplicaReviewPage } from './pages/ReplicaReviewPage';
+import { JobManagementPage } from './pages/JobManagementPage';
+import { MatchingRankingPage } from './pages/MatchingRankingPage';
+import { CandidateComparisonPage } from './pages/CandidateComparisonPage';
 
 const CANDIDATE_ALLOWED_TABS = [
   'candidato-perfil',
@@ -39,7 +52,12 @@ const ADMIN_ALLOWED_TABS = [
   'admin-dashboard'
 ];
 
-const MainLayout: React.FC = () => {
+interface MainLayoutProps {
+  onSwitchToEngine?: () => void;
+  onOpenEngineTab?: (tab: string, params?: any) => void;
+}
+
+const MainLayout: React.FC<MainLayoutProps> = ({ onSwitchToEngine, onOpenEngineTab }) => {
   const { activePersona, isAuthenticated, session, currentUser, needsOnboarding } = useApp();
   
   const [currentTab, setCurrentTabState] = useState<string>('candidato-perfil');
@@ -74,7 +92,6 @@ const MainLayout: React.FC = () => {
     return false;
   };
 
-  // Proteção de navegação por aba: impede Empresa em telas de Candidato e vice-versa
   const setCurrentTab = (nextTab: string) => {
     if (!isAuthenticated) {
       setRouteNotice('Faça login para acessar as áreas internas da plataforma.');
@@ -90,7 +107,6 @@ const MainLayout: React.FC = () => {
     window.location.hash = `#/${nextTab}`;
   };
 
-  // Redirecionamento automático ao autenticar ou trocar de sessão/papel
   useEffect(() => {
     if (!isAuthenticated) {
       const hash = window.location.hash.replace('#/', '').trim();
@@ -122,11 +138,10 @@ const MainLayout: React.FC = () => {
     }
   }, [isAuthenticated, session?.userId, session?.role, activePersona, needsOnboarding]);
 
-  // Monitora alterações manuais na URL (hash) para proteger rotas em tempo real
   useEffect(() => {
     const handleHashChange = () => {
       const hash = window.location.hash.replace('#/', '').trim();
-      if (!hash || hash === 'login') return;
+      if (!hash || hash === 'login' || hash.startsWith('engine')) return;
 
       if (!isAuthenticated) {
         setRouteNotice('Você precisa estar autenticado para acessar páginas internas.');
@@ -163,11 +178,10 @@ const MainLayout: React.FC = () => {
     );
   }
 
-  // Se for um profissional recém-cadastrado com onboarding pendente, leva ao fluxo curto de onboarding
   if (needsOnboarding) {
     return (
-      <div className="min-h-screen flex flex-col justify-between bg-background">
-        <Header currentViewTitle="Onboarding do Profissional" />
+      <div className="min-h-screen flex flex-col justify-between bg-background qi-portal-container">
+        <Header currentViewTitle="Onboarding do Profissional" onSwitchToEngine={onSwitchToEngine} />
         <main className="flex-1 max-w-[1440px] w-full mx-auto px-4 py-6">
           <CandidateOnboardingView
             onComplete={() => {
@@ -207,19 +221,11 @@ const MainLayout: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen flex flex-col justify-between bg-background">
-      
-      {/* Cabeçalho Comercial Autenticado */}
-      <Header currentViewTitle={getTitle()} />
-
-      {/* Corpo Principal */}
+    <div className="min-h-screen flex flex-col justify-between bg-background qi-portal-container">
+      <Header currentViewTitle={getTitle()} onSwitchToEngine={onSwitchToEngine} />
       <main className="flex-1 max-w-[1440px] w-full mx-auto px-4 py-6">
         <div className="flex flex-col lg:flex-row gap-6">
-          
-          {/* Navegação Esquerda */}
-          <SidebarNav currentTab={safeTab} setCurrentTab={setCurrentTab} />
-
-          {/* Área de Conteúdo Central Protegida por Papel */}
+          <SidebarNav currentTab={safeTab} setCurrentTab={setCurrentTab} onOpenEngineTab={onOpenEngineTab} />
           <div className="flex-1 min-w-0">
             {safeTab === 'candidato-perfil' && <CandidateProfileView />}
             {safeTab === 'candidato-entrevista' && <CandidateInterviewView />}
@@ -228,7 +234,6 @@ const MainLayout: React.FC = () => {
             )}
             {safeTab === 'candidato-processos' && <CandidateApplicationsView />}
             {safeTab === 'candidato-estalecas' && <CandidateRewardsView />}
-            
             {safeTab === 'empresa-vagas' && (
               <CompanyDashboardView 
                 onSelectVacancy={(id) => {
@@ -249,32 +254,197 @@ const MainLayout: React.FC = () => {
                 onBack={() => setCurrentTab('empresa-vagas')} 
               />
             )}
-
             {safeTab === 'comunidade-feed' && <CommunityFeedView />}
             {safeTab === 'comunidade-rede' && <CommunityNetworkView />}
             {safeTab === 'comunidade-ajuda' && <CommunityHelperView />}
             {safeTab === 'admin-dashboard' && <AdminDashboardView />}
           </div>
-
         </div>
       </main>
-
-      {/* Rodapé Comercial */}
       <footer className="bg-white border-t border-border py-4 text-center text-xs text-muted-foreground">
         <div className="max-w-[1440px] mx-auto px-4 flex flex-col sm:flex-row items-center justify-between gap-2">
           <span>© 2026 Q.I. Tech — Plataforma de Recrutamento Invertido & Comunidade Técnica</span>
           <span className="text-[11px]">Proteção de Dados e Double Opt-In em conformidade com a LGPD</span>
         </div>
       </footer>
-
     </div>
   );
 };
 
 export default function App() {
+  const [activeModule, setActiveModule] = useState<'portal' | 'engine'>('portal');
+
+  // Estados do Matchmaker Engine
+  const [engineTab, setEngineTab] = useState<string>('dashboard');
+  const [targetReportId, setTargetReportId] = useState<string | undefined>(undefined);
+  const [targetJobId, setTargetJobId] = useState<string | undefined>(undefined);
+  const [targetSkillId, setTargetSkillId] = useState<string | undefined>(undefined);
+  const [targetCandidateIds, setTargetCandidateIds] = useState<string[]>([]);
+
+  useEffect(() => {
+    const hash = window.location.hash.replace('#/', '').trim();
+    if (hash.startsWith('engine')) {
+      setActiveModule('engine');
+      const parts = hash.split('/');
+      if (parts[1]) {
+        setEngineTab(parts[1]);
+      }
+    }
+  }, []);
+
+  const handleOpenEngineTab = (
+    tab: string,
+    params?: { reportId?: string; jobId?: string; candidateIds?: string[]; skillId?: string }
+  ) => {
+    if (params?.reportId) setTargetReportId(params.reportId);
+    if (params?.jobId) setTargetJobId(params.jobId);
+    if (params?.candidateIds) setTargetCandidateIds(params.candidateIds);
+    if (params?.skillId) setTargetSkillId(params.skillId);
+
+    setEngineTab(tab);
+    setActiveModule('engine');
+    window.location.hash = `#/engine/${tab}`;
+  };
+
+  const handleNavigateToReport = (reportId: string) => {
+    setTargetReportId(reportId);
+    setEngineTab('reports');
+  };
+
+  const handleNavigateToReplica = (reportId: string, skillId?: string) => {
+    setTargetReportId(reportId);
+    setTargetSkillId(skillId);
+    setEngineTab('replica');
+  };
+
+  const handleNavigateToMatching = (jobId: string) => {
+    setTargetJobId(jobId);
+    setEngineTab('matching');
+  };
+
+  const handleNavigateToComparison = (jobId: string, candidateIds: string[]) => {
+    setTargetJobId(jobId);
+    setTargetCandidateIds(candidateIds);
+    setEngineTab('comparison');
+  };
+
+  const renderActiveEnginePage = () => {
+    switch (engineTab) {
+      case 'dashboard':
+        return <DashboardPage onNavigate={(tab) => setEngineTab(tab)} />;
+      case 'candidates':
+        return <CandidateRegistrationPage />;
+      case 'interview':
+        return (
+          <InterviewSessionPage
+            onNavigateToReport={handleNavigateToReport}
+            onNavigateToMonitor={() => setEngineTab('monitor')}
+          />
+        );
+      case 'monitor':
+        return <ProcessingMonitorPage />;
+      case 'reports':
+        return (
+          <CompetencyReportPage
+            initialReportId={targetReportId}
+            onNavigateToReplica={handleNavigateToReplica}
+          />
+        );
+      case 'replica':
+        return (
+          <ReplicaReviewPage
+            initialReportId={targetReportId}
+            initialSkillId={targetSkillId}
+          />
+        );
+      case 'jobs':
+        return <JobManagementPage onNavigateToMatching={handleNavigateToMatching} />;
+      case 'matching':
+        return (
+          <MatchingRankingPage
+            initialJobId={targetJobId}
+            onNavigateToComparison={handleNavigateToComparison}
+            onNavigateToReport={handleNavigateToReport}
+          />
+        );
+      case 'comparison':
+        return (
+          <CandidateComparisonPage
+            initialJobId={targetJobId}
+            initialCandidateIds={targetCandidateIds}
+            onBackToMatching={(jobId) => {
+              setTargetJobId(jobId);
+              setEngineTab('matching');
+            }}
+          />
+        );
+      default:
+        return <DashboardPage onNavigate={(tab) => setEngineTab(tab)} />;
+    }
+  };
+
   return (
     <AppProvider>
-      <MainLayout />
+      <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column' }}>
+        <EcosystemTopBar
+          activeModule={activeModule}
+          setActiveModule={(mod) => {
+            setActiveModule(mod);
+            if (mod === 'engine') {
+              window.location.hash = `#/engine/${engineTab}`;
+            }
+          }}
+        />
+
+        {activeModule === 'portal' && (
+          <div style={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
+            <MainLayout
+              onSwitchToEngine={() => setActiveModule('engine')}
+              onOpenEngineTab={handleOpenEngineTab}
+            />
+          </div>
+        )}
+
+        {activeModule === 'engine' && (
+          <div
+            style={{
+              flex: 1,
+              display: 'flex',
+              flexDirection: 'column',
+              background: 'var(--bg-main)',
+              color: 'var(--text-primary)',
+              minHeight: 'calc(100vh - 40px)',
+            }}
+          >
+            <Navbar
+              activeTab={engineTab}
+              setActiveTab={(tab) => {
+                setEngineTab(tab);
+                window.location.hash = `#/engine/${tab}`;
+              }}
+              onSwitchToPortal={() => {
+                setActiveModule('portal');
+                window.location.hash = '#/candidato-perfil';
+              }}
+            />
+            <main style={{ flex: 1, paddingBottom: '3rem' }}>
+              {renderActiveEnginePage()}
+            </main>
+            <footer
+              style={{
+                borderTop: '1px solid var(--border-subtle)',
+                padding: '1.25rem 1.5rem',
+                textAlign: 'center',
+                fontSize: '0.8rem',
+                color: 'var(--text-muted)',
+                background: 'var(--bg-surface)',
+              }}
+            >
+              Q.I. Tech Matchmaker Engine v1.0.0 • TCC Ciência da Computação FECAP 2026 • Modelos 100% Locais (Whisper + Qwen3 + Multilingual-E5)
+            </footer>
+          </div>
+        )}
+      </div>
     </AppProvider>
   );
 }

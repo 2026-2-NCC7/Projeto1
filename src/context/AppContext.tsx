@@ -510,7 +510,7 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
       u => u.cnpj && normalizeCnpj(u.cnpj) === cleanCnpj
     );
     const cnpjExistsInCompanies = companies.some(
-      c => normalizeCnpj(c.cnpj) === cleanCnpj
+      c => c.cnpj && normalizeCnpj(c.cnpj) === cleanCnpj
     );
     if (cnpjExistsInUsers || cnpjExistsInCompanies) {
       return { success: false, error: 'Este CNPJ já está cadastrado em outra conta corporativa.' };
