@@ -1,33 +1,50 @@
 import React, { useState } from 'react';
 import { useApp } from '../context/AppContext';
-import { 
-  Lock, 
-  Unlock, 
-  CheckCircle2, 
-  ArrowLeft, 
-  Sparkles, 
-  Clock, 
-  ThumbsUp, 
+import {
+  Lock,
+  Unlock,
+  CheckCircle2,
+  ArrowLeft,
+  Sparkles,
+  Clock,
+  ThumbsUp,
   MessageSquare,
   CreditCard,
   Gift,
-  AlertCircle
+  AlertCircle,
+  FileText,
+  Target,
+  GitCompare
 } from 'lucide-react';
 
-export const CompanyVacancyDetailView: React.FC<{ vacancyId: string; onBack: () => void }> = ({ vacancyId, onBack }) => {
-  const { 
-    vacancies, 
-    candidates, 
+interface CompanyVacancyDetailViewProps {
+  vacancyId: string;
+  onBack: () => void;
+  onOpenMatchingIa?: () => void;
+  onOpenComparison?: () => void;
+  onOpenCandidateReport?: () => void;
+}
+
+export const CompanyVacancyDetailView: React.FC<CompanyVacancyDetailViewProps> = ({
+  vacancyId,
+  onBack,
+  onOpenMatchingIa,
+  onOpenComparison,
+  onOpenCandidateReport
+}) => {
+  const {
+    vacancies,
+    candidates,
     interviews,
-    selectionProcesses, 
+    selectionProcesses,
     companyCredits,
     commercialConfig,
     unlockCandidateProfile,
-    updateProcessStage, 
-    approveCandidate, 
-    rejectCandidate, 
-    updateInternalNotes, 
-    giveFeedback 
+    updateProcessStage,
+    approveCandidate,
+    rejectCandidate,
+    updateInternalNotes,
+    giveFeedback
   } = useApp();
   
   const vacancy = vacancies.find(v => v.id === vacancyId);
@@ -71,7 +88,23 @@ export const CompanyVacancyDetailView: React.FC<{ vacancyId: string; onBack: () 
           </p>
         </div>
 
-        <div className="flex items-center gap-2">
+        <div className="flex flex-wrap items-center gap-2">
+          {onOpenMatchingIa && (
+            <button
+              onClick={onOpenMatchingIa}
+              className="text-xs bg-secondary text-primary hover:opacity-90 font-bold px-2.5 py-1.5 rounded flex items-center gap-1 border border-primary/20"
+            >
+              <Target className="w-3.5 h-3.5" /> Ranking 5 Etapas
+            </button>
+          )}
+          {onOpenComparison && (
+            <button
+              onClick={onOpenComparison}
+              className="text-xs bg-secondary text-primary hover:opacity-90 font-bold px-2.5 py-1.5 rounded flex items-center gap-1 border border-primary/20"
+            >
+              <GitCompare className="w-3.5 h-3.5" /> Comparar Candidatos
+            </button>
+          )}
           <span className="text-xs bg-background border border-border text-foreground font-semibold px-2.5 py-1 rounded">
             Saldo: <strong className="text-primary">{companyCredits} crédito(s)</strong>
           </span>
@@ -87,7 +120,7 @@ export const CompanyVacancyDetailView: React.FC<{ vacancyId: string; onBack: () 
         {/* COLUNA ESQUERDA: LISTA DE CANDIDATOS */}
         <div className="lg:col-span-5 space-y-3">
           <h3 className="text-xs font-bold text-muted-foreground uppercase tracking-wider px-1">
-            Ranking Explicável da Shortlist
+            Ranking Explicável da Shortlist (Double Opt-In LGPD)
           </h3>
 
           {processes.map((proc, index) => {
@@ -179,8 +212,7 @@ export const CompanyVacancyDetailView: React.FC<{ vacancyId: string; onBack: () 
                   </div>
                 </div>
 
-                {/* Status do Double Opt-In */}
-                <div className="text-left sm:text-right shrink-0">
+                <div className="flex flex-col items-start sm:items-end gap-1.5 shrink-0">
                   {selectedProcess.doubleOptInStatus === 'aceito' ? (
                     <span className="text-xs font-bold text-emerald-800 bg-emerald-100 px-2.5 py-1 rounded inline-flex items-center gap-1">
                       <CheckCircle2 className="w-3.5 h-3.5" /> Double Opt-In Confirmado
@@ -189,6 +221,15 @@ export const CompanyVacancyDetailView: React.FC<{ vacancyId: string; onBack: () 
                     <span className="text-xs font-bold text-amber-800 bg-amber-100 px-2.5 py-1 rounded inline-flex items-center gap-1">
                       <Clock className="w-3.5 h-3.5" /> Aguardando Aceite do Candidato
                     </span>
+                  )}
+
+                  {onOpenCandidateReport && (
+                    <button
+                      onClick={onOpenCandidateReport}
+                      className="text-[11px] text-primary hover:underline font-bold flex items-center gap-1"
+                    >
+                      <FileText className="w-3 h-3" /> Inspecionar Dossiê de Evidências Verbatim (IA)
+                    </button>
                   )}
                 </div>
               </div>
@@ -266,11 +307,11 @@ export const CompanyVacancyDetailView: React.FC<{ vacancyId: string; onBack: () 
                   </p>
                 </div>
 
-                {/* Resumo Autorizado das Soft Skills (Conectado à entrevista real do candidato selecionado) */}
+                {/* Resumo Autorizado das Soft Skills */}
                 <div className="border border-border rounded-base p-3.5 space-y-2.5 text-xs">
                   <div className="flex items-center justify-between">
                     <strong className="text-foreground font-bold text-[11px]">
-                      Síntese Autorizada de Competências Comportamentais (IA Estruturada):
+                      Síntese Autorizada de Competências (IA Estruturada & EvidenceVerifier):
                     </strong>
                     {candidateInterview && candidateInterview.status === 'concluida' && (
                       <span className="text-[10px] bg-secondary text-primary font-bold px-2 py-0.5 rounded">
@@ -295,7 +336,7 @@ export const CompanyVacancyDetailView: React.FC<{ vacancyId: string; onBack: () 
                         ))}
                       </div>
                       <span className="text-[10px] text-muted-foreground block">
-                        * A empresa visualiza apenas a síntese autorizada; respostas brutas permanecem privadas.
+                        * A empresa visualiza apenas a síntese autorizada e citações verificadas; respostas brutas permanecem privadas.
                       </span>
                     </>
                   ) : candidateInterview && candidateInterview.status === 'contestada' ? (

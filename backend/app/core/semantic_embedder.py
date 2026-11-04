@@ -26,7 +26,6 @@ class SemanticEmbedder:
                 from sentence_transformers import SentenceTransformer
                 logger.info(f"Loading SentenceTransformer '{self.model_name}' on {self.device}...")
                 try:
-                    # Attempt loading from local cache first to prevent SSL issues or network delays
                     self._model = SentenceTransformer(self.model_name, device=self.device, local_files_only=True)
                 except Exception as local_err:
                     logger.info(f"Local cache load attempt ({local_err}), trying standard download...")

@@ -38,7 +38,7 @@ class AudioTranscriber:
                 logger.info("faster-whisper loaded successfully.")
             except Exception as e:
                 self._initialization_error = str(e)
-                logger.warning(f"Could not load faster-whisper: {e}")
+                logger.warning(f"Could not load faster-whisper from local cache: {e}")
         return self._model
 
     def is_available(self) -> bool:

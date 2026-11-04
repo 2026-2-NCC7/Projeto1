@@ -79,7 +79,7 @@ class LLMCompetencyExtractor:
     """
 
     def __init__(self):
-        self.base_url = settings.OLLAMA_BASE_URL.rstrip("/")
+        self.base_url = settings.OLLAMA_BASE_URL.rstrip("/").replace("localhost", "127.0.0.1")
         self.model_name = settings.OLLAMA_MODEL
         self.timeout = settings.OLLAMA_TIMEOUT_SECONDS
 

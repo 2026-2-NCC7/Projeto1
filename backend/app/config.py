@@ -26,7 +26,7 @@ class Settings(BaseSettings):
     WHISPER_LANGUAGE: str = "pt"
 
     # Ollama / Qwen3 Settings
-    OLLAMA_BASE_URL: str = "http://localhost:11434"
+    OLLAMA_BASE_URL: str = "http://127.0.0.1:11434"
     OLLAMA_MODEL: str = "qwen3:4b"
     OLLAMA_TIMEOUT_SECONDS: int = 60
 

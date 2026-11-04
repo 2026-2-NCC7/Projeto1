@@ -21,30 +21,30 @@
   --border: 205 218 222;
   --input: 205 218 222;
 
-  /* Matchmaker Engine Tokens */
-  --bg-main: #060B19;
-  --bg-surface: #0B132B;
-  --bg-card: #0F1A36;
-  --bg-card-hover: #16244A;
-  --bg-muted: #1A284E;
+  /* Matchmaker Engine Tokens (Adaptive Light/Dark for Unified System) */
+  --bg-main: #F2F8F9;
+  --bg-surface: #E8F2F4;
+  --bg-card: #FFFFFF;
+  --bg-card-hover: #F0F7F8;
+  --bg-muted: #E0EEEF;
   
-  --border-subtle: rgba(255, 255, 255, 0.08);
-  --border-hover: rgba(0, 232, 198, 0.3);
-  --border-active: #00E8C6;
+  --border-subtle: #CDDADe;
+  --border-hover: rgba(0, 117, 133, 0.4);
+  --border-active: #007585;
 
-  --accent-cyan: #00E8C6;
-  --accent-blue: #38BDF8;
-  --accent-violet: #8B5CF6;
-  --accent-green: #10B981;
-  --accent-amber: #F59E0B;
-  --accent-red: #EF4444;
+  --accent-cyan: #007585;
+  --accent-blue: #0284C7;
+  --accent-violet: #7C3AED;
+  --accent-green: #059669;
+  --accent-amber: #D97706;
+  --accent-red: #DC2626;
 
-  --text-primary: #F8FAFC;
-  --text-secondary: #94A3B8;
-  --text-muted: #64748B;
+  --text-primary: #0C1D23;
+  --text-secondary: #3B5259;
+  --text-muted: #54676D;
   
-  --glow-cyan: 0 0 20px rgba(0, 232, 198, 0.25);
-  --glow-blue: 0 0 20px rgba(56, 189, 248, 0.25);
+  --glow-cyan: 0 4px 14px rgba(0, 117, 133, 0.18);
+  --glow-blue: 0 4px 14px rgba(2, 132, 199, 0.18);
 
   --font-sans: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
   --font-mono: 'JetBrains Mono', monospace;
@@ -67,6 +67,24 @@
   --destructive-foreground: 252 252 252;
   --border: 33 63 80;
   --input: 33 63 80;
+
+  --bg-main: #060B19;
+  --bg-surface: #0B132B;
+  --bg-card: #0F1A36;
+  --bg-card-hover: #16244A;
+  --bg-muted: #1A284E;
+  --border-subtle: rgba(255, 255, 255, 0.1);
+  --border-hover: rgba(0, 232, 198, 0.35);
+  --border-active: #00E8C6;
+  --accent-cyan: #00E8C6;
+  --accent-blue: #38BDF8;
+  --accent-violet: #8B5CF6;
+  --accent-green: #10B981;
+  --accent-amber: #F59E0B;
+  --accent-red: #EF4444;
+  --text-primary: #F8FAFC;
+  --text-secondary: #94A3B8;
+  --text-muted: #64748B;
 }
 
 * {
@@ -105,7 +123,7 @@ body {
 h1, h2, h3, h4, h5, h6 {
   font-weight: 700;
   letter-spacing: -0.02em;
-  color: var(--text-primary);
+  color: rgb(var(--foreground));
 }
 
 a {
@@ -233,36 +251,56 @@ a:hover {
 }
 
 .badge-evidenciada {
-  background: rgba(16, 185, 129, 0.15);
+  background: rgba(16, 185, 129, 0.16);
+  color: #047857;
+  border: 1px solid rgba(16, 185, 129, 0.4);
+}
+.dark .badge-evidenciada {
   color: #34D399;
-  border: 1px solid rgba(16, 185, 129, 0.3);
 }
 
 .badge-parcial {
-  background: rgba(56, 189, 248, 0.15);
+  background: rgba(2, 132, 199, 0.15);
+  color: #0369A1;
+  border: 1px solid rgba(2, 132, 199, 0.35);
+}
+.dark .badge-parcial {
   color: #38BDF8;
-  border: 1px solid rgba(56, 189, 248, 0.3);
 }
 
 .badge-insuficiente {
-  background: rgba(245, 158, 11, 0.15);
+  background: rgba(245, 158, 11, 0.16);
+  color: #B45309;
+  border: 1px solid rgba(245, 158, 11, 0.4);
+}
+.dark .badge-insuficiente {
   color: #FBBF24;
-  border: 1px solid rgba(245, 158, 11, 0.3);
 }
 
 .badge-nao-avaliada {
-  background: rgba(100, 116, 139, 0.15);
+  background: rgba(100, 116, 139, 0.16);
+  color: #475569;
+  border: 1px solid rgba(100, 116, 139, 0.35);
+}
+.dark .badge-nao-avaliada {
   color: #94A3B8;
-  border: 1px solid rgba(100, 116, 139, 0.3);
 }
 
 .badge-divergencia {
   background: rgba(239, 68, 68, 0.15);
+  color: #B91C1C;
+  border: 1px solid rgba(239, 68, 68, 0.35);
+}
+.dark .badge-divergencia {
   color: #F87171;
-  border: 1px solid rgba(239, 68, 68, 0.3);
 }
 
 .badge-cyan {
+  background: rgba(0, 117, 133, 0.14);
+  color: #005F6B;
+  border: 1px solid rgba(0, 117, 133, 0.35);
+}
+.dark .badge-cyan {
   background: rgba(0, 232, 198, 0.15);
   color: #00E8C6;
   border: 1px solid rgba(0, 232, 198, 0.3);
@@ -285,9 +323,13 @@ a:hover {
 }
 
 .btn-primary {
+  background: linear-gradient(135deg, #007585, #0284C7);
+  color: #FFFFFF;
+  box-shadow: 0 4px 12px rgba(0, 117, 133, 0.25);
+}
+.dark .btn-primary {
   background: linear-gradient(135deg, #00E8C6, #0284C7);
   color: #060B19;
-  box-shadow: 0 4px 15px rgba(0, 232, 198, 0.25);
 }
 .btn-primary:hover {
   transform: translateY(-1px);

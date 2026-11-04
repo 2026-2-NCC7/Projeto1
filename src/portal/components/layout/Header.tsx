@@ -4,10 +4,9 @@ import { Bell, Search, User, LogOut, ChevronDown, Check, Sun, Moon, PlayCircle, 
 
 interface HeaderProps {
   currentViewTitle: string;
-  onSwitchToEngine?: () => void;
 }
 
-export const Header: React.FC<HeaderProps> = ({ currentViewTitle, onSwitchToEngine }) => {
+export const Header: React.FC<HeaderProps> = ({ currentViewTitle }) => {
   const {
     theme,
     toggleTheme,
@@ -26,16 +25,16 @@ export const Header: React.FC<HeaderProps> = ({ currentViewTitle, onSwitchToEngi
   const [showUserMenu, setShowUserMenu] = useState(false);
 
   const demoAccounts: Array<{ id: ActivePersona; name: string; badge: string }> = [
-    { id: 'candidato-lucas', name: 'Lucas Almeida', badge: 'Profissional (Demo)' },
-    { id: 'candidato-marina', name: 'Marina Costa', badge: 'Profissional Sênior (Demo)' },
-    { id: 'comunidade-rafael', name: 'Rafael Mendes', badge: 'Comunidade (Demo)' },
-    { id: 'empresa-orion', name: 'Orion Tech Solutions', badge: 'Empresa B2B (Demo)' },
-    { id: 'admin-qitech', name: 'Governança Q.I. Tech', badge: 'Admin (Demo)' }
+    { id: 'candidato-lucas', name: 'Lucas Almeida (Silva)', badge: 'Perfil Candidato Pleno' },
+    { id: 'candidato-marina', name: 'Marina Costa (Albuquerque)', badge: 'Perfil Candidata Sênior' },
+    { id: 'empresa-orion', name: 'Orion Tech Solutions', badge: 'Perfil Empresa B2B' },
+    { id: 'comunidade-rafael', name: 'Rafael Mendes', badge: 'Perfil Comunidade PF' },
+    { id: 'admin-qitech', name: 'Governança & Banca TCC', badge: 'Perfil Admin & IA' }
   ];
 
   let userDisplayName = currentUser?.name || 'Lucas Almeida';
   let userAvatar = '';
-  let userBadge = 'Profissional';
+  let userBadge = 'Perfil Candidato';
   let currentUserId = currentUser?.id || 'user-lucas';
 
   if (session?.role === 'empresa' || activePersona === 'empresa-orion') {
@@ -43,23 +42,23 @@ export const Header: React.FC<HeaderProps> = ({ currentViewTitle, onSwitchToEngi
     userAvatar = currentUser?.isDemo
       ? 'https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=150&auto=format&fit=crop&q=80'
       : '';
-    userBadge = 'Empresa B2B';
+    userBadge = 'Perfil Empresa B2B';
     currentUserId = currentUser?.id || 'user-orion';
   } else if (session?.role === 'admin' || activePersona === 'admin-qitech') {
     userDisplayName = currentUser?.name || 'Governança Q.I. Tech';
     userAvatar = '';
-    userBadge = 'Admin';
+    userBadge = 'Perfil Admin & Auditoria IA';
     currentUserId = currentUser?.id || 'user-admin';
   } else if (activePersona === 'comunidade-rafael') {
     userDisplayName = 'Rafael Mendes';
     userAvatar = 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150&auto=format&fit=crop&q=80';
-    userBadge = 'Comunidade';
+    userBadge = 'Perfil Comunidade PF';
     currentUserId = 'user-rafael-externo';
   } else {
     const cand = candidates[currentCandidateId];
     userDisplayName = cand?.name || currentUser?.name || 'Profissional';
     userAvatar = cand?.avatar || '';
-    userBadge = cand?.seniority ? `Profissional ${cand.seniority}` : 'Profissional';
+    userBadge = cand?.seniority ? `Candidato ${cand.seniority}` : 'Perfil Candidato';
     currentUserId = currentUser?.id || 'user-lucas';
   }
 
@@ -93,27 +92,18 @@ export const Header: React.FC<HeaderProps> = ({ currentViewTitle, onSwitchToEngi
             <Search className="w-4 h-4 absolute left-3 top-2.5 text-muted-foreground" />
             <input
               type="text"
-              placeholder="Pesquisar vagas, habilidades ou especialistas..."
+              placeholder="Pesquisar vagas, competências, evidências ou especialistas..."
               className="w-full h-9 pl-9 pr-3 text-xs bg-background border border-border rounded-base text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-primary"
             />
           </div>
         </div>
 
-        {/* Alternador de Tema, Notificações e Ícone de Conta com Lista Suspensa */}
+        {/* Indicador de Perfil, Alternador de Tema, Notificações e Conta */}
         <div className="flex items-center gap-2.5">
-
-          {/* Botão de Atalho para o Motor IA (TCC) */}
-          {onSwitchToEngine && (
-            <button
-              type="button"
-              onClick={onSwitchToEngine}
-              className="hidden sm:flex items-center gap-1.5 px-2.5 py-1.5 rounded-base text-xs font-bold bg-[#060B19] text-[#00E8C6] border border-[#00E8C6]/40 hover:bg-[#0B132B] transition-all shadow-xs"
-              title="Abrir o Motor de Inteligência Artificial e Matching do TCC"
-            >
-              <Brain className="w-3.5 h-3.5" />
-              <span>Motor IA (TCC)</span>
-            </button>
-          )}
+          <span className="hidden sm:inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-base text-xs font-bold bg-secondary text-primary border border-primary/20">
+            <Brain className="w-3.5 h-3.5 text-primary" />
+            <span>{userBadge}</span>
+          </span>
           
           {/* Botão Alternar Modo Escuro / Claro */}
           <button
@@ -213,7 +203,6 @@ export const Header: React.FC<HeaderProps> = ({ currentViewTitle, onSwitchToEngi
 
             {showUserMenu && (
               <div className="absolute right-0 mt-2 w-64 bg-white border border-border rounded-base shadow-xl py-2 z-50">
-                {/* Dados da Sessão Atual */}
                 <div className="px-3.5 py-2 border-b border-border bg-background/50">
                   <span className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground block">
                     Sessão Autenticada
@@ -226,11 +215,10 @@ export const Header: React.FC<HeaderProps> = ({ currentViewTitle, onSwitchToEngi
                   </span>
                 </div>
 
-                {/* Atalho de Demonstração para alternar personas seedadas */}
                 <div className="px-3.5 py-1.5 border-b border-border flex items-center gap-1">
                   <PlayCircle className="w-3 h-3 text-brandOrange" />
                   <span className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">
-                    Acesso de Demonstração
+                    Alternar Perfil (Demo TCC)
                   </span>
                 </div>
 

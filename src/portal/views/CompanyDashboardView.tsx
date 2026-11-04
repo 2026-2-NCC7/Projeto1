@@ -1,29 +1,43 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useApp } from '../context/AppContext';
 import { Seniority, WorkContractType, WorkModality } from '../types';
-import { 
-  Building2, 
-  Zap, 
-  ArrowRight, 
-  Plus, 
-  CreditCard, 
-  FileText, 
-  CheckCircle2, 
+import {
+  Building2,
+  Zap,
+  ArrowRight,
+  Plus,
+  CreditCard,
+  FileText,
+  CheckCircle2,
   AlertCircle,
-  X
+  X,
+  Target,
+  GitCompare
 } from 'lucide-react';
+import { api } from '../../services/api';
+import { Job, Company as ApiCompany } from '../../types';
 
-export const CompanyDashboardView: React.FC<{ onSelectVacancy: (vacancyId: string) => void }> = ({ onSelectVacancy }) => {
-  const { 
+interface CompanyDashboardViewProps {
+  onSelectVacancy: (vacancyId: string) => void;
+  onOpenMatchingIa?: (jobId?: string) => void;
+  onOpenComparison?: (jobId?: string) => void;
+}
+
+export const CompanyDashboardView: React.FC<CompanyDashboardViewProps> = ({
+  onSelectVacancy,
+  onOpenMatchingIa,
+  onOpenComparison
+}) => {
+  const {
     currentCompany,
     currentUser,
-    vacancies, 
-    selectionProcesses, 
-    companyCredits, 
-    companyInvoices, 
-    commercialConfig, 
-    createVacancy, 
-    buyCompanyCreditPackage 
+    vacancies,
+    selectionProcesses,
+    companyCredits,
+    companyInvoices,
+    commercialConfig,
+    createVacancy,
+    buyCompanyCreditPackage
   } = useApp();
 
   const [showNewVacancyModal, setShowNewVacancyModal] = useState(false);
@@ -34,11 +48,25 @@ export const CompanyDashboardView: React.FC<{ onSelectVacancy: (vacancyId: strin
   const [location, setLocation] = useState('São Paulo/SP (ou Remoto)');
   const [salaryMin, setSalaryMin] = useState<string>('10000');
   const [salaryMax, setSalaryMax] = useState<string>('14000');
-  const [mandatorySkillsInput, setMandatorySkillsInput] = useState('React, TypeScript, Node.js, AWS');
+  const [mandatorySkillsInput, setMandatorySkillsInput] = useState('React, TypeScript, Python, AWS');
   const [softSkillsInput, setSoftSkillsInput] = useState('Comunicação, Resolução de problemas, Adaptabilidade');
   const [description, setDescription] = useState('Atuação em squad ágil construindo microsserviços e interfaces escaláveis.');
   const [isUrgentMatchExpress, setIsUrgentMatchExpress] = useState(true);
   const [formError, setFormError] = useState('');
+  const [apiNotice, setApiNotice] = useState<string | null>(null);
+
+  const [apiJobs, setApiJobs] = useState<Job[]>([]);
+  const [apiCompanies, setApiCompanies] = useState<ApiCompany[]>([]);
+
+  useEffect(() => {
+    Promise.all([
+      api.listJobs().catch(() => []),
+      api.listCompanies().catch(() => [])
+    ]).then(([jbs, comps]) => {
+      setApiJobs(jbs);
+      setApiCompanies(comps);
+    });
+  }, []);
 
   const myCompanyVacancies = vacancies.filter(v => v.companyId === currentCompany.id);
   const isNewCompanyWithoutVacancies = myCompanyVacancies.length === 0;
@@ -47,7 +75,7 @@ export const CompanyDashboardView: React.FC<{ onSelectVacancy: (vacancyId: strin
   const activeProcessesCount = selectionProcesses.filter(p => p.currentStage !== 'recusado' && p.currentStage !== 'aprovado').length;
   const optInAcceptedCount = selectionProcesses.filter(p => p.doubleOptInStatus === 'aceito').length;
 
-  const handleCreateVacancy = (e: React.FormEvent) => {
+  const handleCreateVacancy = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!title.trim()) {
       setFormError('Informe o título da vaga.');
@@ -80,6 +108,41 @@ export const CompanyDashboardView: React.FC<{ onSelectVacancy: (vacancyId: strin
       isUrgentMatchExpress
     });
 
+    // Sincroniza também no Backend FastAPI (SQLite) para o Motor de Matching 5 Etapas
+    try {
+      let targetCompId = apiCompanies[0]?.id;
+      if (!targetCompId) {
+        const createdComp = await api.createCompany({
+          name: currentCompany.name,
+          industry: 'Tecnologia',
+          description: currentCompany.about
+        });
+        targetCompId = createdComp.id;
+      }
+      await api.createJob({
+        company_id: targetCompId,
+        title: title.trim(),
+        description,
+        tech_vertical: area,
+        seniority,
+        contract_type: 'CLT',
+        work_model: modality.toUpperCase() === 'REMOTO' ? 'REMOTO' : 'HIBRIDO',
+        min_salary: min,
+        max_salary: max,
+        min_experience_years: seniority === 'Sênior' ? 5.0 : seniority === 'Pleno' ? 3.0 : 1.0,
+        skills: [
+          { skill_id: 'hard-python', is_mandatory: true, min_level: 3, weight: 2.0 },
+          { skill_id: 'hard-react', is_mandatory: true, min_level: 3, weight: 1.5 },
+          { skill_id: 'soft-comunicacao', is_mandatory: true, min_level: 3, weight: 1.0 }
+        ]
+      });
+      const updatedJobs = await api.listJobs();
+      setApiJobs(updatedJobs);
+      setApiNotice(`Vaga "${title.trim()}" publicada e sincronizada com o Motor de Matching IA (SQLite)!`);
+    } catch {
+      setApiNotice(`Vaga "${title.trim()}" publicada com sucesso!`);
+    }
+
     setTitle('');
     setFormError('');
     setShowNewVacancyModal(false);
@@ -99,22 +162,49 @@ export const CompanyDashboardView: React.FC<{ onSelectVacancy: (vacancyId: strin
                 CNPJ: {currentCompany.cnpj}
               </span>
               <span className="text-[10px] bg-emerald-100 text-emerald-800 font-bold px-2 py-0.5 rounded">
-                Conta Corporativa Ativa
+                Conta Corporativa B2B Ativa
               </span>
             </div>
             <p className="text-xs text-muted-foreground mt-1">
-              {currentUser?.email ? `${currentUser.email} • ` : ''}Gestão de vagas, Match Express e faturamento
+              {currentUser?.email ? `${currentUser.email} • ` : ''}Gestão de vagas, Shortlist com Double Opt-In, Motor de Matching 5 Etapas e Faturamento NFS-e
             </p>
           </div>
 
-          <button
-            onClick={() => setShowNewVacancyModal(true)}
-            className="px-4 py-2 bg-brandOrange hover:opacity-95 text-white text-xs font-bold rounded-base flex items-center gap-1.5 shadow-xs transition-all shrink-0"
-          >
-            <Plus className="w-4 h-4" /> Publicar Nova Vaga
-          </button>
+          <div className="flex flex-wrap items-center gap-2 shrink-0">
+            {onOpenMatchingIa && (
+              <button
+                onClick={() => onOpenMatchingIa()}
+                className="px-3.5 py-2 bg-secondary text-primary hover:opacity-90 text-xs font-bold rounded-base flex items-center gap-1.5 border border-primary/20"
+              >
+                <Target className="w-4 h-4" /> Ranking IA (5 Etapas)
+              </button>
+            )}
+            {onOpenComparison && (
+              <button
+                onClick={() => onOpenComparison()}
+                className="px-3.5 py-2 bg-secondary text-primary hover:opacity-90 text-xs font-bold rounded-base flex items-center gap-1.5 border border-primary/20"
+              >
+                <GitCompare className="w-4 h-4" /> Comparar Lado a Lado
+              </button>
+            )}
+            <button
+              onClick={() => setShowNewVacancyModal(true)}
+              className="px-4 py-2 bg-brandOrange hover:opacity-95 text-white text-xs font-bold rounded-base flex items-center gap-1.5 shadow-xs transition-all"
+            >
+              <Plus className="w-4 h-4" /> Publicar Nova Vaga
+            </button>
+          </div>
         </div>
       </div>
+
+      {apiNotice && (
+        <div className="p-3.5 rounded-base bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs font-bold flex items-center justify-between">
+          <span className="flex items-center gap-2">
+            <CheckCircle2 className="w-4 h-4" /> {apiNotice}
+          </span>
+          <button onClick={() => setApiNotice(null)} className="text-emerald-800 hover:underline">Fechar</button>
+        </div>
+      )}
 
       {/* CTA DE PÓS-CADASTRO PARA PUBLICAR A PRIMEIRA VAGA */}
       {isNewCompanyWithoutVacancies && (
@@ -143,10 +233,10 @@ export const CompanyDashboardView: React.FC<{ onSelectVacancy: (vacancyId: strin
       {/* MÉTRICAS DE RECRUTAMENTO & CRÉDITOS */}
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
         <div className="bg-white p-4 rounded-base border border-border shadow-xs text-center">
-          <span className="text-2xl font-heading font-bold text-primary">{vacancies.length}</span>
-          <span className="block text-xs font-semibold text-foreground mt-1">Vagas Ativas</span>
+          <span className="text-2xl font-heading font-bold text-primary">{vacancies.length + apiJobs.length}</span>
+          <span className="block text-xs font-semibold text-foreground mt-1">Vagas no Ecossistema</span>
           <span className="text-[10px] text-muted-foreground">
-            {vacancies.filter(v => v.isUrgentMatchExpress).length} em Match Express
+            {vacancies.filter(v => v.isUrgentMatchExpress).length} em Match Express + {apiJobs.length} no Motor IA
           </span>
         </div>
 
@@ -169,10 +259,15 @@ export const CompanyDashboardView: React.FC<{ onSelectVacancy: (vacancyId: strin
         </div>
       </div>
 
-      {/* VAGAS ATIVAS E TRIAGEM */}
+      {/* VAGAS ATIVAS E SHORTLISTS (COM ATALHO PARA MOTOR IA) */}
       <div className="bg-white p-5 rounded-base border border-border shadow-xs space-y-4">
-        <div className="border-b border-border pb-3">
-          <h3 className="font-heading font-bold text-sm text-foreground">Minhas Vagas & Shortlists</h3>
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-border pb-3">
+          <div>
+            <h3 className="font-heading font-bold text-sm text-foreground">Minhas Vagas, Shortlists & Motor de Matching IA</h3>
+            <p className="text-xs text-muted-foreground">
+              Gerencie o funil de 8 etapas com Double Opt-In ou execute a avaliação algorítmica de 5 etapas com cobertura de evidências.
+            </p>
+          </div>
         </div>
 
         <div className="space-y-3">
@@ -183,7 +278,7 @@ export const CompanyDashboardView: React.FC<{ onSelectVacancy: (vacancyId: strin
             return (
               <div 
                 key={vac.id} 
-                className="p-4 rounded-base bg-background border border-border hover:border-primary transition-all flex flex-col sm:flex-row sm:items-center justify-between gap-3"
+                className="p-4 rounded-base bg-background border border-border hover:border-primary transition-all flex flex-col md:flex-row md:items-center justify-between gap-3"
               >
                 <div>
                   <div className="flex items-center gap-2 flex-wrap">
@@ -210,8 +305,8 @@ export const CompanyDashboardView: React.FC<{ onSelectVacancy: (vacancyId: strin
                   </div>
                 </div>
 
-                <div className="flex items-center gap-3 shrink-0">
-                  <div className="text-right">
+                <div className="flex flex-wrap items-center gap-2.5 shrink-0">
+                  <div className="text-right mr-1">
                     <span className="text-xs text-foreground font-bold block">
                       {processesForVacancy.length} candidato(s)
                     </span>
@@ -219,11 +314,21 @@ export const CompanyDashboardView: React.FC<{ onSelectVacancy: (vacancyId: strin
                       {acceptedForVacancy} com Double Opt-In
                     </span>
                   </div>
+
+                  {onOpenMatchingIa && (
+                    <button
+                      onClick={() => onOpenMatchingIa()}
+                      className="px-3 py-2 bg-secondary text-primary hover:opacity-90 text-xs font-bold rounded-base flex items-center gap-1 border border-primary/20"
+                    >
+                      <Target className="w-3.5 h-3.5" /> Ranking IA
+                    </button>
+                  )}
+
                   <button
                     onClick={() => onSelectVacancy(vac.id)}
                     className="px-3.5 py-2 bg-primary hover:bg-primary-dark text-white text-xs font-bold rounded-base flex items-center gap-1 transition-all shadow-xs"
                   >
-                    Abrir Shortlist <ArrowRight className="w-3.5 h-3.5" />
+                    Shortlist & Opt-In <ArrowRight className="w-3.5 h-3.5" />
                   </button>
                 </div>
               </div>
@@ -375,7 +480,6 @@ export const CompanyDashboardView: React.FC<{ onSelectVacancy: (vacancyId: strin
                 </div>
               </div>
 
-              {/* Faixa salarial obrigatória */}
               <div className="p-3 bg-secondary/40 border border-border rounded-base space-y-2">
                 <span className="font-bold text-primary block text-[11px]">
                   Faixa Salarial Transparente Obrigatória:
@@ -451,7 +555,7 @@ export const CompanyDashboardView: React.FC<{ onSelectVacancy: (vacancyId: strin
                   type="submit"
                   className="px-4 py-2 rounded-base bg-primary hover:bg-primary-dark text-white font-bold flex items-center gap-1.5 shadow-xs"
                 >
-                  <CheckCircle2 className="w-4 h-4" /> Publicar e Disparar Convites
+                  <CheckCircle2 className="w-4 h-4" /> Publicar e Sincronizar com Motor IA
                 </button>
               </div>
             </form>

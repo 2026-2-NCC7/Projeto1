@@ -1,323 +1,285 @@
-export type Seniority = 'Júnior' | 'Pleno' | 'Sênior';
-export type SkillMastery = 'Iniciante' | 'Básico' | 'Intermediário' | 'Avançado' | 'Especialista';
-export type WorkContractType = 'CLT' | 'PJ' | 'Projeto';
-export type WorkModality = 'Remoto' | 'Híbrido' | 'Presencial';
-export type Availability = 'Imediata' | '15 dias' | '30 dias' | 'A combinar';
-export type VisibilityState = 'Ativo' | 'Discreto' | 'Pausado';
-export type UserRole = 'profissional' | 'empresa' | 'admin';
+// TypeScript interfaces matching backend models and Pydantic schemas
 
-export interface RegisteredUser {
-  id: string;
-  role: UserRole;
-  name: string;
-  email: string;
-  password: string;
-  createdAt: string;
-  status: 'ativo' | 'onboarding_pendente';
-  // Campos exclusivos de Empresa
-  companyName?: string;
-  cnpj?: string;
-  companyId?: string;
-  // Campos exclusivos de Profissional
-  technicalArea?: string;
-  seniority?: Seniority;
-  candidateId?: string;
-  onboardingCompleted?: boolean;
-  // Vínculo opcional com persona demo
-  isDemo?: boolean;
-  personaId?: string;
+export interface SkillAlias {
+  id: number;
+  skill_id: string;
+  alias: string;
 }
 
-export interface UserSession {
-  userId: string;
-  role: UserRole;
-  email: string;
-  loginAt: string;
-}
-
-export interface ProfessionalOnboardingData {
-  headline: string;
-  seniority: Seniority;
-  hardSkills: string[];
-  salaryMin: number;
-  salaryMax: number;
-  modality: WorkModality;
-  city: string;
-  state: string;
-  availability: Availability;
-}
-
-
-export interface CandidateSkill {
+export interface Skill {
   id: string;
   name: string;
-  category: string;
-  mastery: SkillMastery;
-  years: number;
-  months: number;
-  isCustom?: boolean;
-  status?: 'aprovada' | 'pendente_revisao';
-}
-
-export interface CandidateProfile {
-  id: string;
-  userId: string;
-  name: string;
-  avatar: string;
-  headline: string;
-  city: string;
-  state: string;
-  about: string;
-  seniority: Seniority;
-  experiences: Array<{
-    id: string;
-    role: string;
-    company: string;
-    period: string;
-    description: string;
-  }>;
-  projects: Array<{
-    id: string;
-    title: string;
-    description: string;
-    link?: string;
-  }>;
-  education: Array<{
-    id: string;
-    degree: string;
-    institution: string;
-    year: string;
-  }>;
-  certifications: string[];
-  languages: Array<{ language: string; level: string }>;
-  githubUrl: string;
-  gitlabUrl?: string;
-  linkedinUrl: string;
-  portfolioUrl?: string;
-  email: string;
-  phone: string;
-  salaryMin: number;
-  salaryMax: number;
-  contractTypes: WorkContractType[];
-  modalities: WorkModality[];
-  locationPreference: string;
-  availability: Availability;
-  visibility: VisibilityState;
-  skills: CandidateSkill[];
-  isCommunityMember: boolean;
-}
-
-export interface AIInterviewAnswer {
-  questionId: number;
-  question: string;
-  competency: string;
-  answer: string;
-}
-
-export interface AIInterviewSession {
-  id: string;
-  candidateId: string;
-  status: 'nao_iniciada' | 'concluida' | 'contestada';
-  completedAt?: string;
-  answers: AIInterviewAnswer[];
-  summary: Array<{
-    competency: string;
-    level: string;
-    evidence: string;
-    confidence: 'Alta' | 'Média' | 'Insuficiente';
-    insufficientEvidence?: boolean;
-  }>;
-  version: number;
-}
-
-export interface Vacancy {
-  id: string;
-  title: string;
-  companyId: string;
-  area: string;
-  seniority: Seniority;
-  mandatorySkills: string[];
-  desirableSkills: string[];
-  softSkills: string[];
-  contractTypes: WorkContractType[];
-  modality: WorkModality;
-  location: string;
-  salaryMin: number;
-  salaryMax: number;
+  category: 'HARD' | 'SOFT';
+  area?: string;
   description: string;
-  conditions: string;
-  isUrgentMatchExpress: boolean;
-  createdAt: string;
+  behavioral_examples?: string[];
+  evaluation_criteria?: Record<string, string>;
+  aliases?: SkillAlias[];
+}
+
+export interface CandidateDeclaredSkill {
+  id?: number;
+  skill_id: string;
+  skill_name?: string;
+  skill_category?: string;
+  declared_level: number;
+  notes?: string;
+}
+
+export interface Candidate {
+  id: string;
+  name: string;
+  email: string;
+  tech_area: string;
+  declared_seniority: string;
+  years_of_experience: number;
+  contract_preference: string;
+  work_model_preference: string;
+  salary_expectation?: number;
+  bio_summary?: string;
+  created_at: string;
+  declared_skills: CandidateDeclaredSkill[];
+}
+
+export interface InterviewQuestion {
+  id: string;
+  text: string;
+  category: string;
+  target_competencies?: string[];
+  rubric?: string;
+  order_index: number;
+}
+
+export interface TranscriptSegment {
+  start: number;
+  end: number;
+  text: string;
+}
+
+export interface Transcript {
+  id: string;
+  model_name: string;
+  raw_transcript: string;
+  segments?: TranscriptSegment[];
+  language: string;
+  created_at: string;
+}
+
+export interface InterviewAnswer {
+  id: string;
+  session_id: string;
+  question_id: string;
+  input_type: 'AUDIO' | 'TEXT';
+  audio_file_path?: string;
+  audio_duration_seconds?: number;
+  raw_text?: string;
+  edited_text?: string;
+  status: string;
+  created_at: string;
+  transcripts?: Transcript[];
+}
+
+export interface InterviewSession {
+  id: string;
+  candidate_id: string;
+  job_id?: string;
+  interview_type: string;
+  status: string;
+  created_at: string;
+  completed_at?: string;
+  answers: InterviewAnswer[];
+}
+
+export interface CompetencyEvidence {
+  id: string;
+  assessment_id: string;
+  answer_id?: string;
+  exact_quote: string;
+  explanation?: string;
+  paraphrase?: string;
+  created_at: string;
+}
+
+export interface CompetencyAssessment {
+  id: string;
+  skill_id: string;
+  skill_name?: string;
+  skill_category?: string;
+  declared: boolean;
+  declared_level?: number;
+  evidence_status: 'EVIDENCIADA' | 'PARCIALMENTE_EVIDENCIADA' | 'EVIDENCIA_INSUFICIENTE' | 'NAO_AVALIADA' | 'DIVERGENCIA_IDENTIFICADA';
+  estimated_level?: number;
+  explanation: string;
+  requires_review: boolean;
+  is_suggested: boolean;
+  evidences: CompetencyEvidence[];
+}
+
+export interface ReportReview {
+  id: string;
+  report_id: string;
+  version_id: string;
+  candidate_id: string;
+  skill_id?: string;
+  replica_text: string;
+  status: string;
+  resolution_notes?: string;
+  created_at: string;
+}
+
+export interface ReportVersion {
+  id: string;
+  report_id: string;
+  version_number: number;
+  status: string;
+  summary?: string;
+  created_at: string;
+  assessments: CompetencyAssessment[];
+  reviews: ReportReview[];
+}
+
+export interface AssessmentReport {
+  id: string;
+  candidate_id: string;
+  candidate_name?: string;
+  interview_id: string;
+  status: string;
+  active_version_number: number;
+  model_metadata?: Record<string, any>;
+  created_at: string;
+  updated_at: string;
+  active_version?: ReportVersion;
+  versions: ReportVersion[];
+}
+
+export interface JobSkillRequirement {
+  id?: number;
+  job_id?: string;
+  skill_id: string;
+  skill_name?: string;
+  skill_category?: string;
+  is_mandatory: boolean;
+  min_level: number;
+  weight: number;
+}
+
+export interface Job {
+  id: string;
+  company_id: string;
+  company_name?: string;
+  title: string;
+  description: string;
+  tech_vertical: string;
+  seniority: string;
+  contract_type: string;
+  work_model: string;
+  min_salary?: number;
+  max_salary?: number;
+  min_experience_years: number;
+  status: string;
+  created_at: string;
+  skill_requirements: JobSkillRequirement[];
 }
 
 export interface Company {
   id: string;
   name: string;
-  cnpj?: string;
-  about?: string;
-  city?: string;
-  state?: string;
-  website?: string;
   industry?: string;
   description?: string;
-  created_at?: string;
 }
 
-// Re-exporta tipos da suíte do Motor IA (excluindo Company que já está unificada acima)
-export type {
-  Candidate, CandidateDeclaredSkill, Skill, InterviewSession, InterviewQuestion,
-  InterviewAnswer, AssessmentReport, ReportVersion, ReportReview, CompetencyAssessment,
-  Job, JobMatchingRanking, CandidateMatchingResult,
-  CandidateComparisonResponse, HealthResponse, AuditEvent
-} from './engine';
-
-export type SelectionStage = 
-  | 'match_identificado'
-  | 'convite_enviado'
-  | 'candidato_aceitou'
-  | 'dados_liberados'
-  | 'entrevista_agendada'
-  | 'entrevista_realizada'
-  | 'em_avaliacao'
-  | 'aprovado'
-  | 'recusado';
-
-export interface SelectionProcess {
-  id: string;
-  vacancyId: string;
-  candidateId: string;
-  currentStage: SelectionStage;
-  doubleOptInStatus: 'aguardando' | 'aceito' | 'recusado';
-  doubleOptInDate?: string;
-  accessGranted: boolean;
-  demonstrativeScore: number;
-  matchExplanation: string;
-  internalNotes?: string;
-  updatedAt: string;
-  unlockedFreeGrant?: boolean;
-  feedbackGiven?: boolean;
+export interface MatchedSkillDetail {
+  skill_id: string;
+  skill_name: string;
+  category: 'HARD' | 'SOFT';
+  is_mandatory: boolean;
+  required_level: number;
+  weight: number;
+  candidate_declared_level?: number;
+  candidate_evidence_status: string;
+  candidate_estimated_level?: number;
+  alignment_status: 'ATENDIDO' | 'PARCIALMENTE_ATENDIDO' | 'NAO_ATENDIDO' | 'PENDENTE_AVALIACAO';
+  score_contribution: number;
+  gap_notes?: string;
 }
 
-export interface CommunityProfile {
+export interface CandidateMatchingResult {
   id: string;
-  userId: string;
+  job_id: string;
+  candidate_id: string;
+  candidate_name: string;
+  candidate_seniority: string;
+  candidate_experience_years: number;
+  report_version_id?: string;
+  overall_score: number;
+  hard_skills_score: number;
+  soft_skills_score: number;
+  experience_score: number;
+  conditions_score: number;
+  evaluation_coverage: number;
+  is_objectively_incompatible: boolean;
+  incompatibility_reasons: string[];
+  matched_skills: MatchedSkillDetail[];
+  partial_skills: MatchedSkillDetail[];
+  missing_skills: MatchedSkillDetail[];
+  pending_skills: MatchedSkillDetail[];
+  textual_justification: string;
+  algorithm_version: string;
+  evaluated_at: string;
+}
+
+export interface JobMatchingRanking {
+  job_id: string;
+  job_title: string;
+  company_name: string;
+  algorithm_weights: Record<string, number>;
+  total_candidates_evaluated: number;
+  ranking: CandidateMatchingResult[];
+}
+
+export interface CandidateComparisonItem {
+  candidate: CandidateMatchingResult;
+  competency_matrix: Record<string, MatchedSkillDetail>;
+}
+
+export interface CandidateComparisonResponse {
+  job_id: string;
+  job_title: string;
+  required_skills: {
+    skill_id: string;
+    skill_name: string;
+    category: string;
+    is_mandatory: boolean;
+    min_level: number;
+    weight: number;
+  }[];
+  candidates: CandidateComparisonItem[];
+  comparison_summary: string;
+}
+
+export interface ModelStatus {
   name: string;
-  avatar: string;
-  headline: string;
-  bio: string;
-  city: string;
-  state: string;
-  skills: string[];
-  interests: string[];
-  githubUrl?: string;
-  linkedinUrl?: string;
-  portfolioUrl?: string;
-  publicFields: {
-    bio: boolean;
-    location: boolean;
-    skills: boolean;
-    experiences: boolean;
-    links: boolean;
-  };
+  role: string;
+  target_engine: string;
+  available: boolean;
+  device: string;
+  details?: string;
 }
 
-export interface CommunityPost {
-  id: string;
-  authorId: string;
-  authorName: string;
-  authorHeadline: string;
-  authorAvatar: string;
-  type: 'post' | 'pergunta';
-  content: string;
-  tags: string[];
-  likes: number;
-  likedBy: string[];
-  commentsCount: number;
-  savedBy: string[];
-  createdAt: string;
-}
-
-export interface PostComment {
-  id: string;
-  postId: string;
-  authorId: string;
-  authorName: string;
-  authorAvatar: string;
-  content: string;
-  createdAt: string;
-}
-
-export interface Connection {
-  id: string;
-  userAId: string;
-  userBId: string;
-  degree: '1º grau' | '2º grau' | '3º grau';
-  status: 'pendente' | 'conectado';
-}
-
-export interface AppNotification {
-  id: string;
-  recipientUserId: string;
-  title: string;
-  message: string;
-  type: 'vaga' | 'processo' | 'comunidade' | 'sistema';
-  read: boolean;
-  createdAt: string;
-  actionUrl?: string;
-}
-
-export interface AuditLog {
-  id: string;
+export interface HealthResponse {
+  status: string;
+  version: string;
   timestamp: string;
-  action: string;
-  details: string;
-  actor: string;
+  database_connected: boolean;
+  models: ModelStatus[];
 }
 
-export interface RewardItem {
+export interface AuditEvent {
   id: string;
-  title: string;
-  category: 'Certificação' | 'Curso' | 'Evento' | 'Parceiro';
-  costEstalecas: number;
-  partner: string;
-  description: string;
+  event_type: string;
+  entity_name: string;
+  entity_id: string;
+  model_version?: string;
+  payload?: any;
+  created_at: string;
 }
-
-export interface RewardTransaction {
-  id: string;
-  candidateId: string;
-  description: string;
-  amount: number;
-  type: 'credito' | 'resgate';
-  createdAt: string;
-}
-
-export interface CompanyInvoice {
-  id: string;
-  companyId: string;
-  description: string;
-  amountBrl: number;
-  creditsAdded: number;
-  status: 'Pago (NFS-e Emitida)' | 'Cortesia Match Express';
-  nfseNumber: string;
-  createdAt: string;
-}
-
-export interface CommercialConfig {
-  singleUnlockPriceBrl: number;
-  package5PriceBrl: number;
-  matchExpressTopN: number;
-  referralBonusEstalecas: number;
-  maxReferralsPerVacancy: number;
-}
-
-export interface ModerationReport {
-  id: string;
-  postId: string;
-  postSnippet: string;
-  authorName: string;
-  reporterName: string;
-  reason: string;
-  status: 'pendente' | 'resolvido';
-  createdAt: string;
-}
