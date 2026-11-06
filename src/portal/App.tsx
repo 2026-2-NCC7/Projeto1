@@ -5,6 +5,7 @@ import { PresentationBanner } from './components/layout/PresentationBanner';
 import { SidebarNav } from './components/layout/SidebarNav';
 import { PersonaSelectorView } from './views/PersonaSelectorView';
 import { CandidateOnboardingView } from './views/CandidateOnboardingView';
+import { CandidateDashboardView } from './views/CandidateDashboardView';
 import { CandidateProfileView } from './views/CandidateProfileView';
 import { CandidateInterviewView } from './views/CandidateInterviewView';
 import { CandidateOpportunitiesView } from './views/CandidateOpportunitiesView';
@@ -28,6 +29,7 @@ import { MatchingRankingPage } from '../pages/MatchingRankingPage';
 import { CandidateComparisonPage } from '../pages/CandidateComparisonPage';
 
 const CANDIDATE_ALLOWED_TABS = [
+  'candidato-inicio',
   'candidato-perfil',
   'candidato-entrevista',
   'candidato-relatorio',
@@ -85,7 +87,7 @@ export const MainLayout: React.FC = () => {
     if (activePersona === 'comunidade-rafael') {
       return 'comunidade-feed';
     }
-    return 'candidato-perfil';
+    return 'candidato-inicio';
   };
 
   const isTabAllowedForRole = (tab: string): boolean => {
@@ -214,28 +216,29 @@ export const MainLayout: React.FC = () => {
 
   const getTitle = () => {
     switch (safeTab) {
-      case 'candidato-perfil': return 'Meu Perfil Técnico & Autodeclaração (1–5)';
-      case 'candidato-entrevista': return 'Entrevista de Triagem por IA (Áudio Whisper & Texto)';
-      case 'candidato-relatorio': return 'Relatório Consolidado de Competências (5 Estados Epistêmicos)';
-      case 'candidato-replica': return 'Direito de Réplica & Versionamento (Art. 20 LGPD)';
-      case 'candidato-vagas': return 'Vagas Compatíveis (Match Invertido & 5 Etapas)';
-      case 'candidato-processos': return 'Meus Processos & Double Opt-In';
-      case 'candidato-estalecas': return 'Estalecas & Indicações';
-      case 'empresa-vagas': return 'Painel Corporativo, Vagas & Faturamento B2B';
-      case 'empresa-shortlist': return 'Shortlist, Double Opt-In & Funil Seletivo';
-      case 'empresa-vaga-detalhe': return 'Shortlist & Gestão da Vaga';
-      case 'empresa-matching-ia': return 'Ranking Explicável IA (Algoritmo em 5 Etapas)';
-      case 'empresa-comparacao': return 'Comparação de Candidatos Lado a Lado';
-      case 'empresa-relatorios-ia': return 'Dossiês de Evidências Verificadas (Verbatim)';
-      case 'comunidade-feed': return 'Feed Técnico da Comunidade';
-      case 'comunidade-rede': return 'Minha Rede & Afinidade Técnica';
-      case 'comunidade-ajuda': return 'Mentoria & Ajuda Técnica';
-      case 'admin-dashboard': return 'Governança, Precificação B2B & LGPD';
-      case 'admin-motor-ia': return 'Painel do Motor IA & Cenários TCC (A–G)';
-      case 'admin-monitor': return 'Pipeline de Extração IA & Trilha de Auditoria';
-      case 'admin-revisoes': return 'Auditoria de Relatórios & Revisão Humana de Réplicas';
-      case 'admin-laboratorio': return 'Laboratório de Dados (Cadastro SQLite API)';
-      default: return 'Q.I. Tech — Sistema Unificado';
+      case 'candidato-inicio': return 'Painel do Candidato';
+      case 'candidato-perfil': return 'Meu Perfil Profissional';
+      case 'candidato-entrevista': return 'Entrevista de Competências';
+      case 'candidato-relatorio': return 'Relatório de Competências';
+      case 'candidato-replica': return 'Solicitar Revisão de Avaliação (Art. 20 LGPD)';
+      case 'candidato-vagas': return 'Oportunidades Compatíveis';
+      case 'candidato-processos': return 'Meus Processos Seletivos';
+      case 'candidato-estalecas': return 'Indicações & Estalecas Q.I.';
+      case 'empresa-vagas': return 'Painel da Empresa & Vagas';
+      case 'empresa-shortlist': return 'Talentos & Shortlist';
+      case 'empresa-vaga-detalhe': return 'Gestão da Vaga & Candidatos';
+      case 'empresa-matching-ia': return 'Análise de Compatibilidade (5 Dimensões)';
+      case 'empresa-comparacao': return 'Comparador de Perfis Lado a Lado';
+      case 'empresa-relatorios-ia': return 'Evidências e Laudos de Avaliação';
+      case 'comunidade-feed': return 'Comunidade Técnica';
+      case 'comunidade-rede': return 'Rede de Conexões';
+      case 'comunidade-ajuda': return 'Ajuda & Mentoria';
+      case 'admin-dashboard': return 'Governança & Parâmetros Comerciais';
+      case 'admin-motor-ia': return 'Laboratório de Testes do TCC';
+      case 'admin-monitor': return 'Trilha de Auditoria e Pipeline';
+      case 'admin-revisoes': return 'Fila de Revisão de Avaliações';
+      case 'admin-laboratorio': return 'Catálogo de Dados e APIs';
+      default: return 'Q.I. Tech';
     }
   };
 
@@ -247,6 +250,7 @@ export const MainLayout: React.FC = () => {
           <SidebarNav currentTab={safeTab} setCurrentTab={setCurrentTab} />
           <div className="flex-1 min-w-0">
             {/* ==================== ROTAS PERFIL CANDIDATO ==================== */}
+            {safeTab === 'candidato-inicio' && <CandidateDashboardView onNavigateToTab={setCurrentTab} />}
             {safeTab === 'candidato-perfil' && <CandidateProfileView />}
             {safeTab === 'candidato-entrevista' && (
               <CandidateInterviewView

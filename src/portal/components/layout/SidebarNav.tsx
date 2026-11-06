@@ -1,23 +1,20 @@
 import React from 'react';
 import { useApp } from '../../context/AppContext';
 import {
-  User,
+  Home,
   Briefcase,
-  Sparkles,
-  Layers,
-  Award,
+  Mic,
+  User,
   Share2,
-  ShieldCheck,
   Users,
   Search,
-  Brain,
+  ShieldCheck,
+  Target,
   FileText,
   RotateCcw,
-  Target,
-  GitCompare,
-  Activity,
-  Database,
-  Mic
+  CreditCard,
+  Sliders,
+  Database
 } from 'lucide-react';
 
 interface SidebarNavProps {
@@ -26,7 +23,7 @@ interface SidebarNavProps {
 }
 
 export const SidebarNav: React.FC<SidebarNavProps> = ({ currentTab, setCurrentTab }) => {
-  const { activePersona, session, rewardBalance, companyCredits } = useApp();
+  const { activePersona, session, companyCredits } = useApp();
 
   const isCommunityExternal = activePersona === 'comunidade-rafael';
   const isCompany = session?.role === 'empresa' || activePersona === 'empresa-orion';
@@ -46,136 +43,85 @@ export const SidebarNav: React.FC<SidebarNavProps> = ({ currentTab, setCurrentTa
   `;
 
   return (
-    <aside className="w-full lg:w-[240px] shrink-0 space-y-4">
+    <aside className="w-full lg:w-[220px] shrink-0 space-y-4">
       <div className="bg-white p-3 rounded-base border border-border shadow-xs space-y-1">
         
-        {/* ==================== CANDIDATO ==================== */}
+        {/* ==================== 1. CANDIDATO (ATÉ 5 ÁREAS PRINCIPAIS) ==================== */}
         {isCandidate && (
           <>
             <div className="px-2.5 py-1 text-[10px] font-bold text-muted-foreground uppercase tracking-wider">
-              Meu Perfil & IA
+              Menu Principal
             </div>
 
-            <button onClick={() => setCurrentTab('candidato-perfil')} className={getItemClass('candidato-perfil')}>
+            <button onClick={() => setCurrentTab('candidato-inicio')} className={getItemClass('candidato-inicio')}>
               <span className="flex items-center gap-2.5">
-                <User className="w-4 h-4 text-primary" /> Meu Perfil Técnico
+                <Home className="w-4 h-4 text-primary" /> Início
+              </span>
+            </button>
+
+            <button onClick={() => setCurrentTab('candidato-vagas')} className={getItemClass('candidato-vagas')}>
+              <span className="flex items-center gap-2.5">
+                <Briefcase className="w-4 h-4 text-primary" /> Oportunidades
               </span>
             </button>
 
             <button onClick={() => setCurrentTab('candidato-entrevista')} className={getItemClass('candidato-entrevista')}>
               <span className="flex items-center gap-2.5">
-                <Mic className="w-4 h-4 text-brandOrange" /> Entrevista por IA
+                <Mic className="w-4 h-4 text-brandOrange" /> Entrevistas por IA
               </span>
             </button>
 
-            <button onClick={() => setCurrentTab('candidato-relatorio')} className={getItemClass('candidato-relatorio')}>
+            <button onClick={() => setCurrentTab('candidato-perfil')} className={getItemClass('candidato-perfil')}>
               <span className="flex items-center gap-2.5">
-                <FileText className="w-4 h-4 text-emerald-600" /> Relatório de Evidências
+                <User className="w-4 h-4 text-primary" /> Meu Perfil
               </span>
             </button>
-
-            <button onClick={() => setCurrentTab('candidato-replica')} className={getItemClass('candidato-replica')}>
-              <span className="flex items-center gap-2.5">
-                <RotateCcw className="w-4 h-4 text-amber-600" /> Direito de Réplica
-              </span>
-            </button>
-
-            <div className="pt-2.5 mt-2.5 border-t border-border px-2.5 text-[10px] font-bold text-muted-foreground uppercase tracking-wider">
-              Oportunidades
-            </div>
-
-            <button onClick={() => setCurrentTab('candidato-vagas')} className={getItemClass('candidato-vagas')}>
-              <span className="flex items-center gap-2.5">
-                <Briefcase className="w-4 h-4 text-primary" /> Vagas Compatíveis
-              </span>
-            </button>
-
-            <button onClick={() => setCurrentTab('candidato-processos')} className={getItemClass('candidato-processos')}>
-              <span className="flex items-center gap-2.5">
-                <Layers className="w-4 h-4 text-primary" /> Meus Processos
-              </span>
-            </button>
-
-            <button onClick={() => setCurrentTab('candidato-estalecas')} className={getItemClass('candidato-estalecas')}>
-              <span className="flex items-center gap-2.5">
-                <Award className="w-4 h-4 text-brandOrange" /> Estalecas & Indicações
-              </span>
-              <span className="text-[10px] bg-brandOrange/15 text-brandOrange font-bold px-1.5 py-0.5 rounded">
-                {rewardBalance} 🪙
-              </span>
-            </button>
-
-            <div className="pt-2.5 mt-2.5 border-t border-border px-2.5 text-[10px] font-bold text-muted-foreground uppercase tracking-wider">
-              Comunidade
-            </div>
 
             <button onClick={() => setCurrentTab('comunidade-feed')} className={getItemClass('comunidade-feed')}>
               <span className="flex items-center gap-2.5">
-                <Share2 className="w-4 h-4 text-primary" /> Feed Técnico
-              </span>
-            </button>
-
-            <button onClick={() => setCurrentTab('comunidade-rede')} className={getItemClass('comunidade-rede')}>
-              <span className="flex items-center gap-2.5">
-                <Users className="w-4 h-4 text-primary" /> Rede de Contatos
-              </span>
-            </button>
-
-            <button onClick={() => setCurrentTab('comunidade-ajuda')} className={getItemClass('comunidade-ajuda')}>
-              <span className="flex items-center gap-2.5">
-                <Search className="w-4 h-4 text-primary" /> Ajuda & Mentoria
+                <Share2 className="w-4 h-4 text-primary" /> Comunidade
               </span>
             </button>
           </>
         )}
 
-        {/* ==================== EMPRESA ==================== */}
+        {/* ==================== 2. EMPRESA (FLUXO CORPORATIVO B2B) ==================== */}
         {isCompany && (
           <>
             <div className="px-2.5 py-1 text-[10px] font-bold text-muted-foreground uppercase tracking-wider">
-              Gestão da Empresa
+              Painel da Empresa
             </div>
 
             <button onClick={() => setCurrentTab('empresa-vagas')} className={getItemClass('empresa-vagas')}>
               <span className="flex items-center gap-2.5">
-                <Briefcase className="w-4 h-4 text-primary" /> Vagas Abertas
+                <Briefcase className="w-4 h-4 text-primary" /> Vagas & Painel
               </span>
               <span className="text-[10px] bg-secondary text-primary font-bold px-1.5 py-0.5 rounded">
-                {companyCredits} créditos
+                {companyCredits} créd.
               </span>
             </button>
 
             <button onClick={() => setCurrentTab('empresa-shortlist')} className={getItemClass('empresa-shortlist')}>
               <span className="flex items-center gap-2.5">
-                <Users className="w-4 h-4 text-brandOrange" /> Shortlist de Talentos
+                <Users className="w-4 h-4 text-brandOrange" /> Talentos & Shortlist
               </span>
             </button>
 
-            <div className="pt-2.5 mt-2.5 border-t border-border px-2.5 text-[10px] font-bold text-muted-foreground uppercase tracking-wider">
-              Análise & Matching
-            </div>
-
             <button onClick={() => setCurrentTab('empresa-matching-ia')} className={getItemClass('empresa-matching-ia')}>
               <span className="flex items-center gap-2.5">
-                <Target className="w-4 h-4 text-primary" /> Ranking 5 Etapas
+                <Target className="w-4 h-4 text-primary" /> Análise de Matching
               </span>
             </button>
 
             <button onClick={() => setCurrentTab('empresa-comparacao')} className={getItemClass('empresa-comparacao')}>
               <span className="flex items-center gap-2.5">
-                <GitCompare className="w-4 h-4 text-primary" /> Comparar Candidatos
-              </span>
-            </button>
-
-            <button onClick={() => setCurrentTab('empresa-relatorios-ia')} className={getItemClass('empresa-relatorios-ia')}>
-              <span className="flex items-center gap-2.5">
-                <FileText className="w-4 h-4 text-emerald-600" /> Dossiês de Evidências
+                <FileText className="w-4 h-4 text-emerald-600" /> Comparar Perfis
               </span>
             </button>
           </>
         )}
 
-        {/* ==================== COMUNIDADE EXTERNA ==================== */}
+        {/* ==================== 3. COMUNIDADE EXTERNA ==================== */}
         {isCommunityExternal && (
           <>
             <div className="px-2.5 py-1 text-[10px] font-bold text-muted-foreground uppercase tracking-wider">
@@ -190,56 +136,40 @@ export const SidebarNav: React.FC<SidebarNavProps> = ({ currentTab, setCurrentTa
 
             <button onClick={() => setCurrentTab('comunidade-rede')} className={getItemClass('comunidade-rede')}>
               <span className="flex items-center gap-2.5">
-                <Users className="w-4 h-4 text-primary" /> Minha Rede
+                <Users className="w-4 h-4 text-primary" /> Rede de Afinidade
               </span>
             </button>
 
             <button onClick={() => setCurrentTab('comunidade-ajuda')} className={getItemClass('comunidade-ajuda')}>
               <span className="flex items-center gap-2.5">
-                <Search className="w-4 h-4 text-primary" /> Mentoria
+                <Search className="w-4 h-4 text-primary" /> Mentoria & Dúvidas
               </span>
             </button>
           </>
         )}
 
-        {/* ==================== ADMIN & BANCA ==================== */}
+        {/* ==================== 4. ADMIN & AUDITORIA TCC ==================== */}
         {isAdmin && (
           <>
             <div className="px-2.5 py-1 text-[10px] font-bold text-muted-foreground uppercase tracking-wider">
-              Governança & Operação
+              Governança
             </div>
 
             <button onClick={() => setCurrentTab('admin-dashboard')} className={getItemClass('admin-dashboard')}>
               <span className="flex items-center gap-2.5">
-                <ShieldCheck className="w-4 h-4 text-primary" /> Painel de Governança
-              </span>
-            </button>
-
-            <div className="pt-2.5 mt-2.5 border-t border-border px-2.5 text-[10px] font-bold text-muted-foreground uppercase tracking-wider">
-              Auditoria de IA
-            </div>
-
-            <button onClick={() => setCurrentTab('admin-motor-ia')} className={getItemClass('admin-motor-ia')}>
-              <span className="flex items-center gap-2.5">
-                <Brain className="w-4 h-4 text-primary" /> Cenários TCC (A–G)
-              </span>
-            </button>
-
-            <button onClick={() => setCurrentTab('admin-monitor')} className={getItemClass('admin-monitor')}>
-              <span className="flex items-center gap-2.5">
-                <Activity className="w-4 h-4 text-brandOrange" /> Trilha de Extração
+                <ShieldCheck className="w-4 h-4 text-primary" /> Visão Geral & Preços
               </span>
             </button>
 
             <button onClick={() => setCurrentTab('admin-revisoes')} className={getItemClass('admin-revisoes')}>
               <span className="flex items-center gap-2.5">
-                <RotateCcw className="w-4 h-4 text-amber-600" /> Relatórios & Réplicas
+                <RotateCcw className="w-4 h-4 text-amber-600" /> Fila de Revisões (LGPD)
               </span>
             </button>
 
             <button onClick={() => setCurrentTab('admin-laboratorio')} className={getItemClass('admin-laboratorio')}>
               <span className="flex items-center gap-2.5">
-                <Database className="w-4 h-4 text-primary" /> Catálogo de Dados
+                <Database className="w-4 h-4 text-primary" /> Laboratório TCC (Testes)
               </span>
             </button>
           </>

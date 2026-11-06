@@ -1,31 +1,19 @@
 import React, { useState } from 'react';
 import { useApp } from '../context/AppContext';
 import { Availability, Seniority, WorkModality } from '../types';
-import { Sparkles, CheckCircle2, ArrowRight, AlertCircle, User, MapPin, DollarSign, Briefcase, Clock, Plus, X } from 'lucide-react';
+import { Sparkles, CheckCircle2, ArrowRight, ArrowLeft, AlertCircle, ShieldCheck, Check, Plus, X } from 'lucide-react';
 
 const SUGGESTED_SKILLS = [
-  'React',
-  'TypeScript',
-  'Node.js',
-  'Python',
-  'Java',
-  'C#',
-  'Go',
-  'SQL',
-  'PostgreSQL',
-  'AWS',
-  'Docker',
-  'Kubernetes',
-  'Git',
-  'Next.js',
-  'Tailwind CSS',
-  'Spark',
-  'Airflow'
+  'React', 'TypeScript', 'Node.js', 'Python', 'Java', 'C#', 'Go',
+  'SQL', 'PostgreSQL', 'AWS', 'Docker', 'Kubernetes', 'Git', 'Next.js', 'Tailwind CSS'
 ];
 
 export const CandidateOnboardingView: React.FC<{ onComplete: () => void }> = ({ onComplete }) => {
   const { currentUser, completeProfessionalOnboarding } = useApp();
 
+  const [step, setStep] = useState<1 | 2 | 3>(1);
+
+  // Etapa 1 — Perfil Profissional
   const defaultArea = currentUser?.technicalArea || 'Full-Stack';
   const [headline, setHeadline] = useState(
     `Desenvolvedor(a) ${defaultArea} ${currentUser?.seniority || 'Pleno'}`
@@ -33,18 +21,14 @@ export const CandidateOnboardingView: React.FC<{ onComplete: () => void }> = ({ 
   const [seniority, setSeniority] = useState<Seniority>(currentUser?.seniority || 'Pleno');
   const [selectedSkills, setSelectedSkills] = useState<string[]>(() => {
     const areaLower = defaultArea.toLowerCase();
-    if (areaLower.includes('dados') || areaLower.includes('ia') || areaLower.includes('data')) {
-      return ['Python', 'SQL', 'AWS'];
-    }
-    if (areaLower.includes('devops') || areaLower.includes('cloud') || areaLower.includes('infra')) {
-      return ['AWS', 'Docker', 'Kubernetes'];
-    }
-    if (areaLower.includes('back')) {
-      return ['Node.js', 'TypeScript', 'PostgreSQL'];
-    }
+    if (areaLower.includes('dados') || areaLower.includes('ia')) return ['Python', 'SQL', 'AWS'];
+    if (areaLower.includes('devops') || areaLower.includes('cloud')) return ['AWS', 'Docker', 'Kubernetes'];
+    if (areaLower.includes('back')) return ['Node.js', 'TypeScript', 'PostgreSQL'];
     return ['React', 'TypeScript', 'Git'];
   });
   const [customSkillText, setCustomSkillText] = useState('');
+
+  // Etapa 2 — Preferências
   const [salaryMin, setSalaryMin] = useState<string>(
     currentUser?.seniority === 'Sênior' ? '14000' : currentUser?.seniority === 'Júnior' ? '4500' : '8500'
   );
@@ -55,6 +39,8 @@ export const CandidateOnboardingView: React.FC<{ onComplete: () => void }> = ({ 
   const [city, setCity] = useState('São Paulo');
   const [stateUf, setStateUf] = useState('SP');
   const [availability, setAvailability] = useState<Availability>('Imediata');
+
+  // Validação
   const [errorMsg, setErrorMsg] = useState('');
 
   const toggleSkill = (skill: string) => {
@@ -76,293 +62,354 @@ export const CandidateOnboardingView: React.FC<{ onComplete: () => void }> = ({ 
     setErrorMsg('');
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
+  const handleStep1Next = () => {
     if (!headline.trim()) {
-      setErrorMsg('Informe seu título profissional para compor o perfil.');
+      setErrorMsg('Informe seu cargo ou título profissional.');
       return;
     }
     if (selectedSkills.length === 0) {
-      setErrorMsg('Selecione ou adicione pelo menos uma hard skill principal.');
+      setErrorMsg('Selecione pelo menos uma competência técnica principal.');
       return;
     }
+    setErrorMsg('');
+    setStep(2);
+  };
+
+  const handleStep2Next = () => {
     const min = Number(salaryMin);
     const max = Number(salaryMax);
     if (!min || !max || min <= 0 || max < min) {
-      setErrorMsg('Informe uma pretensão salarial válida (mínimo e máximo).');
+      setErrorMsg('Informe uma faixa salarial válida (mínimo e máximo).');
       return;
     }
     if (!city.trim() || !stateUf.trim()) {
-      setErrorMsg('Informe sua cidade e UF de localização.');
+      setErrorMsg('Informe sua cidade e estado.');
       return;
     }
+    setErrorMsg('');
+    setStep(3);
+  };
 
+  const handleFinalSubmit = () => {
     completeProfessionalOnboarding({
       headline: headline.trim(),
       seniority,
       hardSkills: selectedSkills,
-      salaryMin: min,
-      salaryMax: max,
+      salaryMin: Number(salaryMin),
+      salaryMax: Number(salaryMax),
       modality,
       city: city.trim(),
       state: stateUf.trim().toUpperCase(),
       availability
     });
-
     onComplete();
   };
 
   return (
-    <div className="max-w-2xl mx-auto py-4 space-y-6">
+    <div className="max-w-xl mx-auto py-6 space-y-5">
+      
+      {/* INDICADOR DE ETAPAS */}
+      <div className="flex items-center justify-between text-xs px-1">
+        <div className={`flex items-center gap-1.5 font-bold ${step >= 1 ? 'text-primary' : 'text-muted-foreground'}`}>
+          <span className={`w-5 h-5 rounded-full flex items-center justify-center text-[11px] ${step >= 1 ? 'bg-primary text-white' : 'bg-background border border-border'}`}>
+            1
+          </span>
+          <span>Perfil</span>
+        </div>
+        <div className={`h-0.5 flex-1 mx-2 ${step >= 2 ? 'bg-primary' : 'bg-border'}`} />
+        <div className={`flex items-center gap-1.5 font-bold ${step >= 2 ? 'text-primary' : 'text-muted-foreground'}`}>
+          <span className={`w-5 h-5 rounded-full flex items-center justify-center text-[11px] ${step >= 2 ? 'bg-primary text-white' : 'bg-background border border-border'}`}>
+            2
+          </span>
+          <span>Preferências</span>
+        </div>
+        <div className={`h-0.5 flex-1 mx-2 ${step >= 3 ? 'bg-primary' : 'bg-border'}`} />
+        <div className={`flex items-center gap-1.5 font-bold ${step >= 3 ? 'text-primary' : 'text-muted-foreground'}`}>
+          <span className={`w-5 h-5 rounded-full flex items-center justify-center text-[11px] ${step >= 3 ? 'bg-primary text-white' : 'bg-background border border-border'}`}>
+            3
+          </span>
+          <span>Confirmação</span>
+        </div>
+      </div>
+
       <div className="bg-white p-6 rounded-base border border-border shadow-xs space-y-5">
         
-        {/* Cabeçalho do Onboarding */}
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-border pb-4">
-          <div className="space-y-1">
-            <span className="inline-flex items-center gap-1.5 text-[11px] font-bold text-brandOrange bg-brandOrange/10 px-2.5 py-0.5 rounded">
-              <Sparkles className="w-3.5 h-3.5" /> Passo Único • Configuração Rápida de Perfil
-            </span>
-            <h2 className="font-heading font-bold text-lg sm:text-xl text-foreground">
-              Bem-vindo(a), {currentUser?.name || 'Profissional'}!
-            </h2>
-            <p className="text-xs text-muted-foreground">
-              Complete as informações mínimas do seu perfil técnico para ativar o Matchmaking com proteção Double Opt-In.
-            </p>
-          </div>
-          <div className="text-left sm:text-right shrink-0">
-            <span className="text-[10px] font-bold uppercase tracking-wider text-primary bg-secondary px-2.5 py-1 rounded block">
-              +50 🪙 Estalecas Q.I. ao concluir
-            </span>
-          </div>
-        </div>
+        {/* ==================== ETAPA 1: PERFIL PROFISSIONAL ==================== */}
+        {step === 1 && (
+          <div className="space-y-4 text-xs">
+            <div className="border-b border-border pb-3">
+              <h2 className="font-heading font-bold text-base text-foreground">
+                Qual é a sua especialidade?
+              </h2>
+              <p className="text-muted-foreground mt-0.5">
+                Defina seu título profissional e competências técnicas principais.
+              </p>
+            </div>
 
-        <form onSubmit={handleSubmit} className="space-y-4 text-xs">
-          
-          {/* Título Profissional e Senioridade */}
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3.5">
-            <div className="sm:col-span-2">
-              <label className="block font-semibold text-foreground mb-1 flex items-center gap-1.5">
-                <User className="w-3.5 h-3.5 text-primary" /> Título Profissional (Headline) *
-              </label>
+            <div>
+              <label className="block font-semibold text-foreground mb-1">Título Profissional ou Cargo:</label>
               <input
                 type="text"
                 value={headline}
-                onChange={(e) => {
-                  setHeadline(e.target.value);
-                  setErrorMsg('');
-                }}
-                placeholder="Ex: Desenvolvedor(a) Front-end Pleno | React, TypeScript"
-                className="w-full h-9 px-3 bg-background border border-border rounded-base text-foreground focus:outline-none focus:ring-1 focus:ring-primary"
+                onChange={(e) => setHeadline(e.target.value)}
+                placeholder="Ex: Desenvolvedor Front-end Pleno"
+                className="w-full h-10 px-3 rounded-base bg-background border border-border text-foreground font-medium text-xs focus:ring-1 focus:ring-primary"
               />
             </div>
 
             <div>
-              <label className="block font-semibold text-foreground mb-1 flex items-center gap-1.5">
-                <Briefcase className="w-3.5 h-3.5 text-primary" /> Senioridade *
-              </label>
+              <label className="block font-semibold text-foreground mb-1">Senioridade:</label>
               <select
                 value={seniority}
                 onChange={(e) => setSeniority(e.target.value as Seniority)}
-                className="w-full h-9 px-2.5 bg-background border border-border rounded-base text-foreground font-semibold focus:outline-none focus:ring-1 focus:ring-primary"
+                className="w-full h-10 px-3 rounded-base bg-background border border-border text-foreground font-medium text-xs"
               >
-                <option value="Júnior">Júnior</option>
-                <option value="Pleno">Pleno</option>
-                <option value="Sênior">Sênior</option>
+                <option value="Júnior">Júnior (1 a 2 anos de experiência prática)</option>
+                <option value="Pleno">Pleno (3 a 5 anos de experiência prática)</option>
+                <option value="Sênior">Sênior (Mais de 5 anos com autonomia técnica)</option>
+                <option value="Especialista">Especialista / Tech Lead</option>
               </select>
             </div>
-          </div>
 
-          {/* Principais Hard Skills */}
-          <div className="p-3.5 bg-background rounded-base border border-border space-y-2.5">
-            <div className="flex items-center justify-between">
-              <label className="font-semibold text-foreground">
-                Principais Hard Skills * <span className="text-muted-foreground font-normal">(selecione ou adicione)</span>
-              </label>
-              <span className="text-[11px] font-bold text-primary">
-                {selectedSkills.length} selecionada(s)
-              </span>
-            </div>
-
-            <div className="flex flex-wrap gap-1.5">
-              {SUGGESTED_SKILLS.map((sk) => {
-                const isSelected = selectedSkills.includes(sk);
-                return (
-                  <button
-                    key={sk}
-                    type="button"
-                    onClick={() => toggleSkill(sk)}
-                    className={`px-2.5 py-1 rounded text-[11px] font-semibold border transition-all flex items-center gap-1 ${
-                      isSelected
-                        ? 'bg-primary text-white border-primary shadow-2xs'
-                        : 'bg-white text-foreground border-border hover:bg-secondary/60'
-                    }`}
-                  >
-                    {sk}
-                    {isSelected && <CheckCircle2 className="w-3 h-3" />}
-                  </button>
-                );
-              })}
-            </div>
-
-            {/* Adicionar outra skill manualmente */}
-            <div className="flex gap-2 pt-1">
-              <input
-                type="text"
-                value={customSkillText}
-                onChange={(e) => setCustomSkillText(e.target.value)}
-                onKeyDown={(e) => {
-                  if (e.key === 'Enter') {
-                    e.preventDefault();
-                    handleAddCustomSkill();
-                  }
-                }}
-                placeholder="Adicionar outra tecnologia (ex: Rust, Vue.js, Terraform)..."
-                className="flex-1 h-8 px-2.5 bg-white border border-border rounded-base text-xs text-foreground"
-              />
-              <button
-                type="button"
-                onClick={handleAddCustomSkill}
-                className="px-3 h-8 bg-secondary text-primary font-bold rounded-base hover:bg-secondary/80 flex items-center gap-1"
-              >
-                <Plus className="w-3.5 h-3.5" /> Incluir
-              </button>
-            </div>
-
-            {selectedSkills.length > 0 && (
-              <div className="pt-1 flex flex-wrap items-center gap-1.5">
-                <span className="text-[10px] text-muted-foreground font-semibold uppercase">Selecionadas:</span>
-                {selectedSkills.map(sk => (
-                  <span key={sk} className="inline-flex items-center gap-1 text-[10px] bg-secondary text-primary font-bold px-2 py-0.5 rounded">
-                    {sk}
-                    <button type="button" onClick={() => toggleSkill(sk)} className="hover:text-destructive">
-                      <X className="w-3 h-3" />
+            <div>
+              <label className="block font-semibold text-foreground mb-1">Competências Técnicas Principais:</label>
+              <div className="flex flex-wrap gap-1.5 mb-2">
+                {SUGGESTED_SKILLS.map((sk) => {
+                  const isSelected = selectedSkills.includes(sk);
+                  return (
+                    <button
+                      key={sk}
+                      type="button"
+                      onClick={() => toggleSkill(sk)}
+                      className={`px-2.5 py-1 rounded text-[11px] font-medium transition-all ${
+                        isSelected
+                          ? 'bg-primary text-white font-bold shadow-xs'
+                          : 'bg-background border border-border text-muted-foreground hover:text-foreground'
+                      }`}
+                    >
+                      {sk} {isSelected && '✓'}
                     </button>
-                  </span>
-                ))}
+                  );
+                })}
+              </div>
+
+              {/* Adicionar outra habilidade */}
+              <div className="flex gap-2">
+                <input
+                  type="text"
+                  value={customSkillText}
+                  onChange={(e) => setCustomSkillText(e.target.value)}
+                  onKeyDown={(e) => { if (e.key === 'Enter') { e.preventDefault(); handleAddCustomSkill(); } }}
+                  placeholder="Digitar outra competência..."
+                  className="flex-1 h-9 px-3 rounded-base bg-background border border-border text-xs"
+                />
+                <button
+                  type="button"
+                  onClick={handleAddCustomSkill}
+                  className="px-3 h-9 bg-background hover:bg-secondary border border-border rounded-base font-semibold"
+                >
+                  <Plus className="w-3.5 h-3.5 inline" /> Adicionar
+                </button>
+              </div>
+            </div>
+
+            {errorMsg && (
+              <div className="p-2.5 rounded-base bg-red-50 border border-red-200 text-red-700 text-[11px] flex items-center gap-1.5">
+                <AlertCircle className="w-4 h-4 shrink-0" /> {errorMsg}
               </div>
             )}
-          </div>
 
-          {/* Pretensão Salarial */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
-            <div>
-              <label className="block font-semibold text-foreground mb-1 flex items-center gap-1.5">
-                <DollarSign className="w-3.5 h-3.5 text-primary" /> Pretensão Salarial Mínima (R$/mês) *
-              </label>
-              <input
-                type="number"
-                min="1000"
-                step="500"
-                value={salaryMin}
-                onChange={(e) => {
-                  setSalaryMin(e.target.value);
-                  setErrorMsg('');
-                }}
-                className="w-full h-9 px-3 bg-background border border-border rounded-base text-foreground font-bold focus:outline-none focus:ring-1 focus:ring-primary"
-              />
-            </div>
-
-            <div>
-              <label className="block font-semibold text-foreground mb-1 flex items-center gap-1.5">
-                <DollarSign className="w-3.5 h-3.5 text-primary" /> Pretensão Salarial Ideal/Máxima (R$/mês) *
-              </label>
-              <input
-                type="number"
-                min="1000"
-                step="500"
-                value={salaryMax}
-                onChange={(e) => {
-                  setSalaryMax(e.target.value);
-                  setErrorMsg('');
-                }}
-                className="w-full h-9 px-3 bg-background border border-border rounded-base text-foreground font-bold focus:outline-none focus:ring-1 focus:ring-primary"
-              />
-            </div>
-          </div>
-
-          {/* Modalidade, Localização e Disponibilidade */}
-          <div className="grid grid-cols-1 sm:grid-cols-4 gap-3.5">
-            <div>
-              <label className="block font-semibold text-foreground mb-1">Modalidade Preferida *</label>
-              <select
-                value={modality}
-                onChange={(e) => setModality(e.target.value as WorkModality)}
-                className="w-full h-9 px-2.5 bg-background border border-border rounded-base text-foreground font-medium"
+            <div className="pt-2 flex justify-end">
+              <button
+                type="button"
+                onClick={handleStep1Next}
+                className="px-5 py-2.5 bg-primary hover:bg-primary-dark text-white font-bold rounded-base flex items-center gap-1.5 shadow-xs transition-all"
               >
-                <option value="Remoto">Remoto</option>
-                <option value="Híbrido">Híbrido</option>
-                <option value="Presencial">Presencial</option>
-              </select>
+                Avançar para Preferências <ArrowRight className="w-4 h-4" />
+              </button>
+            </div>
+          </div>
+        )}
+
+        {/* ==================== ETAPA 2: PREFERÊNCIAS PROFISSIONAIS ==================== */}
+        {step === 2 && (
+          <div className="space-y-4 text-xs">
+            <div className="border-b border-border pb-3">
+              <h2 className="font-heading font-bold text-base text-foreground">
+                Suas condições de trabalho
+              </h2>
+              <p className="text-muted-foreground mt-0.5">
+                A transparência salarial garante que as empresas façam propostas alinhadas à sua expectativa.
+              </p>
             </div>
 
-            <div>
-              <label className="block font-semibold text-foreground mb-1 flex items-center gap-1">
-                <MapPin className="w-3.5 h-3.5 text-primary" /> Cidade *
-              </label>
-              <input
-                type="text"
-                value={city}
-                onChange={(e) => {
-                  setCity(e.target.value);
-                  setErrorMsg('');
-                }}
-                placeholder="Ex: São Paulo"
-                className="w-full h-9 px-2.5 bg-background border border-border rounded-base text-foreground"
-              />
+            <div className="grid grid-cols-2 gap-3">
+              <div>
+                <label className="block font-semibold text-foreground mb-1">Pretensão Mínima (R$):</label>
+                <input
+                  type="number"
+                  value={salaryMin}
+                  onChange={(e) => setSalaryMin(e.target.value)}
+                  className="w-full h-10 px-3 rounded-base bg-background border border-border text-foreground font-bold text-xs"
+                />
+              </div>
+              <div>
+                <label className="block font-semibold text-foreground mb-1">Pretensão Ideal (R$):</label>
+                <input
+                  type="number"
+                  value={salaryMax}
+                  onChange={(e) => setSalaryMax(e.target.value)}
+                  className="w-full h-10 px-3 rounded-base bg-background border border-border text-foreground font-bold text-xs"
+                />
+              </div>
             </div>
 
-            <div>
-              <label className="block font-semibold text-foreground mb-1">UF *</label>
-              <input
-                type="text"
-                maxLength={2}
-                value={stateUf}
-                onChange={(e) => {
-                  setStateUf(e.target.value.toUpperCase());
-                  setErrorMsg('');
-                }}
-                placeholder="SP"
-                className="w-full h-9 px-2.5 bg-background border border-border rounded-base text-foreground uppercase"
-              />
+            <div className="grid grid-cols-2 gap-3">
+              <div>
+                <label className="block font-semibold text-foreground mb-1">Modalidade Preferida:</label>
+                <select
+                  value={modality}
+                  onChange={(e) => setModality(e.target.value as WorkModality)}
+                  className="w-full h-10 px-3 rounded-base bg-background border border-border text-foreground text-xs"
+                >
+                  <option value="Remoto">100% Remoto</option>
+                  <option value="Híbrido">Híbrido</option>
+                  <option value="Presencial">Presencial</option>
+                </select>
+              </div>
+
+              <div>
+                <label className="block font-semibold text-foreground mb-1">Disponibilidade:</label>
+                <select
+                  value={availability}
+                  onChange={(e) => setAvailability(e.target.value as Availability)}
+                  className="w-full h-10 px-3 rounded-base bg-background border border-border text-foreground text-xs"
+                >
+                  <option value="Imediata">Imediata</option>
+                  <option value="15 dias">Em 15 dias</option>
+                  <option value="30 dias">Em 30 dias</option>
+                </select>
+              </div>
             </div>
 
-            <div>
-              <label className="block font-semibold text-foreground mb-1 flex items-center gap-1">
-                <Clock className="w-3.5 h-3.5 text-primary" /> Disponibilidade *
-              </label>
-              <select
-                value={availability}
-                onChange={(e) => setAvailability(e.target.value as Availability)}
-                className="w-full h-9 px-2.5 bg-background border border-border rounded-base text-foreground font-medium"
+            <div className="grid grid-cols-3 gap-2">
+              <div className="col-span-2">
+                <label className="block font-semibold text-foreground mb-1">Cidade:</label>
+                <input
+                  type="text"
+                  value={city}
+                  onChange={(e) => setCity(e.target.value)}
+                  className="w-full h-10 px-3 rounded-base bg-background border border-border text-xs"
+                />
+              </div>
+              <div>
+                <label className="block font-semibold text-foreground mb-1">UF:</label>
+                <input
+                  type="text"
+                  maxLength={2}
+                  value={stateUf}
+                  onChange={(e) => setStateUf(e.target.value.toUpperCase())}
+                  className="w-full h-10 px-3 rounded-base bg-background border border-border text-xs text-center font-bold"
+                />
+              </div>
+            </div>
+
+            {errorMsg && (
+              <div className="p-2.5 rounded-base bg-red-50 border border-red-200 text-red-700 text-[11px] flex items-center gap-1.5">
+                <AlertCircle className="w-4 h-4 shrink-0" /> {errorMsg}
+              </div>
+            )}
+
+            <div className="pt-2 flex items-center justify-between">
+              <button
+                type="button"
+                onClick={() => setStep(1)}
+                className="px-4 py-2 border border-border hover:bg-background rounded-base font-semibold flex items-center gap-1"
               >
-                <option value="Imediata">Imediata</option>
-                <option value="15 dias">15 dias</option>
-                <option value="30 dias">30 dias</option>
-                <option value="A combinar">A combinar</option>
-              </select>
+                <ArrowLeft className="w-3.5 h-3.5" /> Voltar
+              </button>
+
+              <button
+                type="button"
+                onClick={handleStep2Next}
+                className="px-5 py-2.5 bg-primary hover:bg-primary-dark text-white font-bold rounded-base flex items-center gap-1.5 shadow-xs transition-all"
+              >
+                Revisar e Confirmar <ArrowRight className="w-4 h-4" />
+              </button>
             </div>
           </div>
+        )}
 
-          {errorMsg && (
-            <div className="p-2.5 rounded-base bg-destructive/10 border border-destructive/30 text-destructive flex items-center gap-1.5 font-medium">
-              <AlertCircle className="w-4 h-4 shrink-0" />
-              <span>{errorMsg}</span>
+        {/* ==================== ETAPA 3: CONFIRMAÇÃO & PRIVACIDADE ==================== */}
+        {step === 3 && (
+          <div className="space-y-4 text-xs">
+            <div className="border-b border-border pb-3">
+              <h2 className="font-heading font-bold text-base text-foreground">
+                Pronto para ativar seu perfil
+              </h2>
+              <p className="text-muted-foreground mt-0.5">
+                Confirme as informações abaixo. Você poderá editá-las a qualquer momento.
+              </p>
             </div>
-          )}
 
-          <div className="pt-3 border-t border-border flex flex-col sm:flex-row items-center justify-between gap-3">
-            <span className="text-[11px] text-muted-foreground">
-              🔒 Seus contatos permanecem privados até seu aceite individual (Double Opt-In LGPD).
-            </span>
-            <button
-              type="submit"
-              className="w-full sm:w-auto px-5 py-2.5 bg-primary hover:bg-primary-dark text-white font-bold rounded-base flex items-center justify-center gap-2 shadow-sm transition-all"
-            >
-              Salvar Perfil e Ir para o Dashboard <ArrowRight className="w-4 h-4" />
-            </button>
+            {/* Resumo simples */}
+            <div className="p-3.5 bg-background rounded-base border border-border space-y-2">
+              <div className="flex justify-between items-center border-b border-border pb-2">
+                <span className="text-muted-foreground">Especialidade:</span>
+                <strong className="text-foreground">{headline} ({seniority})</strong>
+              </div>
+              <div className="flex justify-between items-center border-b border-border pb-2">
+                <span className="text-muted-foreground">Pretensão Salarial:</span>
+                <strong className="text-primary">
+                  R$ {Number(salaryMin).toLocaleString('pt-BR')} a R$ {Number(salaryMax).toLocaleString('pt-BR')}
+                </strong>
+              </div>
+              <div className="flex justify-between items-center border-b border-border pb-2">
+                <span className="text-muted-foreground">Modalidade & Local:</span>
+                <span className="text-foreground font-medium">{modality} • {city}/{stateUf}</span>
+              </div>
+              <div className="pt-1">
+                <span className="text-muted-foreground block mb-1">Competências cadastradas:</span>
+                <div className="flex flex-wrap gap-1">
+                  {selectedSkills.map(s => (
+                    <span key={s} className="px-2 py-0.5 rounded bg-white border border-border text-foreground font-semibold text-[11px]">
+                      {s}
+                    </span>
+                  ))}
+                </div>
+              </div>
+            </div>
+
+            {/* Explicação clara de privacidade */}
+            <div className="p-3.5 bg-secondary/40 rounded-base border border-accent space-y-1">
+              <strong className="text-primary font-bold flex items-center gap-1.5">
+                <ShieldCheck className="w-4 h-4 text-emerald-600" /> Privacidade e Proteção de Dados (LGPD)
+              </strong>
+              <p className="text-muted-foreground leading-relaxed text-[11px]">
+                As empresas verão inicialmente apenas o seu índice de compatibilidade e síntese de competências. Seus dados de contato (nome, e-mail, telefone) <strong>só serão compartilhados se você aceitar formalmente o convite</strong> de uma vaga.
+              </p>
+            </div>
+
+            <div className="pt-2 flex items-center justify-between">
+              <button
+                type="button"
+                onClick={() => setStep(2)}
+                className="px-4 py-2 border border-border hover:bg-background rounded-base font-semibold flex items-center gap-1"
+              >
+                <ArrowLeft className="w-3.5 h-3.5" /> Voltar
+              </button>
+
+              <button
+                type="button"
+                onClick={handleFinalSubmit}
+                className="px-6 py-2.5 bg-primary hover:bg-primary-dark text-white font-bold rounded-base shadow-xs flex items-center gap-2 transition-all"
+              >
+                <Check className="w-4 h-4" /> Concluir Cadastro
+              </button>
+            </div>
           </div>
+        )}
 
-        </form>
       </div>
     </div>
   );
