@@ -2,7 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { useApp } from '../context/AppContext';
 import {
   Sparkles, CheckCircle2, AlertCircle, RefreshCw, Send,
-  Mic, FileText, RotateCcw, Brain, Edit3, ChevronRight, ChevronLeft
+  Mic, FileText, RotateCcw, Brain, Edit3, ChevronRight, ChevronLeft,
+  Briefcase, Check, Info
 } from 'lucide-react';
 import { AudioRecorder } from '../../components/AudioRecorder';
 import { api } from '../../services/api';
@@ -22,14 +23,14 @@ export const CandidateInterviewView: React.FC<CandidateInterviewViewProps> = ({
   const profile = candidates[currentCandidateId] || candidates['cand-lucas'];
   const interviewSession = interviews[currentCandidateId];
 
-  // Mode toggle: 'engine' (Motor IA Real com Áudio Whisper + Extração Verbatim) or 'guided' (5 Perguntas Comportamentais Rápidas)
+  // Mode toggle: 'engine' (Entrevista por Áudio / Texto com IA Explicável) ou 'guided' (Resumo Comportamental Rápido)
   const [interviewMode, setInterviewMode] = useState<'engine' | 'guided'>('engine');
 
   // --- ESTADOS DO MOTOR IA REAL (FASTAPI + WHISPER + QWEN3) ---
   const [apiCandidates, setApiCandidates] = useState<Candidate[]>([]);
   const [apiJobs, setApiJobs] = useState<Job[]>([]);
   const [selectedApiCandidateId, setSelectedApiCandidateId] = useState('');
-  const [interviewType, setInterviewType] = useState('TIPO_A_GERAL');
+  const [interviewType, setInterviewType] = useState<'TIPO_A_GERAL' | 'TIPO_B_VAGA'>('TIPO_A_GERAL');
   const [selectedJobId, setSelectedJobId] = useState('');
   const [activeApiSession, setActiveApiSession] = useState<InterviewSession | null>(null);
   const [apiQuestions, setApiQuestions] = useState<InterviewQuestion[]>([]);
@@ -39,6 +40,7 @@ export const CandidateInterviewView: React.FC<CandidateInterviewViewProps> = ({
   const [isEditingTranscript, setIsEditingTranscript] = useState(false);
   const [editedText, setEditedText] = useState('');
   const [savingAnswer, setSavingAnswer] = useState(false);
+  const [isStartingSession, setIsStartingSession] = useState(false);
   const [analyzing, setAnalyzing] = useState(false);
   const [apiError, setApiError] = useState<string | null>(null);
   const [apiNotice, setApiNotice] = useState<string | null>(null);
@@ -54,10 +56,9 @@ export const CandidateInterviewView: React.FC<CandidateInterviewViewProps> = ({
         setApiCandidates(cands);
         setApiJobs(jbs);
         if (cands.length > 0) {
-          // Match current persona (Lucas or Marina) to backend candidate
-          const matchPersona = currentCandidateId === 'cand-marina'
-            ? cands.find(c => c.name.toLowerCase().includes('mariana') || c.name.toLowerCase().includes('beatriz'))
-            : cands.find(c => c.name.toLowerCase().includes('lucas'));
+          // Auto-associação transparente com o perfil ativo
+          const candFirstName = profile?.name ? profile.name.split(' ')[0].toLowerCase() : 'lucas';
+          const matchPersona = cands.find(c => c.name.toLowerCase().includes(candFirstName));
           setSelectedApiCandidateId(matchPersona ? matchPersona.id : cands[0].id);
         }
         if (jbs.length > 0) setSelectedJobId(jbs[0].id);
@@ -66,7 +67,7 @@ export const CandidateInterviewView: React.FC<CandidateInterviewViewProps> = ({
         setBackendAvailable(false);
         setInterviewMode('guided');
       });
-  }, [currentCandidateId]);
+  }, [currentCandidateId, profile?.name]);
 
   const currentApiQuestion = apiQuestions[apiQuestionIdx];
 
@@ -86,9 +87,10 @@ export const CandidateInterviewView: React.FC<CandidateInterviewViewProps> = ({
 
   const handleStartApiSession = async () => {
     if (!selectedApiCandidateId) {
-      setApiError('Selecione o perfil no motor para iniciar a sessão.');
+      setApiError('Não foi possível identificar seu perfil de candidato no banco. Tente novamente.');
       return;
     }
+    setIsStartingSession(true);
     setApiError(null);
     setApiNotice(null);
     try {
@@ -102,15 +104,18 @@ export const CandidateInterviewView: React.FC<CandidateInterviewViewProps> = ({
       setApiQuestions(qs);
       setApiQuestionIdx(0);
       if (qs[0]) loadCurrentQuestionAnswer(session, qs[0].id);
+      setApiNotice('Sessão estruturada iniciada com sucesso. Você pode gravar por voz ou responder em texto.');
     } catch (err: any) {
-      setApiError(`Erro ao iniciar sessão no backend: ${err.message}`);
+      setApiError(`Não foi possível iniciar a sessão de entrevista: ${err.message}`);
+    } finally {
+      setIsStartingSession(false);
     }
   };
 
   const handleTextSubmit = async () => {
     if (!activeApiSession || !currentApiQuestion) return;
     if (textInput.trim().length < 10) {
-      setApiError('Elabore uma resposta descritiva (mínimo 10 caracteres) com fatos e contexto.');
+      setApiError('Por favor, elabore uma resposta descritiva (mínimo 10 caracteres) citando exemplos reais de atuação.');
       return;
     }
     setSavingAnswer(true);
@@ -123,7 +128,7 @@ export const CandidateInterviewView: React.FC<CandidateInterviewViewProps> = ({
       });
       setActiveAnswer(answer);
       setEditedText(answer.edited_text || answer.raw_text || '');
-      setApiNotice('Resposta registrada com sucesso no banco SQLite.');
+      setApiNotice('✓ Resposta registrada com sucesso! Você pode avançar para a próxima pergunta.');
       setActiveApiSession((prev) => {
         if (!prev) return null;
         const copy = [...(prev.answers || [])];
@@ -133,7 +138,7 @@ export const CandidateInterviewView: React.FC<CandidateInterviewViewProps> = ({
         return { ...prev, answers: copy };
       });
     } catch (err: any) {
-      setApiError(`Falha ao salvar resposta: ${err.message}`);
+      setApiError(`Falha ao registrar resposta: ${err.message}`);
     } finally {
       setSavingAnswer(false);
     }
@@ -144,7 +149,7 @@ export const CandidateInterviewView: React.FC<CandidateInterviewViewProps> = ({
     const transcribed = answer.edited_text || answer.raw_text || '';
     setTextInput(transcribed);
     setEditedText(transcribed);
-    setApiNotice('Áudio transcrito com sucesso por faster-whisper! Você pode revisar ou editar o texto antes de avançar.');
+    setApiNotice('✓ Áudio transcrito com sucesso por IA! Você pode revisar ou editar o texto livremente antes de avançar.');
     setActiveApiSession((prev) => {
       if (!prev || !currentApiQuestion) return prev;
       const copy = [...(prev.answers || [])];
@@ -158,14 +163,22 @@ export const CandidateInterviewView: React.FC<CandidateInterviewViewProps> = ({
   const handleSaveEditedTranscript = async () => {
     if (!activeAnswer) return;
     setSavingAnswer(true);
+    setApiError(null);
     try {
-      const updated = await api.editAnswerText(activeAnswer.id, editedText);
+      const updated = await api.editTranscript(activeAnswer.id, editedText);
       setActiveAnswer(updated);
-      setTextInput(updated.edited_text || '');
+      setTextInput(updated.edited_text || updated.raw_text || '');
       setIsEditingTranscript(false);
-      setApiNotice('Transcrição revisada e confirmada pelo candidato.');
+      setApiNotice('✓ Transcrição atualizada e confirmada.');
+      setActiveApiSession((prev) => {
+        if (!prev || !currentApiQuestion) return prev;
+        const copy = [...(prev.answers || [])];
+        const idx = copy.findIndex((a) => a.id === updated.id);
+        if (idx >= 0) copy[idx] = updated;
+        return { ...prev, answers: copy };
+      });
     } catch (err: any) {
-      setApiError(`Erro ao atualizar transcrição: ${err.message}`);
+      setApiError(`Falha ao salvar edição: ${err.message}`);
     } finally {
       setSavingAnswer(false);
     }
@@ -175,27 +188,27 @@ export const CandidateInterviewView: React.FC<CandidateInterviewViewProps> = ({
     if (!activeApiSession) return;
     setAnalyzing(true);
     setApiError(null);
-    setApiNotice('Executando extração estruturada (Qwen3 / Contingência) + EvidenceVerifier (validação verbatim)...');
+    setApiNotice(null);
     try {
-      const res = await api.analyzeInterview(activeApiSession.id);
-      setApiNotice(res.message);
+      const rep = await api.analyzeInterview(activeApiSession.id);
+      setApiNotice(`🎉 Relatório gerado com sucesso! ${rep.assessments_count || 0} competências analisadas com citações auditáveis.`);
       if (onNavigateToReport) {
-        onNavigateToReport(res.report_id);
+        setTimeout(() => onNavigateToReport(rep.report_id), 1200);
       }
     } catch (err: any) {
-      setApiError(`Erro na análise da entrevista: ${err.message}`);
+      setApiError(`Erro no processamento da análise: ${err.message}`);
     } finally {
       setAnalyzing(false);
     }
   };
 
-  // --- ESTADOS DO FLUXO GUIADO DE 5 PERGUNTAS ---
+  // --- MODO GUIADO (5 PERGUNTAS COMPORTAMENTAIS) ---
   const questionsLucas = [
-    { id: 1, competency: 'Comunicação', question: 'Descreva uma situação em que você precisou alinhar uma decisão técnica complexa com pessoas de produto ou design que não tinham formação técnica.' },
-    { id: 2, competency: 'Colaboração', question: 'Conte como você lidou com um desentendimento ou divergência de implementação em um pull request com outro desenvolvedor.' },
-    { id: 3, competency: 'Resolução de problemas', question: 'Descreva um bug ou incidente crítico em produção que exigiu diagnóstico rápido e qual método você aplicou para isolar a causa.' },
-    { id: 4, competency: 'Comunicação & Colaboração', question: 'Como você organiza a documentação e os testes do que produz para que outros desenvolvedores da squad possam dar manutenção sem gargalos?' },
-    { id: 5, competency: 'Resolução de problemas', question: 'Quando os prazos de entrega estão sob pressão e requisitos mudam no meio da sprint, como você reavalia as prioridades com a equipe?' }
+    { id: 1, competency: 'Comunicação', question: 'Como você costuma explicar decisões arquiteturais complexas para equipes multidisciplinares e pessoas não técnicas?' },
+    { id: 2, competency: 'Colaboração', question: 'Conte sobre uma situação de divergência técnica em um code review e como vocês chegaram a um consenso produtivo.' },
+    { id: 3, competency: 'Resolução de problemas', question: 'Descreva um bug crítico ou gargalo de performance em produção que você investigou e resolveu com sucesso.' },
+    { id: 4, competency: 'Adaptabilidade', question: 'Como você reage quando prioridades de negócio mudam subitamente no meio de uma sprint de desenvolvimento?' },
+    { id: 5, competency: 'Pensamento analítico', question: 'Como você avalia o trade-off entre entregar rápido uma funcionalidade ou refatorar o código para maior manutenibilidade?' }
   ];
 
   const questionsMarina = [
@@ -252,14 +265,14 @@ export const CandidateInterviewView: React.FC<CandidateInterviewViewProps> = ({
   return (
     <div className="space-y-6">
       
-      {/* CABEÇALHO UNIFICADO DE ENTREVISTA IA */}
+      {/* CABEÇALHO UNIFICADO */}
       <div className="bg-white p-5 rounded-base border border-border shadow-xs flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
           <div className="flex items-center gap-2 text-primary font-heading font-bold text-base">
             <Brain className="w-5 h-5 text-brandOrange" /> Entrevista de Triagem Técnica & Comportamental por IA
           </div>
           <p className="text-xs text-muted-foreground mt-1">
-            Responda por <strong>Gravação de Áudio (faster-whisper local)</strong> ou <strong>Texto</strong>. O motor extrai competências com validação estrita de citações literais (<em>EvidenceVerifier</em>) e garante o Direito de Réplica (Art. 20 LGPD).
+            Responda por <strong>Voz</strong> ou <strong>Texto</strong>. A IA analisa as respostas extraindo competências fundamentadas com direito a revisão e réplica (Art. 20 LGPD).
           </p>
         </div>
 
@@ -267,23 +280,23 @@ export const CandidateInterviewView: React.FC<CandidateInterviewViewProps> = ({
           {onNavigateToReport && (
             <button
               onClick={() => onNavigateToReport()}
-              className="px-3 py-1.5 rounded-base bg-secondary text-primary hover:opacity-90 text-xs font-bold flex items-center gap-1.5 border border-primary/20"
+              className="px-3.5 py-1.5 rounded-base bg-secondary text-primary hover:opacity-90 text-xs font-bold flex items-center gap-1.5 border border-primary/20"
             >
-              <FileText className="w-3.5 h-3.5" /> Ver Relatório (5 Estados)
+              <FileText className="w-3.5 h-3.5" /> Ver Meu Relatório
             </button>
           )}
           {onNavigateToReplica && (
             <button
               onClick={() => onNavigateToReplica()}
-              className="px-3 py-1.5 rounded-base bg-amber-100 text-amber-800 hover:opacity-90 text-xs font-bold flex items-center gap-1.5"
+              className="px-3.5 py-1.5 rounded-base bg-amber-100 text-amber-800 hover:opacity-90 text-xs font-bold flex items-center gap-1.5"
             >
-              <RotateCcw className="w-3.5 h-3.5" /> Direito de Réplica (v1→v2)
+              <RotateCcw className="w-3.5 h-3.5" /> Direito de Réplica
             </button>
           )}
         </div>
       </div>
 
-      {/* SELETOR DE MODO: MOTOR IA REAL (ÁUDIO WHISPER + BACKEND) vs SÍNTESE COMPORTAMENTAL RÁPIDA */}
+      {/* SELETOR DE MODO */}
       <div className="bg-white p-3 rounded-base border border-border shadow-xs flex flex-wrap items-center justify-between gap-3">
         <div className="flex items-center gap-2">
           <button
@@ -295,7 +308,7 @@ export const CandidateInterviewView: React.FC<CandidateInterviewViewProps> = ({
                 : 'bg-background text-muted-foreground hover:text-foreground'
             }`}
           >
-            <Mic className="w-3.5 h-3.5" /> Entrevista Completa (Áudio Whisper + Citações Verbatim)
+            <Mic className="w-3.5 h-3.5" /> Entrevista por IA (Voz ou Texto com Transcrição)
           </button>
 
           <button
@@ -307,147 +320,174 @@ export const CandidateInterviewView: React.FC<CandidateInterviewViewProps> = ({
                 : 'bg-background text-muted-foreground hover:text-foreground'
             }`}
           >
-            <Sparkles className="w-3.5 h-3.5" /> Resumo Comportamental do Perfil ({profile?.name})
+            <Sparkles className="w-3.5 h-3.5" /> Resumo Rápido de Competências
           </button>
         </div>
 
-        <span className="text-[11px] text-muted-foreground font-medium px-2">
-          {backendAvailable ? '✓ Motor FastAPI + SQLite Conectado' : 'Modo Local Ativo'}
+        <span className="text-[11px] text-muted-foreground font-medium px-2 flex items-center gap-1.5">
+          <span className={`w-2 h-2 rounded-full ${backendAvailable ? 'bg-emerald-500' : 'bg-amber-500'}`} />
+          {backendAvailable ? 'Motor de IA Conectado' : 'Modo Demonstrativo Local'}
         </span>
       </div>
 
-      {/* ==================== MODO 1: MOTOR IA REAL (ÁUDIO WHISPER + QWEN3 + EVIDENCE VERIFIER) ==================== */}
+      {/* ==================== MODO 1: MOTOR IA COM VOZ OU TEXTO ==================== */}
       {interviewMode === 'engine' && (
         <div className="bg-white p-5 rounded-base border border-border shadow-xs space-y-5">
           {apiError && (
-            <div className="p-3 rounded-base bg-red-50 border border-red-200 text-red-700 text-xs font-medium flex items-center gap-2">
+            <div className="p-3.5 rounded-base bg-red-50 border border-red-200 text-red-700 text-xs font-medium flex items-center gap-2 shadow-xs">
               <AlertCircle className="w-4 h-4 shrink-0" /> {apiError}
             </div>
           )}
           {apiNotice && (
-            <div className="p-3 rounded-base bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs font-medium flex items-center gap-2">
-              <CheckCircle2 className="w-4 h-4 shrink-0" /> {apiNotice}
+            <div className="p-3.5 rounded-base bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs font-medium flex items-center gap-2 shadow-xs">
+              <CheckCircle2 className="w-4 h-4 text-emerald-700 shrink-0" /> {apiNotice}
             </div>
           )}
 
           {!activeApiSession ? (
-            <div className="space-y-4">
+            <div className="space-y-5">
               <div className="border-b border-border pb-3">
                 <h3 className="font-heading font-bold text-sm text-foreground">
-                  Configurar Nova Sessão de Entrevista Estruturada
+                  Iniciar Nova Sessão de Entrevista
                 </h3>
                 <p className="text-xs text-muted-foreground mt-0.5">
-                  Escolha o formato da entrevista (Geral Tipo A ou Direcionada a uma Vaga Tipo B) para iniciar a coleta por voz ou texto.
+                  Conectado como <strong className="text-foreground">{profile?.name}</strong> ({profile?.headline}). Selecione o objetivo da entrevista abaixo:
                 </p>
               </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-xs">
-                <div>
-                  <label className="block font-bold text-foreground mb-1">Candidato Vinculado (SQLite):</label>
+              {/* OPÇÕES HUMANIZADAS DE OBJETIVO */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div
+                  onClick={() => setInterviewType('TIPO_A_GERAL')}
+                  className={`p-4 rounded-base border cursor-pointer transition-all space-y-1.5 ${
+                    interviewType === 'TIPO_A_GERAL'
+                      ? 'bg-secondary/40 border-primary ring-1 ring-primary/20'
+                      : 'bg-background border-border hover:bg-white'
+                  }`}
+                >
+                  <div className="flex items-center justify-between">
+                    <strong className="text-xs font-bold text-foreground flex items-center gap-2">
+                      <Sparkles className="w-4 h-4 text-brandOrange" /> Avaliação Geral de Perfil
+                    </strong>
+                    {interviewType === 'TIPO_A_GERAL' && <Check className="w-4 h-4 text-primary" />}
+                  </div>
+                  <p className="text-[11px] text-muted-foreground leading-relaxed">
+                    Perguntas abrangentes que mapeiam suas competências essenciais para ranqueamento em todas as vagas do ecossistema.
+                  </p>
+                </div>
+
+                <div
+                  onClick={() => setInterviewType('TIPO_B_VAGA')}
+                  className={`p-4 rounded-base border cursor-pointer transition-all space-y-1.5 ${
+                    interviewType === 'TIPO_B_VAGA'
+                      ? 'bg-secondary/40 border-primary ring-1 ring-primary/20'
+                      : 'bg-background border-border hover:bg-white'
+                  }`}
+                >
+                  <div className="flex items-center justify-between">
+                    <strong className="text-xs font-bold text-foreground flex items-center gap-2">
+                      <Briefcase className="w-4 h-4 text-primary" /> Focada em uma Vaga Aberta
+                    </strong>
+                    {interviewType === 'TIPO_B_VAGA' && <Check className="w-4 h-4 text-primary" />}
+                  </div>
+                  <p className="text-[11px] text-muted-foreground leading-relaxed">
+                    Perguntas adaptadas especificamente para os requisitos e desafios de uma oportunidade selecionada.
+                  </p>
+                </div>
+              </div>
+
+              {interviewType === 'TIPO_B_VAGA' && (
+                <div className="p-4 rounded-base bg-background border border-border space-y-2 text-xs">
+                  <label className="block font-bold text-foreground">Selecione a vaga desejada:</label>
                   <select
-                    value={selectedApiCandidateId}
-                    onChange={(e) => setSelectedApiCandidateId(e.target.value)}
-                    className="w-full h-9 px-3 rounded-base bg-background border border-border text-foreground font-medium"
+                    value={selectedJobId}
+                    onChange={(e) => setSelectedJobId(e.target.value)}
+                    className="w-full h-10 px-3 rounded-base bg-white border border-border text-foreground font-medium"
                   >
-                    {apiCandidates.map((c) => (
-                      <option key={c.id} value={c.id}>
-                        {c.name} ({c.declared_seniority} • {c.tech_area})
+                    {apiJobs.map((j) => (
+                      <option key={j.id} value={j.id}>
+                        {j.title} ({j.seniority} • {j.work_model} • {j.tech_vertical})
                       </option>
                     ))}
                   </select>
                 </div>
+              )}
 
-                <div>
-                  <label className="block font-bold text-foreground mb-1">Modalidade de Roteiro:</label>
-                  <select
-                    value={interviewType}
-                    onChange={(e) => setInterviewType(e.target.value)}
-                    className="w-full h-9 px-3 rounded-base bg-background border border-border text-foreground font-medium"
-                  >
-                    <option value="TIPO_A_GERAL">Tipo A — Mapeamento Geral de Competências</option>
-                    <option value="TIPO_B_VAGA">Tipo B — Entrevista Direcionada a uma Vaga</option>
-                  </select>
-                </div>
-
-                {interviewType === 'TIPO_B_VAGA' && (
-                  <div>
-                    <label className="block font-bold text-foreground mb-1">Vaga Alvo:</label>
-                    <select
-                      value={selectedJobId}
-                      onChange={(e) => setSelectedJobId(e.target.value)}
-                      className="w-full h-9 px-3 rounded-base bg-background border border-border text-foreground font-medium"
-                    >
-                      {apiJobs.map((j) => (
-                        <option key={j.id} value={j.id}>
-                          {j.title} ({j.seniority})
-                        </option>
-                      ))}
-                    </select>
-                  </div>
-                )}
-              </div>
-
-              <div className="pt-2 flex items-center gap-3">
+              <div className="pt-2">
                 <button
                   type="button"
                   onClick={handleStartApiSession}
-                  className="px-5 py-2.5 rounded-base bg-primary hover:bg-primary-dark text-white text-xs font-bold flex items-center gap-2 shadow-xs transition-all"
+                  disabled={isStartingSession}
+                  className="px-6 py-2.5 rounded-base bg-primary hover:bg-primary-dark text-white text-xs font-bold flex items-center gap-2 shadow-xs transition-all disabled:opacity-50"
                 >
-                  <Mic className="w-4 h-4" /> Iniciar Sessão de Entrevista (Áudio / Texto)
+                  {isStartingSession ? (
+                    <>Iniciando sessão...</>
+                  ) : (
+                    <>
+                      <Mic className="w-4 h-4" /> Iniciar Entrevista Agora
+                    </>
+                  )}
                 </button>
               </div>
             </div>
           ) : (
             <div className="space-y-5">
-              {/* Barra de Progresso das Perguntas */}
+              {/* PROGRESSO DA SESSÃO */}
               <div className="flex flex-wrap items-center justify-between gap-2 border-b border-border pb-3">
-                <div>
+                <div className="flex items-center gap-2">
                   <span className="text-xs font-bold text-primary uppercase tracking-wider">
                     Pergunta {apiQuestionIdx + 1} de {apiQuestions.length}
                   </span>
                   {currentApiQuestion?.category && (
-                    <span className="ml-2 text-[11px] bg-secondary text-primary px-2 py-0.5 rounded font-bold">
-                      Categoria: {currentApiQuestion.category}
+                    <span className="text-[11px] bg-secondary text-primary px-2.5 py-0.5 rounded font-bold">
+                      {currentApiQuestion.category}
                     </span>
                   )}
                 </div>
 
-                <div className="flex items-center gap-2">
+                <div className="flex items-center gap-3">
                   <span className="text-xs text-muted-foreground">
-                    Respondidas: <strong>{activeApiSession.answers?.length || 0}</strong> / {apiQuestions.length}
+                    Respondidas: <strong className="text-foreground">{activeApiSession.answers?.length || 0}</strong> de {apiQuestions.length}
                   </span>
                   <button
                     type="button"
                     onClick={() => setActiveApiSession(null)}
-                    className="text-xs text-muted-foreground hover:text-foreground underline ml-2"
+                    className="text-xs text-muted-foreground hover:text-foreground underline"
                   >
-                    Trocar Roteiro
+                    Trocar Objetivo
                   </button>
                 </div>
               </div>
 
+              {/* PERGUNTA ATIVA */}
               {currentApiQuestion && (
-                <div className="space-y-4">
-                  <div className="p-4 rounded-base bg-secondary/40 border border-border space-y-1.5">
+                <div className="space-y-5">
+                  <div className="p-4 rounded-base bg-secondary/30 border border-border space-y-1.5">
                     <h4 className="font-heading font-bold text-sm text-foreground leading-relaxed">
                       {currentApiQuestion.text}
                     </h4>
                     {currentApiQuestion.rubric && (
-                      <p className="text-[11px] text-muted-foreground">
-                        <strong>Critério de Evidência:</strong> {currentApiQuestion.rubric}
+                      <p className="text-[11px] text-muted-foreground flex items-center gap-1.5">
+                        <Info className="w-3.5 h-3.5 text-primary shrink-0" />
+                        <span><strong>Dica de Evidência:</strong> {currentApiQuestion.rubric}</span>
                       </p>
                     )}
                   </div>
 
-                  {/* GRAVADOR DE ÁUDIO WHISPER + RESPOSTA EM TEXTO */}
-                  <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 items-start">
-                    <div className="lg:col-span-5 p-4 rounded-base bg-background border border-border space-y-2">
-                      <span className="text-xs font-bold text-foreground flex items-center gap-1.5">
-                        <Mic className="w-4 h-4 text-brandOrange" /> Opção 1: Gravar Resposta em Áudio (Whisper pt-BR)
-                      </span>
-                      <p className="text-[11px] text-muted-foreground">
-                        O áudio é processado localmente pelo modelo <code>faster-whisper-small</code> (int8) e você pode revisar a transcrição.
-                      </p>
+                  {/* GRAVADOR POR VOZ & RESPOSTA EM TEXTO */}
+                  <div className="grid grid-cols-1 lg:grid-cols-12 gap-5 items-start">
+                    
+                    {/* Opção Voz */}
+                    <div className="lg:col-span-5 p-4 rounded-base bg-background border border-border space-y-2.5">
+                      <div className="space-y-0.5">
+                        <span className="text-xs font-bold text-foreground flex items-center gap-1.5">
+                          <Mic className="w-4 h-4 text-brandOrange" /> Opção 1: Responda Gravando sua Voz
+                        </span>
+                        <p className="text-[11px] text-muted-foreground">
+                          Grave seu áudio falando naturalmente. A IA transcreverá seu relato e você poderá revisar antes de confirmar.
+                        </p>
+                      </div>
+
                       <AudioRecorder
                         sessionId={activeApiSession.id}
                         questionId={currentApiQuestion.id}
@@ -455,14 +495,15 @@ export const CandidateInterviewView: React.FC<CandidateInterviewViewProps> = ({
                       />
                     </div>
 
+                    {/* Opção Texto */}
                     <div className="lg:col-span-7 p-4 rounded-base bg-background border border-border space-y-3">
                       <div className="flex items-center justify-between">
                         <span className="text-xs font-bold text-foreground">
-                          Opção 2: Digitar ou Revisar Transcrição da Resposta
+                          Opção 2: Escreva ou Revise a Transcrição
                         </span>
                         {activeAnswer && (
-                          <span className="text-[10px] bg-emerald-100 text-emerald-800 font-bold px-2 py-0.5 rounded">
-                            ✓ Resposta Salva ({activeAnswer.input_type})
+                          <span className="text-[10px] bg-emerald-100 text-emerald-800 font-bold px-2 py-0.5 rounded flex items-center gap-1">
+                            <CheckCircle2 className="w-3 h-3" /> Resposta Registrada ({activeAnswer.input_type === 'AUDIO' ? 'Por Áudio' : 'Em Texto'})
                           </span>
                         )}
                       </div>
@@ -473,8 +514,8 @@ export const CandidateInterviewView: React.FC<CandidateInterviewViewProps> = ({
                             rows={4}
                             value={textInput}
                             onChange={(e) => setTextInput(e.target.value)}
-                            placeholder="Descreva o contexto real, as ferramentas utilizadas, sua ação direta e os resultados mensuráveis..."
-                            className="w-full bg-white border border-border rounded-base p-3 text-xs text-foreground focus:ring-1 focus:ring-primary"
+                            placeholder="Descreva seu exemplo real, ferramentas utilizadas, desafios enfrentados e resultados alcançados..."
+                            className="w-full bg-white border border-border rounded-base p-3 text-xs text-foreground focus:ring-1 focus:ring-primary leading-relaxed"
                           />
                           <div className="flex items-center justify-between gap-2">
                             {activeAnswer ? (
@@ -484,9 +525,9 @@ export const CandidateInterviewView: React.FC<CandidateInterviewViewProps> = ({
                                   setEditedText(textInput);
                                   setIsEditingTranscript(true);
                                 }}
-                                className="px-3 py-1.5 rounded-base border border-border bg-white text-xs font-semibold text-foreground flex items-center gap-1"
+                                className="px-3 py-1.5 rounded-base border border-border bg-white hover:bg-background text-xs font-semibold text-foreground flex items-center gap-1"
                               >
-                                <Edit3 className="w-3.5 h-3.5" /> Editar Transcrição Confirmada
+                                <Edit3 className="w-3.5 h-3.5" /> Editar Texto
                               </button>
                             ) : <span />}
 
@@ -494,7 +535,7 @@ export const CandidateInterviewView: React.FC<CandidateInterviewViewProps> = ({
                               type="button"
                               onClick={handleTextSubmit}
                               disabled={savingAnswer}
-                              className="px-4 py-1.5 rounded-base bg-primary hover:bg-primary-dark text-white text-xs font-bold flex items-center gap-1.5"
+                              className="px-4 py-2 rounded-base bg-primary hover:bg-primary-dark text-white text-xs font-bold flex items-center gap-1.5 shadow-xs disabled:opacity-50"
                             >
                               {savingAnswer ? 'Salvando...' : 'Salvar Resposta'}
                             </button>
@@ -506,7 +547,7 @@ export const CandidateInterviewView: React.FC<CandidateInterviewViewProps> = ({
                             rows={4}
                             value={editedText}
                             onChange={(e) => setEditedText(e.target.value)}
-                            className="w-full bg-white border border-primary rounded-base p-3 text-xs text-foreground"
+                            className="w-full bg-white border border-primary rounded-base p-3 text-xs text-foreground leading-relaxed"
                           />
                           <div className="flex justify-end gap-2">
                             <button
@@ -520,9 +561,9 @@ export const CandidateInterviewView: React.FC<CandidateInterviewViewProps> = ({
                               type="button"
                               onClick={handleSaveEditedTranscript}
                               disabled={savingAnswer}
-                              className="px-4 py-1.5 rounded-base bg-primary text-white text-xs font-bold"
+                              className="px-4 py-1.5 rounded-base bg-primary text-white text-xs font-bold disabled:opacity-50"
                             >
-                              Confirmar Revisão da Transcrição
+                              {savingAnswer ? 'Atualizando...' : 'Confirmar Revisão'}
                             </button>
                           </div>
                         </div>
@@ -530,7 +571,7 @@ export const CandidateInterviewView: React.FC<CandidateInterviewViewProps> = ({
                     </div>
                   </div>
 
-                  {/* Navegação entre Perguntas e Botão de Extração de Competências */}
+                  {/* NAVEGAÇÃO ENTRE PERGUNTAS & FINALIZAÇÃO */}
                   <div className="flex flex-wrap items-center justify-between gap-3 pt-3 border-t border-border">
                     <div className="flex items-center gap-2">
                       <button
@@ -541,7 +582,7 @@ export const CandidateInterviewView: React.FC<CandidateInterviewViewProps> = ({
                           setApiQuestionIdx(prevIdx);
                           loadCurrentQuestionAnswer(activeApiSession, apiQuestions[prevIdx].id);
                         }}
-                        className="px-3 py-1.5 rounded-base border border-border text-xs font-semibold disabled:opacity-40 flex items-center gap-1"
+                        className="px-3.5 py-2 rounded-base border border-border hover:bg-background text-xs font-semibold disabled:opacity-40 flex items-center gap-1"
                       >
                         <ChevronLeft className="w-3.5 h-3.5" /> Anterior
                       </button>
@@ -554,7 +595,7 @@ export const CandidateInterviewView: React.FC<CandidateInterviewViewProps> = ({
                           setApiQuestionIdx(nextIdx);
                           loadCurrentQuestionAnswer(activeApiSession, apiQuestions[nextIdx].id);
                         }}
-                        className="px-3 py-1.5 rounded-base border border-border text-xs font-semibold disabled:opacity-40 flex items-center gap-1"
+                        className="px-3.5 py-2 rounded-base border border-border hover:bg-background text-xs font-semibold disabled:opacity-40 flex items-center gap-1"
                       >
                         Próxima <ChevronRight className="w-3.5 h-3.5" />
                       </button>
@@ -564,12 +605,12 @@ export const CandidateInterviewView: React.FC<CandidateInterviewViewProps> = ({
                       type="button"
                       onClick={handleAnalyzeApiInterview}
                       disabled={analyzing || (activeApiSession.answers?.length || 0) === 0}
-                      className="px-5 py-2 rounded-base bg-brandOrange hover:opacity-95 text-white text-xs font-bold flex items-center gap-2 shadow-xs disabled:opacity-50"
+                      className="px-5 py-2.5 rounded-base bg-brandOrange hover:opacity-95 text-white text-xs font-bold flex items-center gap-2 shadow-xs disabled:opacity-50 transition-all"
                     >
                       <Brain className="w-4 h-4" />
                       {analyzing
-                        ? 'Processando Extração & Verificando Evidências...'
-                        : 'Concluir e Gerar Relatório de Competências (IA)'}
+                        ? 'Analisando Evidências com IA...'
+                        : 'Finalizar e Gerar Relatório de Competências'}
                     </button>
                   </div>
                 </div>
@@ -579,7 +620,7 @@ export const CandidateInterviewView: React.FC<CandidateInterviewViewProps> = ({
         </div>
       )}
 
-      {/* ==================== MODO 2: RESUMO COMPORTAMENTAL DO PERFIL ==================== */}
+      {/* ==================== MODO 2: RESUMO COMPORTAMENTAL ==================== */}
       {interviewMode === 'guided' && (
         <>
           {isCompleted && (
@@ -627,7 +668,7 @@ export const CandidateInterviewView: React.FC<CandidateInterviewViewProps> = ({
                       "{item.evidence}"
                     </p>
                     <span className="text-[10px] text-muted-foreground block font-medium">
-                      Confiança observada: {item.confidence}
+                      Confiança: {item.confidence}
                     </span>
                   </div>
                 ))}
@@ -676,7 +717,7 @@ export const CandidateInterviewView: React.FC<CandidateInterviewViewProps> = ({
                     [activeQuestions[currentQuestionIndex].id]: e.target.value
                   })}
                   placeholder="Digite aqui sua resposta objetiva destacando ações práticas, ferramentas e resultados alcançados..."
-                  className="w-full bg-background border border-border rounded-base p-3 text-xs text-foreground focus:ring-1 focus:ring-primary"
+                  className="w-full bg-background border border-border rounded-base p-3 text-xs text-foreground focus:ring-1 focus:ring-primary leading-relaxed"
                 />
               </div>
 
@@ -684,7 +725,7 @@ export const CandidateInterviewView: React.FC<CandidateInterviewViewProps> = ({
                 <button
                   onClick={() => setCurrentQuestionIndex(Math.max(0, currentQuestionIndex - 1))}
                   disabled={currentQuestionIndex === 0}
-                  className="px-3 py-1.5 rounded-base border border-border text-xs text-muted-foreground hover:bg-background disabled:opacity-40"
+                  className="px-3.5 py-1.5 rounded-base border border-border text-xs text-muted-foreground hover:bg-background disabled:opacity-40"
                 >
                   Anterior
                 </button>
@@ -692,7 +733,7 @@ export const CandidateInterviewView: React.FC<CandidateInterviewViewProps> = ({
                 <button
                   onClick={handleNextOrFinish}
                   disabled={isProcessing}
-                  className="px-5 py-2 rounded-base bg-primary hover:bg-primary-dark text-white text-xs font-bold flex items-center gap-1.5 transition-all shadow-xs"
+                  className="px-5 py-2 rounded-base bg-primary hover:bg-primary-dark text-white text-xs font-bold flex items-center gap-1.5 transition-all shadow-xs disabled:opacity-50"
                 >
                   {isProcessing ? (
                     <>Processando com IA...</>

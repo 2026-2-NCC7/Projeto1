@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { Mic, Square, Play, Upload, Check, RefreshCw, AlertCircle } from 'lucide-react';
+import { Mic, Square, Play, Upload, Check, RefreshCw, AlertCircle, Volume2 } from 'lucide-react';
 import { api } from '../services/api';
 import { InterviewAnswer } from '../types';
 
@@ -55,7 +55,6 @@ export const AudioRecorder: React.FC<AudioRecorderProps> = ({
         const blob = new Blob(audioChunksRef.current, { type: 'audio/webm' });
         setAudioBlob(blob);
         setAudioUrl(URL.createObjectURL(blob));
-        // Stop audio tracks
         stream.getTracks().forEach((track) => track.stop());
       };
 
@@ -66,7 +65,7 @@ export const AudioRecorder: React.FC<AudioRecorderProps> = ({
         setTimerSeconds((prev) => prev + 1);
       }, 1000);
     } catch (err: any) {
-      setErrorMessage(`Permissão de microfone negada ou não suportada: ${err.message}`);
+      setErrorMessage(`Permissão de microfone negada ou indisponível: ${err.message}`);
     }
   };
 
@@ -98,7 +97,7 @@ export const AudioRecorder: React.FC<AudioRecorderProps> = ({
       const answer = await api.submitAudioAnswer(sessionId, questionId, audioBlob);
       onTranscriptionComplete(answer);
     } catch (err: any) {
-      setErrorMessage(`Erro ao processar áudio com faster-whisper: ${err.message}`);
+      setErrorMessage(`Não foi possível transcrever o áudio: ${err.message}`);
     } finally {
       setIsUploading(false);
     }
@@ -111,53 +110,69 @@ export const AudioRecorder: React.FC<AudioRecorderProps> = ({
   };
 
   return (
-    <div style={{ background: 'var(--bg-surface)', padding: '1.25rem', borderRadius: '12px', border: '1px solid var(--border-subtle)' }}>
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '1rem' }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-          <Mic size={18} color="var(--accent-cyan)" />
-          <span style={{ fontSize: '0.9rem', fontWeight: 600 }}>Gravação de Resposta (faster-whisper)</span>
+    <div className="bg-white p-4 rounded-base border border-border shadow-xs space-y-3">
+      <div className="flex items-center justify-between">
+        <div className="flex items-center gap-2">
+          <Mic className="w-4 h-4 text-brandOrange" />
+          <span className="text-xs font-bold text-foreground">Gravação de Voz</span>
         </div>
         {isRecording && (
-          <span style={{ color: 'var(--accent-red)', fontWeight: 700, fontSize: '0.85rem' }}>
-            ● Gravando: {formatTime(timerSeconds)}
+          <span className="text-xs font-bold text-red-600 flex items-center gap-1.5 animate-pulse">
+            <span className="w-2 h-2 rounded-full bg-red-600" />
+            Gravando: {formatTime(timerSeconds)}
           </span>
         )}
       </div>
 
       {isRecording && (
-        <div className="waveform-bars" style={{ margin: '1.5rem 0' }}>
+        <div className="flex items-center justify-center gap-1 py-3 bg-red-50/50 rounded-base border border-red-100">
           {[...Array(16)].map((_, i) => (
             <div
               key={i}
-              className="wave-bar"
-              style={{ animationDelay: `${(i % 5) * 0.15}s` }}
+              className="w-1 bg-red-500 rounded-full animate-bounce"
+              style={{
+                height: `${12 + (i % 5) * 6}px`,
+                animationDelay: `${(i % 5) * 0.12}s`,
+                animationDuration: '0.8s'
+              }}
             />
           ))}
         </div>
       )}
 
       {audioUrl && !isRecording && (
-        <div style={{ margin: '1rem 0' }}>
-          <p style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', marginBottom: '0.4rem' }}>Pré-visualização do áudio:</p>
-          <audio controls src={audioUrl} style={{ width: '100%', height: '40px' }} />
+        <div className="space-y-1.5 p-2.5 bg-background rounded-base border border-border">
+          <p className="text-[11px] font-medium text-muted-foreground flex items-center gap-1">
+            <Volume2 className="w-3.5 h-3.5 text-primary" /> Ouvir prévia gravada:
+          </p>
+          <audio controls src={audioUrl} className="w-full h-8" />
         </div>
       )}
 
       {errorMessage && (
-        <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', color: 'var(--accent-red)', fontSize: '0.85rem', margin: '0.75rem 0' }}>
-          <AlertCircle size={16} />
+        <div className="p-2.5 rounded-base bg-red-50 border border-red-200 text-red-700 text-[11px] flex items-center gap-1.5">
+          <AlertCircle className="w-4 h-4 shrink-0" />
           <span>{errorMessage}</span>
         </div>
       )}
 
-      <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.75rem', marginTop: '1rem' }}>
+      <div className="flex flex-wrap items-center gap-2 pt-1">
         {!isRecording ? (
-          <button className="btn btn-primary" onClick={startRecording} disabled={isUploading}>
-            <Mic size={16} /> Iniciar Gravação
+          <button
+            type="button"
+            onClick={startRecording}
+            disabled={isUploading}
+            className="px-3.5 py-1.5 bg-brandOrange hover:opacity-95 text-white text-xs font-bold rounded-base flex items-center gap-1.5 shadow-xs disabled:opacity-50 transition-all"
+          >
+            <Mic className="w-3.5 h-3.5" /> Começar a Gravar
           </button>
         ) : (
-          <button className="btn btn-danger" onClick={stopRecording}>
-            <Square size={16} /> Finalizar Gravação
+          <button
+            type="button"
+            onClick={stopRecording}
+            className="px-3.5 py-1.5 bg-red-600 hover:bg-red-700 text-white text-xs font-bold rounded-base flex items-center gap-1.5 shadow-xs transition-all"
+          >
+            <Square className="w-3.5 h-3.5" /> Concluir Gravação
           </button>
         )}
 
@@ -169,27 +184,28 @@ export const AudioRecorder: React.FC<AudioRecorderProps> = ({
           onChange={handleFileUpload}
         />
         <button
-          className="btn btn-secondary"
+          type="button"
           onClick={() => fileInputRef.current?.click()}
           disabled={isRecording || isUploading}
+          className="px-3 py-1.5 bg-background hover:bg-secondary/40 text-muted-foreground hover:text-foreground text-xs font-medium rounded-base border border-border flex items-center gap-1.5 disabled:opacity-50 transition-all"
         >
-          <Upload size={16} /> Enviar Arquivo de Áudio
+          <Upload className="w-3.5 h-3.5" /> Enviar Arquivo
         </button>
 
         {audioBlob && !isRecording && (
           <button
-            className="btn btn-primary"
+            type="button"
             onClick={submitAudioForTranscription}
             disabled={isUploading}
-            style={{ marginLeft: 'auto' }}
+            className="ml-auto px-4 py-1.5 bg-primary hover:bg-primary-dark text-white text-xs font-bold rounded-base flex items-center gap-1.5 shadow-xs disabled:opacity-50 transition-all"
           >
             {isUploading ? (
               <>
-                <RefreshCw size={16} className="animate-spin" /> Transcrevendo com faster-whisper...
+                <RefreshCw className="w-3.5 h-3.5 animate-spin" /> Transcrevendo com IA...
               </>
             ) : (
               <>
-                <Check size={16} /> Transcrever Áudio
+                <Check className="w-3.5 h-3.5" /> Transcrever Áudio
               </>
             )}
           </button>

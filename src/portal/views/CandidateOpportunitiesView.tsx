@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useApp } from '../context/AppContext';
-import { Sparkles, Building2, CheckCircle2, ArrowRight, Target, FileText, ShieldCheck } from 'lucide-react';
+import { Sparkles, Building2, CheckCircle2, ArrowRight, Target, FileText, ShieldCheck, Check, X, Clock, Lock, Unlock } from 'lucide-react';
 import { api } from '../../services/api';
 import { Job } from '../../types';
 
@@ -13,8 +13,18 @@ export const CandidateOpportunitiesView: React.FC<CandidateOpportunitiesViewProp
   onNavigateToProcess,
   onNavigateToReport
 }) => {
-  const { currentCandidateId, vacancies, selectionProcesses, companies } = useApp();
+  const {
+    currentCandidateId,
+    candidates,
+    vacancies,
+    selectionProcesses,
+    companies,
+    acceptOpportunity,
+    rejectOpportunity
+  } = useApp();
+
   const [apiJobs, setApiJobs] = useState<Job[]>([]);
+  const [feedbackNotice, setFeedbackNotice] = useState<string | null>(null);
 
   useEffect(() => {
     api.listJobs()
@@ -22,18 +32,32 @@ export const CandidateOpportunitiesView: React.FC<CandidateOpportunitiesViewProp
       .catch(() => setApiJobs([]));
   }, []);
 
+  const candidate = candidates[currentCandidateId] || candidates['cand-lucas'];
   const myProcesses = selectionProcesses.filter(p => p.candidateId === currentCandidateId);
+
+  const handleDirectAccept = (processId: string, vacancyTitle: string) => {
+    acceptOpportunity(processId);
+    setFeedbackNotice(`✓ Você aceitou o convite para "${vacancyTitle}". Seus dados de contato foram liberados com segurança (Double Opt-In).`);
+    setTimeout(() => setFeedbackNotice(null), 5000);
+  };
+
+  const handleDirectReject = (processId: string, vacancyTitle: string) => {
+    rejectOpportunity(processId);
+    setFeedbackNotice(`Convite para "${vacancyTitle}" recusado. Sua identidade permanece 100% protegida.`);
+    setTimeout(() => setFeedbackNotice(null), 5000);
+  };
 
   return (
     <div className="space-y-6">
       
+      {/* CABEÇALHO */}
       <div className="bg-white p-5 rounded-base border border-border shadow-xs flex flex-col sm:flex-row sm:items-center justify-between gap-3">
         <div>
           <h2 className="font-heading font-bold text-base text-foreground flex items-center gap-2">
             <Target className="w-5 h-5 text-primary" /> Vagas Compatíveis com seu Perfil (Matching Explicável 5 Etapas)
           </h2>
           <p className="text-xs text-muted-foreground mt-0.5">
-            Oportunidades ranqueadas com base nas suas Hard Skills (50%), Soft Skills (25%), Experiência (15%), Condições Objetivas (10%) e Cobertura de Avaliação.
+            Oportunidades calculadas por similaridade semântica nas suas Hard Skills (50%), Soft Skills (25%), Experiência (15%), Condições Objetivas (10%) e Cobertura de Avaliação.
           </p>
         </div>
 
@@ -47,6 +71,14 @@ export const CandidateOpportunitiesView: React.FC<CandidateOpportunitiesViewProp
         )}
       </div>
 
+      {feedbackNotice && (
+        <div className="p-3.5 rounded-base bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs font-medium flex items-center gap-2 shadow-xs transition-all">
+          <CheckCircle2 className="w-4 h-4 text-emerald-700 shrink-0" />
+          <span>{feedbackNotice}</span>
+        </div>
+      )}
+
+      {/* LISTA DE PROCESSOS SELETIVOS / VAGAS COMPATÍVEIS */}
       <div className="space-y-4">
         {myProcesses.length === 0 ? (
           <div className="p-8 text-center bg-white rounded-base border border-border text-xs text-muted-foreground">
@@ -58,11 +90,21 @@ export const CandidateOpportunitiesView: React.FC<CandidateOpportunitiesViewProp
             const company = companies.find(c => c.id === vacancy?.companyId);
             if (!vacancy) return null;
 
-            const hardScore = Math.min(100, proc.demonstrativeScore + 3);
-            const softScore = Math.max(75, proc.demonstrativeScore - 4);
-            const expScore = Math.min(100, proc.demonstrativeScore + 2);
+            // Cálculo dinâmico e coerente baseado no perfil real do candidato
+            const candSkills = candidate?.skills || [];
+            const matchedSkills = vacancy.mandatorySkills.filter(req =>
+              candSkills.some(cs => cs.name.toLowerCase().includes(req.toLowerCase()))
+            );
+            const hardScore = Math.min(100, Math.max(65, Math.round((matchedSkills.length / Math.max(1, vacancy.mandatorySkills.length)) * 100)));
+            const softScore = candidate?.interviewSummary?.length ? 90 : 82;
+            const expYears = candSkills.reduce((acc, curr) => acc + (curr.years || 0), 0) / Math.max(1, candSkills.length);
+            const expScore = Math.min(100, Math.max(70, Math.round(expYears >= 4 ? 95 : expYears >= 2 ? 85 : 75)));
             const condScore = 100;
-            const coverageScore = currentCandidateId === 'cand-marina' ? 92 : 85;
+            const coverageScore = candSkills.length >= 3 ? 92 : 80;
+
+            const isPendingOptIn = proc.doubleOptInStatus === 'aguardando';
+            const isAccepted = proc.doubleOptInStatus === 'aceito';
+            const isRejected = proc.doubleOptInStatus === 'recusado';
 
             return (
               <div key={proc.id} className="bg-white p-5 rounded-base border border-border shadow-xs space-y-4">
@@ -73,11 +115,11 @@ export const CandidateOpportunitiesView: React.FC<CandidateOpportunitiesViewProp
                       <h3 className="font-heading font-bold text-sm text-foreground">{vacancy.title}</h3>
                       {vacancy.isUrgentMatchExpress && (
                         <span className="text-[10px] bg-brandOrange/15 text-brandOrange font-bold px-2 py-0.5 rounded">
-                          Match Express
+                          Match Express Prioritário
                         </span>
                       )}
                       <span className="text-[10px] bg-secondary text-primary font-bold px-2 py-0.5 rounded">
-                        Cobertura de Avaliação: {coverageScore}%
+                        Cobertura IA: {coverageScore}%
                       </span>
                     </div>
                     <p className="text-xs text-muted-foreground mt-0.5 flex items-center gap-1.5">
@@ -118,7 +160,7 @@ export const CandidateOpportunitiesView: React.FC<CandidateOpportunitiesViewProp
                   </div>
                 </div>
 
-                {/* Faixa Salarial e Status */}
+                {/* Faixa Salarial e Status do Double Opt-in */}
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
                   <div className="p-3 rounded-base bg-background border border-border">
                     <strong className="text-[11px] text-muted-foreground block mb-1">Faixa Salarial Transparente:</strong>
@@ -127,15 +169,18 @@ export const CandidateOpportunitiesView: React.FC<CandidateOpportunitiesViewProp
                     </span>
                   </div>
 
-                  <div className="p-3 rounded-base bg-background border border-border">
-                    <strong className="text-[11px] text-muted-foreground block mb-1">Status do Double Opt-In (LGPD):</strong>
-                    <span className={`inline-block font-bold text-xs px-2 py-0.5 rounded ${
-                      proc.doubleOptInStatus === 'aceito' ? 'bg-emerald-100 text-emerald-800' :
-                      proc.doubleOptInStatus === 'recusado' ? 'bg-red-100 text-red-800' : 'bg-secondary text-primary'
-                    }`}>
-                      {proc.doubleOptInStatus === 'aceito' ? '✓ Aceito (Dados Liberados à Empresa)' :
-                       proc.doubleOptInStatus === 'recusado' ? '✕ Recusado por você' : '⏳ Aguardando seu Aceite (Identidade Oculta)'}
-                    </span>
+                  <div className="p-3 rounded-base bg-background border border-border flex items-center justify-between">
+                    <div>
+                      <strong className="text-[11px] text-muted-foreground block mb-1">Status do Double Opt-In (LGPD):</strong>
+                      <span className={`inline-flex items-center gap-1 font-bold text-xs px-2.5 py-1 rounded ${
+                        isAccepted ? 'bg-emerald-100 text-emerald-800' :
+                        isRejected ? 'bg-red-100 text-red-800' : 'bg-amber-100 text-amber-900'
+                      }`}>
+                        {isAccepted && <><Unlock className="w-3.5 h-3.5" /> Aceito (Contatos Liberados à Empresa)</>}
+                        {isRejected && <><X className="w-3.5 h-3.5" /> Recusado por você</>}
+                        {isPendingOptIn && <><Clock className="w-3.5 h-3.5 text-amber-700" /> Aguardando sua decisão</>}
+                      </span>
+                    </div>
                   </div>
                 </div>
 
@@ -149,7 +194,37 @@ export const CandidateOpportunitiesView: React.FC<CandidateOpportunitiesViewProp
                   </p>
                 </div>
 
-                {/* Botões de Ação */}
+                {/* AÇÃO DIRETA DE DOUBLE OPT-IN SE PENDENTE */}
+                {isPendingOptIn && (
+                  <div className="p-3.5 rounded-base bg-secondary/60 border border-accent flex flex-col md:flex-row items-start md:items-center justify-between gap-3">
+                    <div className="space-y-0.5">
+                      <strong className="text-xs text-primary font-bold flex items-center gap-1.5">
+                        <Lock className="w-3.5 h-3.5 text-brandOrange" /> Confirmação Imediata de Interesse
+                      </strong>
+                      <p className="text-[11px] text-muted-foreground">
+                        A empresa visualizou apenas seu perfil anônimo e quer convidá-lo. Deseja autorizar o compartilhamento seguro de contatos?
+                      </p>
+                    </div>
+
+                    <div className="flex items-center gap-2 shrink-0">
+                      <button
+                        onClick={() => handleDirectAccept(proc.id, vacancy.title)}
+                        className="px-3.5 py-2 bg-primary hover:bg-primary-dark text-white text-xs font-bold rounded-base flex items-center gap-1.5 shadow-xs transition-all"
+                      >
+                        <Check className="w-3.5 h-3.5" /> Aceitar Oportunidade
+                      </button>
+
+                      <button
+                        onClick={() => handleDirectReject(proc.id, vacancy.title)}
+                        className="px-3 py-2 bg-white hover:bg-red-50 text-destructive border border-destructive/30 text-xs font-semibold rounded-base flex items-center gap-1 transition-all"
+                      >
+                        <X className="w-3.5 h-3.5" /> Recusar
+                      </button>
+                    </div>
+                  </div>
+                )}
+
+                {/* Competências e Navegação para o Funil Completo */}
                 <div className="flex flex-wrap justify-between items-center gap-2 pt-1">
                   <div className="flex flex-wrap gap-1.5">
                     {vacancy.mandatorySkills.map((sk) => (
@@ -161,9 +236,9 @@ export const CandidateOpportunitiesView: React.FC<CandidateOpportunitiesViewProp
 
                   <button
                     onClick={onNavigateToProcess}
-                    className="px-4 py-2 bg-primary hover:bg-primary-dark text-white text-xs font-bold rounded-base flex items-center gap-1.5 transition-all shadow-xs"
+                    className="text-xs font-bold text-primary hover:underline flex items-center gap-1"
                   >
-                    Ver Funil 8 Etapas & Decidir Opt-In <ArrowRight className="w-3.5 h-3.5" />
+                    Ver Funil de 8 Etapas e Histórico <ArrowRight className="w-3.5 h-3.5" />
                   </button>
                 </div>
 

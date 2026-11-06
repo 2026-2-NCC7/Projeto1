@@ -54,6 +54,7 @@ export const CompanyDashboardView: React.FC<CompanyDashboardViewProps> = ({
   const [isUrgentMatchExpress, setIsUrgentMatchExpress] = useState(true);
   const [formError, setFormError] = useState('');
   const [apiNotice, setApiNotice] = useState<string | null>(null);
+  const [isSavingVacancy, setIsSavingVacancy] = useState(false);
 
   const [apiJobs, setApiJobs] = useState<Job[]>([]);
   const [apiCompanies, setApiCompanies] = useState<ApiCompany[]>([]);
@@ -91,6 +92,9 @@ export const CompanyDashboardView: React.FC<CompanyDashboardViewProps> = ({
     const mandatory = mandatorySkillsInput.split(',').map(s => s.trim()).filter(Boolean);
     const softs = softSkillsInput.split(',').map(s => s.trim()).filter(Boolean);
 
+    setIsSavingVacancy(true);
+    setFormError('');
+
     createVacancy({
       title: title.trim(),
       area,
@@ -108,7 +112,22 @@ export const CompanyDashboardView: React.FC<CompanyDashboardViewProps> = ({
       isUrgentMatchExpress
     });
 
-    // Sincroniza também no Backend FastAPI (SQLite) para o Motor de Matching 5 Etapas
+    // Mapeamento dinâmico e coerente de competências para o Motor de IA (SQLite)
+    const dynamicBackendSkills = [
+      ...(mandatory.length ? mandatory : ['React', 'TypeScript']).map((sk) => ({
+        skill_id: `hard-${sk.toLowerCase().replace(/[^a-z0-9]/g, '-')}`,
+        is_mandatory: true,
+        min_level: seniority === 'Sênior' ? 4 : seniority === 'Pleno' ? 3 : 2,
+        weight: 2.0
+      })),
+      ...(softs.length ? softs : ['Comunicação']).map((sk) => ({
+        skill_id: `soft-${sk.toLowerCase().replace(/[^a-z0-9]/g, '-')}`,
+        is_mandatory: false,
+        min_level: 3,
+        weight: 1.0
+      }))
+    ];
+
     try {
       let targetCompId = apiCompanies[0]?.id;
       if (!targetCompId) {
@@ -130,22 +149,19 @@ export const CompanyDashboardView: React.FC<CompanyDashboardViewProps> = ({
         min_salary: min,
         max_salary: max,
         min_experience_years: seniority === 'Sênior' ? 5.0 : seniority === 'Pleno' ? 3.0 : 1.0,
-        skills: [
-          { skill_id: 'hard-python', is_mandatory: true, min_level: 3, weight: 2.0 },
-          { skill_id: 'hard-react', is_mandatory: true, min_level: 3, weight: 1.5 },
-          { skill_id: 'soft-comunicacao', is_mandatory: true, min_level: 3, weight: 1.0 }
-        ]
+        skills: dynamicBackendSkills
       });
       const updatedJobs = await api.listJobs();
       setApiJobs(updatedJobs);
       setApiNotice(`Vaga "${title.trim()}" publicada e sincronizada com o Motor de Matching IA (SQLite)!`);
     } catch {
       setApiNotice(`Vaga "${title.trim()}" publicada com sucesso!`);
+    } finally {
+      setIsSavingVacancy(false);
+      setTitle('');
+      setFormError('');
+      setShowNewVacancyModal(false);
     }
-
-    setTitle('');
-    setFormError('');
-    setShowNewVacancyModal(false);
   };
 
   return (
@@ -547,15 +563,23 @@ export const CompanyDashboardView: React.FC<CompanyDashboardViewProps> = ({
                 <button
                   type="button"
                   onClick={() => setShowNewVacancyModal(false)}
-                  className="px-4 py-2 rounded-base border border-border text-muted-foreground hover:bg-background"
+                  disabled={isSavingVacancy}
+                  className="px-4 py-2 rounded-base border border-border text-muted-foreground hover:bg-background disabled:opacity-50"
                 >
                   Cancelar
                 </button>
                 <button
                   type="submit"
-                  className="px-4 py-2 rounded-base bg-primary hover:bg-primary-dark text-white font-bold flex items-center gap-1.5 shadow-xs"
+                  disabled={isSavingVacancy}
+                  className="px-4 py-2 rounded-base bg-primary hover:bg-primary-dark text-white font-bold flex items-center gap-1.5 shadow-xs disabled:opacity-50 transition-all"
                 >
-                  <CheckCircle2 className="w-4 h-4" /> Publicar e Sincronizar com Motor IA
+                  {isSavingVacancy ? (
+                    <>Publicando vaga...</>
+                  ) : (
+                    <>
+                      <CheckCircle2 className="w-4 h-4" /> Publicar e Sincronizar com Motor IA
+                    </>
+                  )}
                 </button>
               </div>
             </form>

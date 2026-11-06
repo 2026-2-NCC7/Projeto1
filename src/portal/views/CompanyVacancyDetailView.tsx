@@ -56,6 +56,8 @@ export const CompanyVacancyDetailView: React.FC<CompanyVacancyDetailViewProps> =
   const candidateInterview = selectedCandidate ? interviews[selectedCandidate.id] : null;
 
   const [noteDraft, setNoteDraft] = useState(selectedProcess?.internalNotes || '');
+  const [showRejectConfirm, setShowRejectConfirm] = useState(false);
+  const [actionFeedback, setActionFeedback] = useState<string | null>(null);
 
   if (!vacancy) {
     return <div className="p-4 text-xs">Vaga não encontrada.</div>;
@@ -386,19 +388,30 @@ export const CompanyVacancyDetailView: React.FC<CompanyVacancyDetailViewProps> =
                   </button>
 
                   <button
-                    onClick={() => approveCandidate(selectedProcess.id)}
-                    className="px-4 py-1.5 rounded-base bg-emerald-600 hover:bg-emerald-700 text-white font-bold flex items-center gap-1 shadow-xs"
+                    onClick={() => {
+                      approveCandidate(selectedProcess.id);
+                      setActionFeedback('✓ Candidato aprovado no processo seletivo!');
+                      setTimeout(() => setActionFeedback(null), 4000);
+                    }}
+                    className="px-4 py-1.5 rounded-base bg-emerald-600 hover:bg-emerald-700 text-white font-bold flex items-center gap-1 shadow-xs transition-all"
                   >
                     <CheckCircle2 className="w-3.5 h-3.5" /> Aprovar Candidato
                   </button>
 
                   <button
-                    onClick={() => rejectCandidate(selectedProcess.id)}
-                    className="px-3 py-1.5 rounded-base text-destructive hover:bg-destructive/10 border border-destructive/30 font-bold"
+                    onClick={() => setShowRejectConfirm(true)}
+                    className="px-3 py-1.5 rounded-base text-destructive hover:bg-destructive/10 border border-destructive/30 font-bold transition-all"
                   >
                     Recusar Candidato
                   </button>
                 </div>
+
+                {actionFeedback && (
+                  <div className="p-2.5 rounded-base bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs font-semibold flex items-center gap-1.5">
+                    <CheckCircle2 className="w-4 h-4 text-emerald-700" />
+                    <span>{actionFeedback}</span>
+                  </div>
+                )}
 
                 <div className="flex items-center justify-between pt-2">
                   <button
@@ -442,6 +455,41 @@ export const CompanyVacancyDetailView: React.FC<CompanyVacancyDetailViewProps> =
         </div>
 
       </div>
+
+      {/* MODAL DE CONFIRMAÇÃO DE RECUSA */}
+      {showRejectConfirm && selectedProcess && (
+        <div className="fixed inset-0 z-50 bg-black/40 flex items-center justify-center p-4">
+          <div className="bg-white rounded-base border border-border p-5 max-w-sm w-full shadow-lg space-y-3">
+            <h4 className="font-heading font-bold text-sm text-destructive flex items-center gap-1.5">
+              <AlertCircle className="w-4 h-4" /> Recusar Candidato
+            </h4>
+            <p className="text-xs text-muted-foreground leading-relaxed">
+              Tem certeza que deseja recusar este candidato para a vaga <strong>"{vacancy.title}"</strong>? O processo seletivo deste talento será encerrado nesta vaga.
+            </p>
+            <div className="flex justify-end gap-2 pt-2">
+              <button
+                type="button"
+                onClick={() => setShowRejectConfirm(false)}
+                className="px-3.5 py-1.5 text-xs text-muted-foreground hover:bg-background rounded-base border border-border"
+              >
+                Voltar
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  rejectCandidate(selectedProcess.id);
+                  setShowRejectConfirm(false);
+                  setActionFeedback('Candidato recusado no processo.');
+                  setTimeout(() => setActionFeedback(null), 4000);
+                }}
+                className="px-4 py-1.5 text-xs bg-destructive text-white font-bold rounded-base hover:opacity-90 shadow-xs"
+              >
+                Confirmar Recusa
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
     </div>
   );

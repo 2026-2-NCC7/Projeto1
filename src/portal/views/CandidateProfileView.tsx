@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useApp } from '../context/AppContext';
 import { CandidateSkill, SkillMastery } from '../types';
-import { Plus, Trash2, CheckCircle2, AlertCircle, HelpCircle } from 'lucide-react';
+import { Plus, Trash2, CheckCircle2, AlertCircle, HelpCircle, AlertTriangle } from 'lucide-react';
 
 const SKILL_CATALOG_SAMPLES = [
   // Linguagens
@@ -53,6 +53,10 @@ export const CandidateProfileView: React.FC = () => {
   // Adesão à comunidade
   const [showCommunityModal, setShowCommunityModal] = useState(false);
 
+  // Confirmação de exclusão e feedback
+  const [skillToDelete, setSkillToDelete] = useState<CandidateSkill | null>(null);
+  const [profileNotice, setProfileNotice] = useState<string | null>(null);
+
   if (!profile) {
     return <div className="p-4 text-xs text-muted-foreground">Perfil não localizado para a persona ativa.</div>;
   }
@@ -75,34 +79,48 @@ export const CandidateProfileView: React.FC = () => {
 
   const handleAddSkill = () => {
     const catalogItem = SKILL_CATALOG_SAMPLES.find(s => s.name === selectedSkillName);
+    const safeYears = Math.max(0, Number(experienceYears) || 0);
+    const safeMonths = Math.max(0, Math.min(11, Number(experienceMonths) || 0));
+
     const newSkill: CandidateSkill = {
       id: `sk-${Date.now()}`,
       name: selectedSkillName,
       category: catalogItem?.category || 'Geral',
       mastery: selectedMastery,
-      years: Number(experienceYears),
-      months: Number(experienceMonths)
+      years: safeYears,
+      months: safeMonths
     };
     addCandidateSkill(currentCandidateId, newSkill);
+    setProfileNotice(`✓ Habilidade "${selectedSkillName}" adicionada com sucesso ao seu perfil técnico.`);
+    setTimeout(() => setProfileNotice(null), 4000);
   };
 
   const handleSuggestCustom = () => {
     if (!customSkillInput.trim()) return;
     suggestNewSkill(customSkillInput);
-    // Adiciona como habilidade do perfil marcada como pendente de revisão
     const newSkill: CandidateSkill = {
       id: `sk-custom-${Date.now()}`,
       name: customSkillInput.trim(),
       category: 'Especialidade Sugerida',
       mastery: selectedMastery,
-      years: Number(experienceYears),
-      months: Number(experienceMonths),
+      years: Math.max(0, Number(experienceYears) || 0),
+      months: Math.max(0, Math.min(11, Number(experienceMonths) || 0)),
       isCustom: true,
       status: 'pendente_revisao'
     };
     addCandidateSkill(currentCandidateId, newSkill);
     setCustomSkillInput('');
     setShowCustomModal(false);
+    setProfileNotice(`✓ Habilidade sugerida "${newSkill.name}" adicionada ao seu perfil.`);
+    setTimeout(() => setProfileNotice(null), 4000);
+  };
+
+  const confirmDeleteSkill = () => {
+    if (!skillToDelete) return;
+    removeCandidateSkill(currentCandidateId, skillToDelete.id);
+    setProfileNotice(`Habilidade "${skillToDelete.name}" removida do seu perfil.`);
+    setSkillToDelete(null);
+    setTimeout(() => setProfileNotice(null), 4000);
   };
 
   const handleConfirmCommunity = () => {
@@ -114,6 +132,8 @@ export const CandidateProfileView: React.FC = () => {
       links: true
     });
     setShowCommunityModal(false);
+    setProfileNotice('🎉 Perfil na Comunidade Técnica criado com sucesso!');
+    setTimeout(() => setProfileNotice(null), 4000);
   };
 
   return (
@@ -139,63 +159,78 @@ export const CandidateProfileView: React.FC = () => {
                 </span>
               </div>
               <p className="text-xs text-muted-foreground mt-0.5">{profile.headline}</p>
-              <p className="text-[11px] text-muted-foreground">{profile.city}/{profile.state} • Disponibilidade: {profile.availability}</p>
+              <p className="text-[11px] text-muted-foreground mt-0.5">
+                📍 {profile.city}/{profile.state} • Disponibilidade: <strong>{profile.availability}</strong>
+              </p>
             </div>
           </div>
 
-          {/* Barra de Completude */}
-          <div className="w-full sm:w-56 p-3 bg-background rounded-base border border-border text-center sm:text-right">
-            <div className="flex justify-between items-center text-xs mb-1">
-              <span className="text-muted-foreground font-medium">Completude do Perfil:</span>
-              <strong className="text-primary font-bold">{completenessPercent}%</strong>
+          <div className="w-full sm:w-auto text-left sm:text-right shrink-0">
+            <span className="text-xs font-bold text-foreground">Completude do Perfil</span>
+            <div className="w-full sm:w-36 h-2 bg-background border border-border rounded-full overflow-hidden mt-1">
+              <div 
+                className="h-full bg-primary rounded-full transition-all duration-500"
+                style={{ width: `${completenessPercent}%` }}
+              />
             </div>
-            <div className="w-full h-2 bg-muted rounded-full overflow-hidden">
-              <div className="h-full bg-primary transition-all duration-300" style={{ width: `${completenessPercent}%` }} />
-            </div>
-            <span className="text-[10px] text-muted-foreground mt-1 block">Nenhum campo bloqueia seu cadastro inicial</span>
+            <span className="text-[10px] text-muted-foreground mt-0.5 block">{completenessPercent}% das informações preenchidas</span>
           </div>
         </div>
 
-        {/* Chamada para Comunidade (se não for membro) */}
-        {!profile.isCommunityMember && (
-          <div className="mt-4 p-3 rounded-base bg-secondary/70 border border-accent flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2">
-            <div>
-              <strong className="text-xs text-primary font-bold block">Participe da Comunidade Técnica Q.I.</strong>
-              <span className="text-[11px] text-muted-foreground">Compartilhe conhecimento técnico, conecte-se com pares e responda dúvidas. Sem expor dados de recrutamento.</span>
-            </div>
-            <button
-              onClick={() => setShowCommunityModal(true)}
-              className="px-3 py-1.5 rounded-base bg-primary text-white text-xs font-bold hover:bg-primary-dark transition-all shrink-0"
-            >
-              Participar da Comunidade
-            </button>
+        {/* FEEDBACK NOTICE */}
+        {profileNotice && (
+          <div className="mt-4 p-3 rounded-base bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs font-medium flex items-center gap-2 shadow-xs transition-all">
+            <CheckCircle2 className="w-4 h-4 text-emerald-700 shrink-0" />
+            <span>{profileNotice}</span>
           </div>
         )}
       </div>
 
-      {/* MÓDULO DE HARD SKILLS: ADIÇÃO, NÍVEL E EXPERIÊNCIA */}
+      {/* ADESÃO À COMUNIDADE (SE AINDA NÃO FOR MEMBRO) */}
+      {!profile.joinedCommunity && (
+        <div className="bg-secondary/40 border border-accent p-4 rounded-base flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+          <div className="space-y-0.5">
+            <strong className="text-xs font-bold text-primary flex items-center gap-1.5">
+              🚀 Participe da Comunidade Técnica Q.I. Tech
+            </strong>
+            <p className="text-xs text-foreground">
+              Conecte-se com outros desenvolvedores, compartilhe artigos e participe do programa "Quem Indica" para acumular Estalecas Q.I.
+            </p>
+          </div>
+          <button
+            onClick={() => setShowCommunityModal(true)}
+            className="px-4 py-2 bg-primary hover:bg-primary-dark text-white text-xs font-bold rounded-base shadow-xs shrink-0 transition-all"
+          >
+            Ativar Perfil Comunitário
+          </button>
+        </div>
+      )}
+
+      {/* GESTÃO DE HARD SKILLS */}
       <div className="bg-white p-5 rounded-base border border-border shadow-xs space-y-4">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-border pb-3">
           <div>
-            <h3 className="font-heading font-bold text-sm text-foreground">Catálogo de Hard Skills</h3>
-            <p className="text-[11px] text-muted-foreground">Selecione suas tecnologias, nível de domínio e tempo real de experiência comprovada.</p>
+            <h3 className="font-heading font-bold text-sm text-foreground">Habilidades Técnicas (Hard Skills)</h3>
+            <p className="text-xs text-muted-foreground">
+              Cadastre suas tecnologias e frameworks com nível de domínio e tempo de prática comprovado.
+            </p>
           </div>
           <button
             onClick={() => setShowCustomModal(true)}
-            className="text-xs text-primary font-bold hover:underline flex items-center gap-1 self-start sm:self-auto"
+            className="text-xs text-primary font-bold hover:underline self-start sm:self-auto"
           >
-            <HelpCircle className="w-3.5 h-3.5" /> Não encontrei minha habilidade
+            + Sugerir habilidade fora da lista
           </button>
         </div>
 
-        {/* Formulário de Inclusão Rápida */}
-        <div className="grid grid-cols-1 sm:grid-cols-4 gap-3 bg-background p-3 rounded-base border border-border text-xs">
+        {/* Formulário de Adição Rápida */}
+        <div className="grid grid-cols-1 sm:grid-cols-4 gap-3 bg-background p-4 rounded-base border border-border text-xs">
           <div>
-            <label className="block text-muted-foreground font-medium mb-1">Tecnologia/Habilidade:</label>
+            <label className="block text-muted-foreground font-medium mb-1">Tecnologia do Catálogo:</label>
             <select
               value={selectedSkillName}
               onChange={(e) => setSelectedSkillName(e.target.value)}
-              className="w-full h-9 bg-white border border-border rounded-base px-2 text-foreground focus:ring-1 focus:ring-primary"
+              className="w-full h-9 bg-white border border-border rounded-base px-2.5 text-foreground font-medium"
             >
               {SKILL_CATALOG_SAMPLES.map(s => (
                 <option key={s.name} value={s.name}>{s.name} ({s.category})</option>
@@ -204,14 +239,13 @@ export const CandidateProfileView: React.FC = () => {
           </div>
 
           <div>
-            <label className="block text-muted-foreground font-medium mb-1">Domínio Prático:</label>
+            <label className="block text-muted-foreground font-medium mb-1">Nível de Domínio:</label>
             <select
               value={selectedMastery}
               onChange={(e) => setSelectedMastery(e.target.value as SkillMastery)}
-              className="w-full h-9 bg-white border border-border rounded-base px-2 text-foreground focus:ring-1 focus:ring-primary"
+              className="w-full h-9 bg-white border border-border rounded-base px-2.5 text-foreground font-medium"
             >
               <option value="Iniciante">Iniciante</option>
-              <option value="Básico">Básico</option>
               <option value="Intermediário">Intermediário</option>
               <option value="Avançado">Avançado</option>
               <option value="Especialista">Especialista</option>
@@ -219,14 +253,14 @@ export const CandidateProfileView: React.FC = () => {
           </div>
 
           <div>
-            <label className="block text-muted-foreground font-medium mb-1">Experiência (Anos / Meses):</label>
+            <label className="block text-muted-foreground font-medium mb-1">Tempo de Experiência:</label>
             <div className="flex gap-2">
               <input
                 type="number"
                 min="0"
-                max="30"
+                max="40"
                 value={experienceYears}
-                onChange={(e) => setExperienceYears(Number(e.target.value))}
+                onChange={(e) => setExperienceYears(Math.max(0, Number(e.target.value) || 0))}
                 className="w-1/2 h-9 bg-white border border-border rounded-base px-2 text-foreground"
                 placeholder="Anos"
               />
@@ -235,7 +269,7 @@ export const CandidateProfileView: React.FC = () => {
                 min="0"
                 max="11"
                 value={experienceMonths}
-                onChange={(e) => setExperienceMonths(Number(e.target.value))}
+                onChange={(e) => setExperienceMonths(Math.max(0, Math.min(11, Number(e.target.value) || 0)))}
                 className="w-1/2 h-9 bg-white border border-border rounded-base px-2 text-foreground"
                 placeholder="Meses"
               />
@@ -245,7 +279,7 @@ export const CandidateProfileView: React.FC = () => {
           <div className="flex items-end">
             <button
               onClick={handleAddSkill}
-              className="w-full h-9 bg-primary hover:bg-primary-dark text-white font-bold rounded-base flex items-center justify-center gap-1.5 transition-all"
+              className="w-full h-9 bg-primary hover:bg-primary-dark text-white font-bold rounded-base flex items-center justify-center gap-1.5 transition-all shadow-xs"
             >
               <Plus className="w-4 h-4" /> Adicionar Habilidade
             </button>
@@ -295,8 +329,8 @@ export const CandidateProfileView: React.FC = () => {
                     <td className="p-2.5 text-foreground">{sk.years} ano(s) {sk.months ? `e ${sk.months} m.` : ''}</td>
                     <td className="p-2.5 text-right">
                       <button
-                        onClick={() => removeCandidateSkill(currentCandidateId, sk.id)}
-                        className="text-destructive hover:bg-destructive/10 p-1 rounded"
+                        onClick={() => setSkillToDelete(sk)}
+                        className="text-destructive hover:bg-destructive/10 p-1 rounded transition-colors"
                         title="Remover habilidade"
                       >
                         <Trash2 className="w-3.5 h-3.5" />
@@ -373,6 +407,36 @@ export const CandidateProfileView: React.FC = () => {
           </button>
         </div>
       </div>
+
+      {/* DIÁLOGO DE CONFIRMAÇÃO DE EXCLUSÃO DE SKILL */}
+      {skillToDelete && (
+        <div className="fixed inset-0 z-50 bg-black/40 flex items-center justify-center p-4">
+          <div className="bg-white rounded-base border border-border p-5 max-w-sm w-full shadow-lg space-y-3">
+            <div className="flex items-center gap-2 text-destructive font-bold text-sm">
+              <AlertTriangle className="w-4 h-4" /> Confirmar Remoção
+            </div>
+            <p className="text-xs text-muted-foreground leading-relaxed">
+              Tem certeza que deseja remover <strong>{skillToDelete.name}</strong> do seu perfil? Esta alteração impactará seu score de compatibilidade nas vagas abertas.
+            </p>
+            <div className="flex justify-end gap-2 pt-2">
+              <button
+                type="button"
+                onClick={() => setSkillToDelete(null)}
+                className="px-3.5 py-1.5 text-xs text-muted-foreground hover:bg-background rounded-base border border-border"
+              >
+                Cancelar
+              </button>
+              <button
+                type="button"
+                onClick={confirmDeleteSkill}
+                className="px-4 py-1.5 text-xs bg-destructive text-white font-bold rounded-base hover:opacity-90 shadow-xs"
+              >
+                Sim, Remover
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* MODAL: SUGERIR HABILIDADE INEXISTENTE */}
       {showCustomModal && (
