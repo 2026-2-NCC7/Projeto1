@@ -1,12 +1,12 @@
 import React, { useEffect, useState } from 'react';
-import { CheckCircle, AlertTriangle, Cpu, Database, ShieldCheck, Mic, Brain, Sparkles } from 'lucide-react';
 import { api } from '../services/api';
 import { HealthResponse } from '../types';
 import { useApp } from '../portal/context/AppContext';
+import { RefreshCw, Activity, User, Building2, Users, Shield } from 'lucide-react';
 
 export const EcosystemTopBar: React.FC = () => {
   const [health, setHealth] = useState<HealthResponse | null>(null);
-  const { activePersona, session, isAuthenticated, setActivePersona } = useApp();
+  const { activePersona, session, isAuthenticated, setActivePersona, resetAllData } = useApp();
 
   useEffect(() => {
     api.getHealth()
@@ -17,220 +17,92 @@ export const EcosystemTopBar: React.FC = () => {
       api.getHealth()
         .then(setHealth)
         .catch(() => setHealth(null));
-    }, 15000);
+    }, 20000);
 
     return () => clearInterval(interval);
   }, []);
 
-  const role = session?.role;
-  const activeRoleBadge = !isAuthenticated
-    ? 'Visitante / Autenticação'
-    : role === 'empresa' || activePersona === 'empresa-orion'
-      ? 'Perfil: Empresa Contratante (B2B)'
-      : role === 'admin' || activePersona === 'admin-qitech'
-        ? 'Perfil: Governança, Admin & Banca TCC'
-        : activePersona === 'comunidade-rafael'
-          ? 'Perfil: Membro da Comunidade Técnica'
-          : 'Perfil: Candidato / Profissional';
+  const isOnline = Boolean(health?.status === 'ok');
 
   return (
-    <div
-      style={{
-        background: '#040814',
-        borderBottom: '1px solid rgba(255, 255, 255, 0.1)',
-        padding: '0.4rem 1.25rem',
-        fontSize: '0.75rem',
-        color: '#94A3B8',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'space-between',
-        flexWrap: 'wrap',
-        gap: '0.65rem',
-        zIndex: 60,
-        position: 'relative'
-      }}
-    >
-      {/* IDENTIFICAÇÃO DO ECOSSISTEMA UNIFICADO */}
-      <div style={{ display: 'flex', alignItems: 'center', gap: '0.65rem', flexWrap: 'wrap' }}>
-        <span
-          style={{
-            background: 'linear-gradient(135deg, #00E8C6, #0284C7)',
-            color: '#040814',
-            borderRadius: '4px',
-            padding: '0.15rem 0.45rem',
-            fontSize: '0.68rem',
-            fontWeight: 800,
-            letterSpacing: '0.04em'
-          }}
-        >
-          Q.I. TECH — SISTEMA UNIFICADO
+    <div className="bg-[#040814] text-slate-300 border-b border-white/10 px-4 py-1.5 text-xs flex items-center justify-between gap-3 z-50 sticky top-0">
+      {/* IDENTIFICAÇÃO ENXUTA */}
+      <div className="flex items-center gap-2.5">
+        <span className="font-heading font-black text-[11px] tracking-wider text-primary bg-primary/10 px-2 py-0.5 rounded border border-primary/20">
+          Q.I. TECH
         </span>
-        <span style={{ fontSize: '0.72rem', color: '#E2E8F0', fontWeight: 600 }}>
-          Recrutamento Invertido, Comunidade & Motor de IA Explicável
+        <span className="text-[11px] text-slate-400 hidden sm:inline">
+          Ecossistema Unificado de Recrutamento & IA Explicável
         </span>
-        <span style={{ fontSize: '0.7rem', color: '#64748B' }}>
-          • FECAP 2026 (TCC Ciência da Computação)
+        <span className="flex items-center gap-1 text-[10px] text-slate-400 bg-white/5 px-2 py-0.5 rounded border border-white/5">
+          <span className={`w-1.5 h-1.5 rounded-full ${isOnline ? 'bg-emerald-400 animate-pulse' : 'bg-amber-400'}`} />
+          {isOnline ? 'Motor IA Online' : 'Modo Demonstrativo'}
         </span>
       </div>
 
-      {/* SELETOR RÁPIDO DE PERFIL (CANDIDATO | EMPRESA | COMUNIDADE | ADMIN) */}
+      {/* SELETOR RÁPIDO DE VISÃO (ENXUTO E MINIMALISTA) */}
       {isAuthenticated && (
-        <div
-          style={{
-            display: 'flex',
-            alignItems: 'center',
-            gap: '0.35rem',
-            background: 'rgba(255, 255, 255, 0.05)',
-            padding: '0.2rem 0.4rem',
-            borderRadius: '6px',
-            border: '1px solid rgba(255, 255, 255, 0.1)'
-          }}
-        >
-          <span style={{ fontSize: '0.68rem', color: '#94A3B8', marginRight: '0.25rem', fontWeight: 600 }}>
-            Alternar Visão:
+        <div className="flex items-center gap-1.5">
+          <span className="text-[10px] text-slate-400 uppercase tracking-wider hidden md:inline font-semibold">
+            Visão:
           </span>
+          <div className="flex items-center bg-white/5 p-0.5 rounded-base border border-white/10 text-[11px]">
+            <button
+              type="button"
+              onClick={() => setActivePersona('candidato-lucas')}
+              className={`px-2.5 py-1 rounded font-semibold transition-all flex items-center gap-1 ${
+                activePersona === 'candidato-lucas' || activePersona === 'candidato-marina'
+                  ? 'bg-primary text-slate-950 font-bold shadow-xs'
+                  : 'text-slate-300 hover:text-white'
+              }`}
+            >
+              <User className="w-3 h-3" /> Candidato
+            </button>
+            <button
+              type="button"
+              onClick={() => setActivePersona('empresa-orion')}
+              className={`px-2.5 py-1 rounded font-semibold transition-all flex items-center gap-1 ${
+                activePersona === 'empresa-orion'
+                  ? 'bg-brandOrange text-white font-bold shadow-xs'
+                  : 'text-slate-300 hover:text-white'
+              }`}
+            >
+              <Building2 className="w-3 h-3" /> Empresa
+            </button>
+            <button
+              type="button"
+              onClick={() => setActivePersona('comunidade-rafael')}
+              className={`px-2.5 py-1 rounded font-semibold transition-all flex items-center gap-1 ${
+                activePersona === 'comunidade-rafael'
+                  ? 'bg-emerald-600 text-white font-bold shadow-xs'
+                  : 'text-slate-300 hover:text-white'
+              }`}
+            >
+              <Users className="w-3 h-3" /> Comunidade
+            </button>
+            <button
+              type="button"
+              onClick={() => setActivePersona('admin-qitech')}
+              className={`px-2.5 py-1 rounded font-semibold transition-all flex items-center gap-1 ${
+                activePersona === 'admin-qitech'
+                  ? 'bg-slate-700 text-white font-bold shadow-xs'
+                  : 'text-slate-300 hover:text-white'
+              }`}
+            >
+              <Shield className="w-3 h-3" /> Admin
+            </button>
+          </div>
+
           <button
             type="button"
-            onClick={() => setActivePersona('candidato-lucas')}
-            style={{
-              padding: '0.2rem 0.55rem',
-              borderRadius: '4px',
-              fontSize: '0.7rem',
-              fontWeight: 700,
-              border: 'none',
-              cursor: 'pointer',
-              background: (activePersona === 'candidato-lucas' || activePersona === 'candidato-marina') ? '#00E8C6' : 'transparent',
-              color: (activePersona === 'candidato-lucas' || activePersona === 'candidato-marina') ? '#040814' : '#CBD5E1'
-            }}
+            onClick={resetAllData}
+            title="Restaurar dados originais de demonstração"
+            className="p-1.5 rounded hover:bg-white/10 text-slate-400 hover:text-white transition-all ml-1"
           >
-            Candidato
-          </button>
-          <button
-            type="button"
-            onClick={() => setActivePersona('empresa-orion')}
-            style={{
-              padding: '0.2rem 0.55rem',
-              borderRadius: '4px',
-              fontSize: '0.7rem',
-              fontWeight: 700,
-              border: 'none',
-              cursor: 'pointer',
-              background: activePersona === 'empresa-orion' ? '#FF6B35' : 'transparent',
-              color: activePersona === 'empresa-orion' ? '#FFFFFF' : '#CBD5E1'
-            }}
-          >
-            Empresa B2B
-          </button>
-          <button
-            type="button"
-            onClick={() => setActivePersona('comunidade-rafael')}
-            style={{
-              padding: '0.2rem 0.55rem',
-              borderRadius: '4px',
-              fontSize: '0.7rem',
-              fontWeight: 700,
-              border: 'none',
-              cursor: 'pointer',
-              background: activePersona === 'comunidade-rafael' ? '#38BDF8' : 'transparent',
-              color: activePersona === 'comunidade-rafael' ? '#040814' : '#CBD5E1'
-            }}
-          >
-            Comunidade
-          </button>
-          <button
-            type="button"
-            onClick={() => setActivePersona('admin-qitech')}
-            style={{
-              padding: '0.2rem 0.55rem',
-              borderRadius: '4px',
-              fontSize: '0.7rem',
-              fontWeight: 700,
-              border: 'none',
-              cursor: 'pointer',
-              background: activePersona === 'admin-qitech' ? '#A855F7' : 'transparent',
-              color: activePersona === 'admin-qitech' ? '#FFFFFF' : '#CBD5E1'
-            }}
-          >
-            Admin & TCC
+            <RefreshCw className="w-3.5 h-3.5" />
           </button>
         </div>
       )}
-
-      {/* STATUS DO BACKEND & MODELOS DE IA EM TEMPO REAL */}
-      <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', flexWrap: 'wrap' }}>
-        <span
-          style={{
-            display: 'inline-flex',
-            alignItems: 'center',
-            gap: '0.3rem',
-            color: '#E2E8F0',
-            background: 'rgba(255, 255, 255, 0.08)',
-            border: '1px solid rgba(255, 255, 255, 0.15)',
-            padding: '0.18rem 0.55rem',
-            borderRadius: '9999px',
-            fontSize: '0.68rem',
-            fontWeight: 600
-          }}
-        >
-          <ShieldCheck size={11} color="#00E8C6" /> {activeRoleBadge}
-        </span>
-
-        {health?.status === 'healthy' ? (
-          <span
-            style={{
-              display: 'inline-flex',
-              alignItems: 'center',
-              gap: '0.3rem',
-              color: '#34D399',
-              background: 'rgba(16, 185, 129, 0.12)',
-              border: '1px solid rgba(16, 185, 129, 0.3)',
-              padding: '0.18rem 0.55rem',
-              borderRadius: '9999px',
-              fontSize: '0.68rem',
-              fontWeight: 600
-            }}
-            title="FastAPI REST API Operacional na porta 8000"
-          >
-            <CheckCircle size={11} /> API FastAPI Online (v{health.version})
-          </span>
-        ) : (
-          <span
-            style={{
-              display: 'inline-flex',
-              alignItems: 'center',
-              gap: '0.3rem',
-              color: '#FBBF24',
-              background: 'rgba(245, 158, 11, 0.12)',
-              border: '1px solid rgba(245, 158, 11, 0.3)',
-              padding: '0.18rem 0.55rem',
-              borderRadius: '9999px',
-              fontSize: '0.68rem',
-              fontWeight: 600
-            }}
-            title="Operando em contingência local caso o backend FastAPI na porta 8000 não esteja iniciado"
-          >
-            <AlertTriangle size={11} /> API Local (Contingência)
-          </span>
-        )}
-
-        <span
-          style={{
-            display: 'inline-flex',
-            alignItems: 'center',
-            gap: '0.3rem',
-            color: '#00E8C6',
-            background: 'rgba(0, 232, 198, 0.12)',
-            border: '1px solid rgba(0, 232, 198, 0.3)',
-            padding: '0.18rem 0.55rem',
-            borderRadius: '9999px',
-            fontSize: '0.68rem',
-            fontWeight: 600
-          }}
-          title="Faster-Whisper int8 (Áudio pt-BR) + Qwen3/EvidenceVerifier + Multilingual-E5 (384d)"
-        >
-          <Cpu size={11} /> Whisper + Qwen3 + E5
-        </span>
-      </div>
     </div>
   );
 };

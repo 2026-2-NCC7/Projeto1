@@ -191,7 +191,6 @@ export const MainLayout: React.FC = () => {
   if (needsOnboarding) {
     return (
       <div className="min-h-screen flex flex-col justify-between bg-background qi-portal-container">
-        <PresentationBanner />
         <Header currentViewTitle="Onboarding do Profissional" />
         <main className="flex-1 max-w-[1440px] w-full mx-auto px-4 py-6">
           <CandidateOnboardingView
@@ -242,7 +241,6 @@ export const MainLayout: React.FC = () => {
 
   return (
     <div className="min-h-screen flex flex-col justify-between bg-background qi-portal-container">
-      <PresentationBanner />
       <Header currentViewTitle={getTitle()} />
       <main className="flex-1 max-w-[1440px] w-full mx-auto px-4 py-6">
         <div className="flex flex-col lg:flex-row gap-6">
