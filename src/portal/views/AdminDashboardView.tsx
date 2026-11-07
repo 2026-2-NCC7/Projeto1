@@ -57,7 +57,7 @@ export const AdminDashboardView: React.FC = () => {
     <div className="space-y-6">
       
       {/* CABEÇALHO DO BACKOFFICE */}
-      <div className="bg-white p-5 rounded-base border border-border shadow-xs flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+      <div className="bg-card p-5 rounded-base border border-border shadow-xs flex flex-col sm:flex-row sm:items-center justify-between gap-3">
         <div>
           <div className="flex items-center gap-2">
             <ShieldCheck className="w-5 h-5 text-primary" />
@@ -76,27 +76,27 @@ export const AdminDashboardView: React.FC = () => {
 
       {/* MÉTRICAS CONSOLIDADAS */}
       <div className="grid grid-cols-2 sm:grid-cols-5 gap-4 text-center">
-        <div className="bg-white p-4 rounded-base border border-border shadow-xs">
+        <div className="bg-card p-4 rounded-base border border-border shadow-xs">
           <span className="text-2xl font-heading font-bold text-primary">{Object.keys(candidates).length}</span>
           <span className="block text-xs font-semibold text-foreground mt-0.5">Talentos Qualificados</span>
         </div>
 
-        <div className="bg-white p-4 rounded-base border border-border shadow-xs">
+        <div className="bg-card p-4 rounded-base border border-border shadow-xs">
           <span className="text-2xl font-heading font-bold text-primary">{Object.keys(communityProfiles).length}</span>
           <span className="block text-xs font-semibold text-foreground mt-0.5">Membros Comunidade</span>
         </div>
 
-        <div className="bg-white p-4 rounded-base border border-border shadow-xs">
+        <div className="bg-card p-4 rounded-base border border-border shadow-xs">
           <span className="text-2xl font-heading font-bold text-primary">{vacancies.length}</span>
           <span className="block text-xs font-semibold text-foreground mt-0.5">Vagas Ativas</span>
         </div>
 
-        <div className="bg-white p-4 rounded-base border border-border shadow-xs">
+        <div className="bg-card p-4 rounded-base border border-border shadow-xs">
           <span className="text-2xl font-heading font-bold text-brandOrange">{selectionProcesses.length}</span>
           <span className="block text-xs font-semibold text-foreground mt-0.5">Matches no Funil</span>
         </div>
 
-        <div className="bg-white p-4 rounded-base border border-emerald-300 bg-emerald-50/40 shadow-xs col-span-2 sm:col-span-1">
+        <div className="bg-card p-4 rounded-base border border-emerald-300 bg-emerald-50/40 shadow-xs col-span-2 sm:col-span-1">
           <span className="text-xl font-heading font-bold text-emerald-700">
             R$ {totalRevenueBrl.toLocaleString('pt-BR')}
           </span>
@@ -105,7 +105,7 @@ export const AdminDashboardView: React.FC = () => {
       </div>
 
       {/* PARÂMETROS COMERCIAIS CONFIGURÁVEIS */}
-      <div className="bg-white p-5 rounded-base border border-border shadow-xs space-y-4">
+      <div className="bg-card p-5 rounded-base border border-border shadow-xs space-y-4">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-border pb-3">
           <div>
             <h3 className="font-heading font-bold text-xs text-foreground uppercase tracking-wider flex items-center gap-2">
@@ -185,7 +185,7 @@ export const AdminDashboardView: React.FC = () => {
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         
         {/* HABILIDADES PENDENTES DE REVISÃO */}
-        <div className="bg-white p-5 rounded-base border border-border shadow-xs space-y-3">
+        <div className="bg-card p-5 rounded-base border border-border shadow-xs space-y-3">
           <h3 className="font-heading font-bold text-xs text-foreground uppercase tracking-wider flex items-center gap-2">
             <ListChecks className="w-4 h-4 text-brandOrange" /> Curadoria de Habilidades do Catálogo
           </h3>
@@ -214,7 +214,7 @@ export const AdminDashboardView: React.FC = () => {
                     </button>
                     <button
                       onClick={() => rejectCustomSkill(sk)}
-                      className="px-3 py-1 bg-white hover:bg-destructive/10 text-destructive border border-destructive/30 font-bold rounded-base flex items-center gap-1 transition-all"
+                      className="px-3 py-1 bg-card hover:bg-destructive/10 text-destructive border border-destructive/30 font-bold rounded-base flex items-center gap-1 transition-all"
                     >
                       <X className="w-3.5 h-3.5" /> Rejeitar
                     </button>
@@ -226,7 +226,7 @@ export const AdminDashboardView: React.FC = () => {
         </div>
 
         {/* MODERAÇÃO DA COMUNIDADE E ANTI-SPAM */}
-        <div className="bg-white p-5 rounded-base border border-border shadow-xs space-y-3">
+        <div className="bg-card p-5 rounded-base border border-border shadow-xs space-y-3">
           <h3 className="font-heading font-bold text-xs text-foreground uppercase tracking-wider flex items-center gap-2">
             <Flag className="w-4 h-4 text-destructive" /> Moderação da Comunidade
           </h3>
@@ -243,13 +243,13 @@ export const AdminDashboardView: React.FC = () => {
                     <strong className="text-destructive font-bold">{rep.reason}</strong>
                     <span className="text-[10px] text-muted-foreground">Reportado por {rep.reporterName}</span>
                   </div>
-                  <p className="text-[11px] text-foreground italic bg-white p-2 rounded border border-border">
+                  <p className="text-[11px] text-foreground italic bg-card p-2 rounded border border-border">
                     "{rep.postSnippet}" — <span className="font-semibold not-italic">{rep.authorName}</span>
                   </p>
                   <div className="flex justify-end gap-2 pt-1">
                     <button
                       onClick={() => resolveModerationReport(rep.id, false)}
-                      className="px-2.5 py-1 bg-white border border-border rounded text-[11px] font-semibold hover:bg-secondary"
+                      className="px-2.5 py-1 bg-card border border-border rounded text-[11px] font-semibold hover:bg-secondary"
                     >
                       Manter e Arquivar
                     </button>
@@ -269,7 +269,7 @@ export const AdminDashboardView: React.FC = () => {
       </div>
 
       {/* LOG DE AUDITORIA LGPD */}
-      <div className="bg-white p-5 rounded-base border border-border shadow-xs space-y-3">
+      <div className="bg-card p-5 rounded-base border border-border shadow-xs space-y-3">
         <h3 className="font-heading font-bold text-xs text-foreground uppercase tracking-wider flex items-center gap-2">
           <Activity className="w-4 h-4 text-primary" /> Trilha de Auditoria, Acesso e Consentimento (LGPD)
         </h3>

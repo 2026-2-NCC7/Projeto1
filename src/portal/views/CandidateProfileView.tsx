@@ -140,7 +140,7 @@ export const CandidateProfileView: React.FC = () => {
     <div className="space-y-6">
       
       {/* CARD PRINCIPAL DE IDENTIFICAÇÃO E COMPLETUDE */}
-      <div className="bg-white p-5 rounded-base border border-border shadow-xs">
+      <div className="bg-card p-5 rounded-base border border-border shadow-xs">
         <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
           <div className="flex items-center gap-4">
             <img 
@@ -207,7 +207,7 @@ export const CandidateProfileView: React.FC = () => {
       )}
 
       {/* GESTÃO DE HARD SKILLS */}
-      <div className="bg-white p-5 rounded-base border border-border shadow-xs space-y-4">
+      <div className="bg-card p-5 rounded-base border border-border shadow-xs space-y-4">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-border pb-3">
           <div>
             <h3 className="font-heading font-bold text-sm text-foreground">Habilidades Técnicas (Hard Skills)</h3>
@@ -230,7 +230,7 @@ export const CandidateProfileView: React.FC = () => {
             <select
               value={selectedSkillName}
               onChange={(e) => setSelectedSkillName(e.target.value)}
-              className="w-full h-9 bg-white border border-border rounded-base px-2.5 text-foreground font-medium"
+              className="w-full h-9 bg-card border border-border rounded-base px-2.5 text-foreground font-medium"
             >
               {SKILL_CATALOG_SAMPLES.map(s => (
                 <option key={s.name} value={s.name}>{s.name} ({s.category})</option>
@@ -243,7 +243,7 @@ export const CandidateProfileView: React.FC = () => {
             <select
               value={selectedMastery}
               onChange={(e) => setSelectedMastery(e.target.value as SkillMastery)}
-              className="w-full h-9 bg-white border border-border rounded-base px-2.5 text-foreground font-medium"
+              className="w-full h-9 bg-card border border-border rounded-base px-2.5 text-foreground font-medium"
             >
               <option value="Iniciante">Iniciante</option>
               <option value="Intermediário">Intermediário</option>
@@ -261,7 +261,7 @@ export const CandidateProfileView: React.FC = () => {
                 max="40"
                 value={experienceYears}
                 onChange={(e) => setExperienceYears(Math.max(0, Number(e.target.value) || 0))}
-                className="w-1/2 h-9 bg-white border border-border rounded-base px-2 text-foreground"
+                className="w-1/2 h-9 bg-card border border-border rounded-base px-2 text-foreground"
                 placeholder="Anos"
               />
               <input
@@ -270,7 +270,7 @@ export const CandidateProfileView: React.FC = () => {
                 max="11"
                 value={experienceMonths}
                 onChange={(e) => setExperienceMonths(Math.max(0, Math.min(11, Number(e.target.value) || 0)))}
-                className="w-1/2 h-9 bg-white border border-border rounded-base px-2 text-foreground"
+                className="w-1/2 h-9 bg-card border border-border rounded-base px-2 text-foreground"
                 placeholder="Meses"
               />
             </div>
@@ -345,7 +345,7 @@ export const CandidateProfileView: React.FC = () => {
       </div>
 
       {/* DEMAIS DADOS DO PERFIL (PREFERÊNCIAS E CONTRATAÇÃO) */}
-      <div className="bg-white p-5 rounded-base border border-border shadow-xs space-y-4">
+      <div className="bg-card p-5 rounded-base border border-border shadow-xs space-y-4">
         <h3 className="font-heading font-bold text-sm text-foreground border-b border-border pb-2">
           Preferências de Contratação & Condições (Privadas até o Double Opt-In)
         </h3>
@@ -411,7 +411,7 @@ export const CandidateProfileView: React.FC = () => {
       {/* DIÁLOGO DE CONFIRMAÇÃO DE EXCLUSÃO DE SKILL */}
       {skillToDelete && (
         <div className="fixed inset-0 z-50 bg-black/40 flex items-center justify-center p-4">
-          <div className="bg-white rounded-base border border-border p-5 max-w-sm w-full shadow-lg space-y-3">
+          <div className="bg-card rounded-base border border-border p-5 max-w-sm w-full shadow-lg space-y-3">
             <div className="flex items-center gap-2 text-destructive font-bold text-sm">
               <AlertTriangle className="w-4 h-4" /> Confirmar Remoção
             </div>
@@ -441,7 +441,7 @@ export const CandidateProfileView: React.FC = () => {
       {/* MODAL: SUGERIR HABILIDADE INEXISTENTE */}
       {showCustomModal && (
         <div className="fixed inset-0 z-50 bg-black/40 flex items-center justify-center p-4">
-          <div className="bg-white rounded-base border border-border p-5 max-w-md w-full shadow-lg space-y-4">
+          <div className="bg-card rounded-base border border-border p-5 max-w-md w-full shadow-lg space-y-4">
             <h4 className="font-heading font-bold text-sm text-foreground">Sugerir Nova Habilidade Técnica</h4>
             <p className="text-xs text-muted-foreground leading-relaxed">
               Caso sua stack ou framework não conste no catálogo inicial, digite o nome abaixo. A habilidade será incorporada ao seu perfil imediatamente como <em>"pendente de revisão"</em>, sem alterar silenciosamente o catálogo global do sistema.
@@ -474,7 +474,7 @@ export const CandidateProfileView: React.FC = () => {
       {/* MODAL: ADERIR À COMUNIDADE PESSOA FÍSICA */}
       {showCommunityModal && (
         <div className="fixed inset-0 z-50 bg-black/40 flex items-center justify-center p-4">
-          <div className="bg-white rounded-base border border-border p-5 max-w-md w-full shadow-lg space-y-4">
+          <div className="bg-card rounded-base border border-border p-5 max-w-md w-full shadow-lg space-y-4">
             <h4 className="font-heading font-bold text-sm text-foreground">Entrar na Comunidade Q.I. Tech</h4>
             <p className="text-xs text-muted-foreground leading-relaxed">
               Confirmando sua adesão, criaremos seu perfil social como <strong>pessoa física</strong> aproveitando suas hard skills públicas, foto e biografia.

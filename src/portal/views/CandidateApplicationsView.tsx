@@ -45,7 +45,7 @@ export const CandidateApplicationsView: React.FC = () => {
     <div className="space-y-6">
       
       {/* CABEÇALHO DO PAINEL DE PROCESSOS SELETIVOS E DOUBLE OPT-IN */}
-      <div className="bg-white p-5 rounded-base border border-border shadow-xs flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+      <div className="bg-card p-5 rounded-base border border-border shadow-xs flex flex-col sm:flex-row sm:items-center justify-between gap-3">
         <div>
           <h2 className="font-heading font-bold text-base text-foreground">Meus Processos Seletivos & Double Opt-In</h2>
           <p className="text-xs text-muted-foreground mt-0.5">
@@ -60,7 +60,7 @@ export const CandidateApplicationsView: React.FC = () => {
       {/* LISTA DE PROCESSOS SELETIVOS */}
       <div className="space-y-4">
         {myProcesses.length === 0 ? (
-          <div className="p-8 text-center bg-white rounded-base border border-border text-xs text-muted-foreground">
+          <div className="p-8 text-center bg-card rounded-base border border-border text-xs text-muted-foreground">
             Nenhum processo seletivo ativo no momento.
           </div>
         ) : (
@@ -75,7 +75,7 @@ export const CandidateApplicationsView: React.FC = () => {
             const isApproved = proc.currentStage === 'aprovado';
 
             return (
-              <div key={proc.id} className="bg-white p-5 rounded-base border border-border shadow-xs space-y-5">
+              <div key={proc.id} className="bg-card p-5 rounded-base border border-border shadow-xs space-y-5">
                 
                 {/* Topo do Processo */}
                 <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-border pb-4">
@@ -132,7 +132,7 @@ export const CandidateApplicationsView: React.FC = () => {
 
                       <button
                         onClick={() => rejectOpportunity(proc.id)}
-                        className="px-3 py-2 bg-white hover:bg-destructive/10 text-destructive border border-destructive/30 text-xs font-semibold rounded-base flex items-center gap-1 transition-all"
+                        className="px-3 py-2 bg-card hover:bg-destructive/10 text-destructive border border-destructive/30 text-xs font-semibold rounded-base flex items-center gap-1 transition-all"
                       >
                         <X className="w-3.5 h-3.5" /> Recusar
                       </button>

@@ -43,7 +43,7 @@ export const CandidateOpportunitiesView: React.FC<CandidateOpportunitiesViewProp
     <div className="space-y-5">
       
       {/* CABEÇALHO LIMPO E AREJADO */}
-      <div className="bg-white p-5 rounded-base border border-border shadow-xs flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+      <div className="bg-card p-5 rounded-base border border-border shadow-xs flex flex-col sm:flex-row sm:items-center justify-between gap-3">
         <div>
           <h2 className="font-heading font-bold text-base text-foreground flex items-center gap-2">
             <Target className="w-5 h-5 text-primary" /> Vagas Compatíveis com seu Perfil
@@ -73,7 +73,7 @@ export const CandidateOpportunitiesView: React.FC<CandidateOpportunitiesViewProp
       {/* LISTA LIMPA DE VAGAS */}
       <div className="space-y-4">
         {myProcesses.length === 0 ? (
-          <div className="p-8 text-center bg-white rounded-base border border-border text-xs text-muted-foreground">
+          <div className="p-8 text-center bg-card rounded-base border border-border text-xs text-muted-foreground">
             Nenhuma oportunidade compatível no momento.
           </div>
         ) : (
@@ -97,7 +97,7 @@ export const CandidateOpportunitiesView: React.FC<CandidateOpportunitiesViewProp
             const isExpanded = expandedMatchId === proc.id;
 
             return (
-              <div key={proc.id} className="bg-white p-5 rounded-base border border-border shadow-xs space-y-4 transition-all">
+              <div key={proc.id} className="bg-card p-5 rounded-base border border-border shadow-xs space-y-4 transition-all">
                 
                 {/* LINHA PRINCIPAL: TÍTULO, EMPRESA E SCORE */}
                 <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
@@ -173,7 +173,7 @@ export const CandidateOpportunitiesView: React.FC<CandidateOpportunitiesViewProp
                     </p>
                     <div className="flex flex-wrap gap-1.5 pt-1">
                       {vacancy.mandatorySkills.map((sk) => (
-                        <span key={sk} className="text-[10px] bg-white border border-border px-2 py-0.5 rounded text-foreground font-medium">
+                        <span key={sk} className="text-[10px] bg-card border border-border px-2 py-0.5 rounded text-foreground font-medium">
                           {sk}
                         </span>
                       ))}
@@ -199,13 +199,13 @@ export const CandidateOpportunitiesView: React.FC<CandidateOpportunitiesViewProp
                       <>
                         <button
                           onClick={() => handleDirectAccept(proc.id, vacancy.title)}
-                          className="px-4 py-1.5 bg-primary hover:bg-primary-dark text-white text-xs font-bold rounded-base flex items-center gap-1.5 shadow-xs transition-all"
+                          className="px-4 py-1.5 bg-primary hover:bg-primary-dark text-black text-xs font-bold rounded-base flex items-center gap-1.5 shadow-xs transition-all"
                         >
                           <Check className="w-3.5 h-3.5" /> Aceitar Convite
                         </button>
                         <button
                           onClick={() => handleDirectReject(proc.id, vacancy.title)}
-                          className="px-3 py-1.5 bg-white hover:bg-red-50 text-destructive border border-destructive/30 text-xs font-semibold rounded-base flex items-center gap-1 transition-all"
+                          className="px-3 py-1.5 bg-card hover:bg-red-50 text-destructive border border-destructive/30 text-xs font-semibold rounded-base flex items-center gap-1 transition-all"
                         >
                           <X className="w-3.5 h-3.5" /> Recusar
                         </button>

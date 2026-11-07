@@ -105,7 +105,7 @@ export const CommunityNetworkView: React.FC = () => {
     <div className="space-y-6 animate-fadeIn">
       
       {/* Cabeçalho da Rede */}
-      <div className="bg-white p-5 rounded-base border border-border shadow-xs flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+      <div className="bg-card p-5 rounded-base border border-border shadow-xs flex flex-col sm:flex-row sm:items-center justify-between gap-3">
         <div>
           <div className="flex items-center gap-2 flex-wrap">
             <Users className="w-5 h-5 text-primary" />
@@ -145,19 +145,19 @@ export const CommunityNetworkView: React.FC = () => {
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
           placeholder="Filtrar profissionais por nome, tecnologia ou especialidade..."
-          className="w-full h-9 pl-9 pr-3 text-xs bg-white border border-border rounded-base focus:ring-1 focus:ring-primary"
+          className="w-full h-9 pl-9 pr-3 text-xs bg-card border border-border rounded-base focus:ring-1 focus:ring-primary"
         />
       </div>
 
       {/* Lista de Conexões com Grau de Habilidade e Afinidade */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         {filtered.length === 0 ? (
-          <div className="col-span-2 p-8 text-center bg-white rounded-base border border-border text-xs text-muted-foreground">
+          <div className="col-span-2 p-8 text-center bg-card rounded-base border border-border text-xs text-muted-foreground">
             Nenhum profissional encontrado com o filtro selecionado.
           </div>
         ) : (
           filtered.map(person => (
-            <div key={person.id} className="bg-white p-5 rounded-base border border-border shadow-xs space-y-3.5 flex flex-col justify-between">
+            <div key={person.id} className="bg-card p-5 rounded-base border border-border shadow-xs space-y-3.5 flex flex-col justify-between">
               
               <div className="space-y-3">
                 <div className="flex items-start justify-between gap-3">

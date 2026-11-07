@@ -3,88 +3,93 @@
 @tailwind utilities;
 
 :root {
-  /* QI Portal Tokens (Tailwind) */
-  --background: 242 248 249;
-  --foreground: 12 29 35;
+  /* QI Portal Tokens (Tailwind) — Paleta Preto & Amarelo */
+  --background: 248 250 252;
+  --foreground: 15 23 42;
   --card: 255 255 255;
-  --primary: 0 117 133;
-  --primary-foreground: 252 252 252;
-  --primary-dark: 0 62 72;
-  --secondary: 224 238 239;
-  --secondary-foreground: 12 29 35;
-  --muted: 230 236 239;
-  --muted-foreground: 84 103 109;
-  --accent: 206 240 237;
-  --accent-foreground: 0 62 72;
+  --primary: 234 179 8;
+  --primary-foreground: 10 12 16;
+  --primary-dark: 202 138 4;
+  --secondary: 254 249 195;
+  --secondary-foreground: 113 63 18;
+  --muted: 241 245 249;
+  --muted-foreground: 100 116 139;
+  --accent: 254 240 138;
+  --accent-foreground: 113 63 18;
   --destructive: 223 35 33;
   --destructive-foreground: 252 252 252;
-  --border: 205 218 222;
-  --input: 205 218 222;
+  --border: 226 232 240;
+  --input: 226 232 240;
 
-  /* Matchmaker Engine Tokens (Adaptive Light/Dark for Unified System) */
-  --bg-main: #F2F8F9;
-  --bg-surface: #E8F2F4;
+  /* Matchmaker Engine Tokens */
+  --bg-main: #F8FAFC;
+  --bg-surface: #F1F5F9;
   --bg-card: #FFFFFF;
-  --bg-card-hover: #F0F7F8;
-  --bg-muted: #E0EEEF;
+  --bg-card-hover: #F8FAFC;
+  --bg-muted: #F1F5F9;
   
-  --border-subtle: #CDDADe;
-  --border-hover: rgba(0, 117, 133, 0.4);
-  --border-active: #007585;
+  --border-subtle: #E2E8F0;
+  --border-hover: rgba(234, 179, 8, 0.4);
+  --border-active: #EAB308;
 
-  --accent-cyan: #007585;
-  --accent-blue: #0284C7;
-  --accent-violet: #7C3AED;
-  --accent-green: #059669;
-  --accent-amber: #D97706;
+  --accent-cyan: #EAB308;
+  --accent-blue: #FACC15;
+  --accent-violet: #8B5CF6;
+  --accent-green: #10B981;
+  --accent-amber: #F59E0B;
+  --accent-yellow: #FACC15;
   --accent-red: #DC2626;
 
-  --text-primary: #0C1D23;
-  --text-secondary: #3B5259;
-  --text-muted: #54676D;
+  --text-primary: #0F172A;
+  --text-secondary: #334155;
+  --text-muted: #64748B;
   
-  --glow-cyan: 0 4px 14px rgba(0, 117, 133, 0.18);
-  --glow-blue: 0 4px 14px rgba(2, 132, 199, 0.18);
+  --glow-cyan: 0 4px 14px rgba(234, 179, 8, 0.25);
+  --glow-blue: 0 4px 14px rgba(250, 204, 21, 0.25);
 
   --font-sans: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
   --font-mono: 'JetBrains Mono', monospace;
 }
 
 .dark {
-  --background: 9 20 26;
-  --foreground: 236 246 248;
-  --card: 15 32 42;
-  --primary: 14 165 183;
-  --primary-foreground: 252 252 252;
-  --primary-dark: 0 117 133;
-  --secondary: 23 47 61;
-  --secondary-foreground: 236 246 248;
-  --muted: 20 41 54;
-  --muted-foreground: 150 178 186;
-  --accent: 22 62 72;
-  --accent-foreground: 206 240 237;
+  /* QI Portal Tokens (Tailwind) — Modo Escuro Premium Preto & Amarelo */
+  --background: 10 12 16;
+  --foreground: 248 250 252;
+  --card: 18 22 30;
+  --primary: 250 204 21;
+  --primary-foreground: 10 12 16;
+  --primary-dark: 234 179 8;
+  --secondary: 26 32 44;
+  --secondary-foreground: 250 204 21;
+  --muted: 22 28 38;
+  --muted-foreground: 148 163 184;
+  --accent: 250 204 21;
+  --accent-foreground: 10 12 16;
   --destructive: 239 68 68;
-  --destructive-foreground: 252 252 252;
-  --border: 33 63 80;
-  --input: 33 63 80;
+  --destructive-foreground: 255 255 255;
+  --border: 38 47 64;
+  --input: 26 32 44;
 
-  --bg-main: #060B19;
-  --bg-surface: #0B132B;
-  --bg-card: #0F1A36;
-  --bg-card-hover: #16244A;
-  --bg-muted: #1A284E;
-  --border-subtle: rgba(255, 255, 255, 0.1);
-  --border-hover: rgba(0, 232, 198, 0.35);
-  --border-active: #00E8C6;
-  --accent-cyan: #00E8C6;
-  --accent-blue: #38BDF8;
-  --accent-violet: #8B5CF6;
+  --bg-main: #0A0C10;
+  --bg-surface: #12161E;
+  --bg-card: #161B26;
+  --bg-card-hover: #1E2536;
+  --bg-muted: #1A2232;
+  --border-subtle: #262F40;
+  --border-hover: rgba(250, 204, 21, 0.45);
+  --border-active: #FACC15;
+  --accent-cyan: #FACC15;
+  --accent-blue: #FACC15;
+  --accent-violet: #A855F7;
   --accent-green: #10B981;
   --accent-amber: #F59E0B;
+  --accent-yellow: #FACC15;
   --accent-red: #EF4444;
   --text-primary: #F8FAFC;
-  --text-secondary: #94A3B8;
-  --text-muted: #64748B;
+  --text-secondary: #CBD5E1;
+  --text-muted: #94A3B8;
+  --glow-cyan: 0 4px 14px rgba(250, 204, 21, 0.3);
+  --glow-blue: 0 4px 14px rgba(250, 204, 21, 0.3);
 }
 
 * {
@@ -296,14 +301,14 @@ a:hover {
 }
 
 .badge-cyan {
-  background: rgba(0, 117, 133, 0.14);
-  color: #005F6B;
-  border: 1px solid rgba(0, 117, 133, 0.35);
+  background: rgba(234, 179, 8, 0.15);
+  color: #B45309;
+  border: 1px solid rgba(234, 179, 8, 0.4);
 }
 .dark .badge-cyan {
-  background: rgba(0, 232, 198, 0.15);
-  color: #00E8C6;
-  border: 1px solid rgba(0, 232, 198, 0.3);
+  background: rgba(250, 204, 21, 0.15);
+  color: #FACC15;
+  border: 1px solid rgba(250, 204, 21, 0.35);
 }
 
 /* Buttons */
@@ -323,17 +328,20 @@ a:hover {
 }
 
 .btn-primary {
-  background: linear-gradient(135deg, #007585, #0284C7);
-  color: #FFFFFF;
-  box-shadow: 0 4px 12px rgba(0, 117, 133, 0.25);
+  background: #FACC15;
+  color: #0A0C10;
+  font-weight: 700;
+  box-shadow: 0 4px 12px rgba(250, 204, 21, 0.25);
 }
 .dark .btn-primary {
-  background: linear-gradient(135deg, #00E8C6, #0284C7);
-  color: #060B19;
+  background: #FACC15;
+  color: #0A0C10;
+  font-weight: 700;
 }
 .btn-primary:hover {
+  background: #EAB308;
   transform: translateY(-1px);
-  box-shadow: 0 6px 20px rgba(0, 232, 198, 0.4);
+  box-shadow: 0 6px 20px rgba(250, 204, 21, 0.4);
 }
 
 .btn-secondary {
@@ -343,16 +351,17 @@ a:hover {
 }
 .btn-secondary:hover {
   background: var(--bg-card-hover);
-  border-color: rgba(255, 255, 255, 0.2);
+  border-color: rgba(250, 204, 21, 0.3);
 }
 
 .btn-outline {
   background: transparent;
-  color: var(--accent-cyan);
-  border: 1px solid rgba(0, 232, 198, 0.4);
+  color: #FACC15;
+  border: 1px solid rgba(250, 204, 21, 0.4);
 }
 .btn-outline:hover {
-  background: rgba(0, 232, 198, 0.1);
+  background: rgba(250, 204, 21, 0.12);
+  border-color: #FACC15;
 }
 
 .btn-danger {

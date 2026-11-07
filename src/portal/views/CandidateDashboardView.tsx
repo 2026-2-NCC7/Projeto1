@@ -54,7 +54,7 @@ export const CandidateDashboardView: React.FC<CandidateDashboardViewProps> = ({
     <div className="space-y-6">
       
       {/* 1. SAUDAÇÃO CONTEXTUAL & AÇÃO PRINCIPAL */}
-      <div className="bg-white p-6 rounded-base border border-border shadow-xs space-y-4">
+      <div className="bg-card p-6 rounded-base border border-border shadow-xs space-y-4">
         <div>
           <span className="text-[11px] font-bold uppercase tracking-wider text-primary bg-secondary px-2.5 py-0.5 rounded">
             Painel do Candidato
@@ -83,7 +83,7 @@ export const CandidateDashboardView: React.FC<CandidateDashboardViewProps> = ({
 
           <button
             onClick={() => onNavigateToTab(primaryActionTab)}
-            className="px-5 py-2.5 bg-primary hover:bg-primary-dark text-white text-xs font-bold rounded-base flex items-center gap-2 shadow-xs transition-all shrink-0"
+            className="px-5 py-2.5 bg-primary hover:bg-primary-dark text-black text-xs font-bold rounded-base flex items-center gap-2 shadow-xs transition-all shrink-0"
           >
             {primaryActionBtn} <ArrowRight className="w-4 h-4" />
           </button>
@@ -96,7 +96,7 @@ export const CandidateDashboardView: React.FC<CandidateDashboardViewProps> = ({
         {/* Indicador 1: Convites Pendentes */}
         <div
           onClick={() => onNavigateToTab('candidato-vagas')}
-          className="bg-white p-4 rounded-base border border-border shadow-xs cursor-pointer hover:border-primary/50 transition-all space-y-1"
+          className="bg-card p-4 rounded-base border border-border shadow-xs cursor-pointer hover:border-primary/50 transition-all space-y-1"
         >
           <div className="flex items-center justify-between text-muted-foreground">
             <span className="text-xs font-semibold">Convites Pendentes</span>
@@ -113,7 +113,7 @@ export const CandidateDashboardView: React.FC<CandidateDashboardViewProps> = ({
         {/* Indicador 2: Vagas Compatíveis */}
         <div
           onClick={() => onNavigateToTab('candidato-vagas')}
-          className="bg-white p-4 rounded-base border border-border shadow-xs cursor-pointer hover:border-primary/50 transition-all space-y-1"
+          className="bg-card p-4 rounded-base border border-border shadow-xs cursor-pointer hover:border-primary/50 transition-all space-y-1"
         >
           <div className="flex items-center justify-between text-muted-foreground">
             <span className="text-xs font-semibold">Oportunidades Compatíveis</span>
@@ -130,7 +130,7 @@ export const CandidateDashboardView: React.FC<CandidateDashboardViewProps> = ({
         {/* Indicador 3: Situação da Avaliação */}
         <div
           onClick={() => onNavigateToTab(isInterviewDone ? 'candidato-relatorio' : 'candidato-entrevista')}
-          className="bg-white p-4 rounded-base border border-border shadow-xs cursor-pointer hover:border-primary/50 transition-all space-y-1"
+          className="bg-card p-4 rounded-base border border-border shadow-xs cursor-pointer hover:border-primary/50 transition-all space-y-1"
         >
           <div className="flex items-center justify-between text-muted-foreground">
             <span className="text-xs font-semibold">Avaliação por IA</span>
@@ -154,7 +154,7 @@ export const CandidateDashboardView: React.FC<CandidateDashboardViewProps> = ({
 
       {/* 3. CONVITES PENDENTES EM DESTAQUE (SE HOUVER) */}
       {pendingInvites.length > 0 && (
-        <div className="bg-white p-5 rounded-base border border-amber-200 shadow-xs space-y-3">
+        <div className="bg-card p-5 rounded-base border border-yellow-500/40 shadow-xs space-y-3">
           <div className="flex items-center justify-between border-b border-border pb-2">
             <h3 className="font-heading font-bold text-sm text-foreground flex items-center gap-2">
               <Clock className="w-4 h-4 text-brandOrange" /> Convites que precisam da sua decisão
@@ -190,7 +190,7 @@ export const CandidateDashboardView: React.FC<CandidateDashboardViewProps> = ({
 
                   <button
                     onClick={() => onNavigateToTab('candidato-vagas')}
-                    className="px-4 py-1.5 bg-primary hover:bg-primary-dark text-white text-xs font-bold rounded-base shadow-xs shrink-0 self-start sm:self-auto"
+                    className="px-4 py-1.5 bg-primary hover:bg-primary-dark text-black text-xs font-bold rounded-base shadow-xs shrink-0 self-start sm:self-auto"
                   >
                     Avaliar Convite
                   </button>
@@ -202,7 +202,7 @@ export const CandidateDashboardView: React.FC<CandidateDashboardViewProps> = ({
       )}
 
       {/* 4. RESUMO DAS OPORTUNIDADES MAIS COMPATÍVEIS */}
-      <div className="bg-white p-5 rounded-base border border-border shadow-xs space-y-4">
+      <div className="bg-card p-5 rounded-base border border-border shadow-xs space-y-4">
         <div className="flex items-center justify-between border-b border-border pb-3">
           <div>
             <h3 className="font-heading font-bold text-sm text-foreground">

@@ -110,7 +110,7 @@ export const AudioRecorder: React.FC<AudioRecorderProps> = ({
   };
 
   return (
-    <div className="bg-white p-4 rounded-base border border-border shadow-xs space-y-3">
+    <div className="bg-card p-4 rounded-base border border-border shadow-xs space-y-3">
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2">
           <Mic className="w-4 h-4 text-brandOrange" />

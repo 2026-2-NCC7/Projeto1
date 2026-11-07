@@ -229,7 +229,7 @@ export const PersonaSelectorView: React.FC<{ onEnterApp: () => void; initialAuth
           
           {/* Logo Comercial */}
           <div className="flex items-center gap-3">
-            <div className="w-9 h-9 rounded-base bg-primary flex items-center justify-center font-heading font-bold text-white text-lg shadow-xs">
+            <div className="w-9 h-9 rounded-base bg-yellow-400 flex items-center justify-center font-heading font-bold text-black text-lg shadow-xs">
               Q
             </div>
             <div>
@@ -287,7 +287,7 @@ export const PersonaSelectorView: React.FC<{ onEnterApp: () => void; initialAuth
             <button
               type="button"
               onClick={() => openSignupModal('profissional')}
-              className="flex items-center gap-1.5 px-3.5 py-2 rounded-base bg-brandOrange hover:opacity-95 text-xs font-bold text-white shadow-xs transition-all"
+              className="flex items-center gap-1.5 px-3.5 py-2 rounded-base bg-yellow-400 hover:bg-yellow-300 text-xs font-bold text-black shadow-xs transition-all"
             >
               <UserPlus className="w-3.5 h-3.5" />
               <span>Criar conta</span>
@@ -317,12 +317,12 @@ export const PersonaSelectorView: React.FC<{ onEnterApp: () => void; initialAuth
         <div className="max-w-[1320px] mx-auto px-4 sm:px-8 grid grid-cols-1 lg:grid-cols-12 gap-10 items-center">
           
           <div className="lg:col-span-7 space-y-5">
-            <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-white/10 text-brandOrange text-xs font-bold border border-white/10">
+            <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-white/10 text-yellow-400 text-xs font-bold border border-white/10">
               <Sparkles className="w-3.5 h-3.5" /> Plataforma de Recrutamento Invertido & Comunidade Tech
             </span>
 
             <h1 className="text-3xl sm:text-4xl lg:text-5xl font-heading font-bold leading-tight text-white">
-              Contratação técnica em dias, não meses — com <span className="text-brandOrange">1º Match Grátis</span> e Privacidade Total.
+              Contratação técnica em dias, não meses — com <span className="text-yellow-400">1º Match Grátis</span> e Privacidade Total.
             </h1>
 
             <p className="text-sm sm:text-base text-brandNavySub max-w-2xl leading-relaxed">
@@ -335,7 +335,7 @@ export const PersonaSelectorView: React.FC<{ onEnterApp: () => void; initialAuth
                 <button
                   type="button"
                   onClick={() => openSignupModal('profissional')}
-                  className="px-5 py-3 rounded-base bg-brandOrange hover:opacity-95 text-white text-xs sm:text-sm font-bold flex items-center gap-2 shadow-md transition-all"
+                  className="px-5 py-3 rounded-base bg-yellow-400 hover:bg-yellow-300 text-black text-xs sm:text-sm font-bold flex items-center gap-2 shadow-md transition-all"
                 >
                   <UserPlus className="w-4 h-4" /> Criar conta <ArrowRight className="w-4 h-4" />
                 </button>
@@ -365,7 +365,7 @@ export const PersonaSelectorView: React.FC<{ onEnterApp: () => void; initialAuth
           {/* Métricas de Impacto Comercial */}
           <div className="lg:col-span-5 grid grid-cols-2 gap-3.5">
             <div className="p-5 rounded-base bg-white/5 border border-white/10">
-              <span className="text-2xl sm:text-3xl font-heading font-bold text-brandOrange block">R$ 0</span>
+              <span className="text-2xl sm:text-3xl font-heading font-bold text-yellow-400 block">R$ 0</span>
               <span className="text-xs font-bold text-white mt-1 block">no 1º Candidato Aceito</span>
               <span className="text-[11px] text-brandNavySub">Cortesia imediata no Match Express</span>
             </div>
@@ -397,76 +397,76 @@ export const PersonaSelectorView: React.FC<{ onEnterApp: () => void; initialAuth
       {/* OS 3 PILARES DO ECOSSISTEMA */}
       <section id="solucoes" className="py-14 max-w-[1320px] mx-auto px-4 sm:px-8 space-y-8">
         <div className="text-center max-w-2xl mx-auto space-y-2">
-          <h2 className="text-xl sm:text-2xl font-heading font-bold text-foreground">
+          <h2 className="text-xl sm:text-2xl font-heading font-bold text-white">
             Como funciona o ecossistema Q.I. Tech
           </h2>
-          <p className="text-xs sm:text-sm text-muted-foreground">
+          <p className="text-xs sm:text-sm text-slate-300">
             Três motores integrados para acelerar contratações e recompensar a comunidade técnica.
           </p>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           {/* Pilar 1 */}
-          <div className="bg-white p-6 rounded-base border border-border shadow-xs space-y-3 flex flex-col justify-between">
+          <div className="bg-[#12161E] p-6 rounded-base border border-[#262F40] hover:border-yellow-400/50 shadow-md space-y-3 flex flex-col justify-between transition-all group">
             <div className="space-y-3">
-              <div className="w-10 h-10 rounded-base bg-brandOrange/15 text-brandOrange flex items-center justify-center">
+              <div className="w-10 h-10 rounded-base bg-yellow-400/10 text-yellow-400 border border-yellow-400/20 flex items-center justify-center">
                 <Zap className="w-5 h-5" />
               </div>
-              <h3 className="font-heading font-bold text-base text-foreground">
+              <h3 className="font-heading font-bold text-base text-white group-hover:text-yellow-400 transition-colors">
                 1. Motor Comercial B2B & Match Express
               </h3>
-              <p className="text-xs text-muted-foreground leading-relaxed">
-                Empresas publicam vagas com transparência salarial e recebem o <strong>1º candidato com Double Opt-In gratuitamente</strong>. Perfis adicionais são desbloqueados sob demanda (R$ {commercialConfig.singleUnlockPriceBrl} ou pacotes de créditos com emissão automática de NFS-e).
+              <p className="text-xs text-slate-300 leading-relaxed">
+                Empresas publicam vagas com transparência salarial e recebem o <strong className="text-yellow-400 font-semibold">1º candidato com Double Opt-In gratuitamente</strong>. Perfis adicionais são desbloqueados sob demanda (R$ {commercialConfig.singleUnlockPriceBrl} ou pacotes de créditos com emissão automática de NFS-e).
               </p>
             </div>
             <button
               type="button"
               onClick={() => openSignupModal('empresa')}
-              className="text-xs font-bold text-primary hover:underline flex items-center gap-1 pt-2"
+              className="text-xs font-bold text-yellow-400 hover:text-yellow-300 hover:underline flex items-center gap-1.5 pt-2"
             >
               Criar Conta Corporativa <ArrowRight className="w-3.5 h-3.5" />
             </button>
           </div>
 
           {/* Pilar 2 */}
-          <div className="bg-white p-6 rounded-base border border-border shadow-xs space-y-3 flex flex-col justify-between">
+          <div className="bg-[#12161E] p-6 rounded-base border border-[#262F40] hover:border-yellow-400/50 shadow-md space-y-3 flex flex-col justify-between transition-all group">
             <div className="space-y-3">
-              <div className="w-10 h-10 rounded-base bg-secondary text-primary flex items-center justify-center">
+              <div className="w-10 h-10 rounded-base bg-yellow-400/10 text-yellow-400 border border-yellow-400/20 flex items-center justify-center">
                 <Award className="w-5 h-5" />
               </div>
-              <h3 className="font-heading font-bold text-base text-foreground">
+              <h3 className="font-heading font-bold text-base text-white group-hover:text-yellow-400 transition-colors">
                 2. "Quem Indica" Gamificado (Estalecas Q.I.)
               </h3>
-              <p className="text-xs text-muted-foreground leading-relaxed">
-                Profissionais que indicam colegas por link rastreável ganham <strong>+{commercialConfig.referralBonusEstalecas} Estalecas Q.I.</strong> na aprovação, resgatáveis por vouchers de certificação AWS, cursos e eventos (sem alterar o score técnico).
+              <p className="text-xs text-slate-300 leading-relaxed">
+                Profissionais que indicam colegas por link rastreável ganham <strong className="text-yellow-400 font-semibold">+{commercialConfig.referralBonusEstalecas} Estalecas Q.I.</strong> na aprovação, resgatáveis por vouchers de certificação AWS, cursos e eventos (sem alterar o score técnico).
               </p>
             </div>
             <button
               type="button"
               onClick={() => openSignupModal('profissional')}
-              className="text-xs font-bold text-primary hover:underline flex items-center gap-1 pt-2"
+              className="text-xs font-bold text-yellow-400 hover:text-yellow-300 hover:underline flex items-center gap-1.5 pt-2"
             >
               Cadastrar Perfil Profissional <ArrowRight className="w-3.5 h-3.5" />
             </button>
           </div>
 
           {/* Pilar 3 */}
-          <div className="bg-white p-6 rounded-base border border-border shadow-xs space-y-3 flex flex-col justify-between">
+          <div className="bg-[#12161E] p-6 rounded-base border border-[#262F40] hover:border-yellow-400/50 shadow-md space-y-3 flex flex-col justify-between transition-all group">
             <div className="space-y-3">
-              <div className="w-10 h-10 rounded-base bg-emerald-100 text-emerald-800 flex items-center justify-center">
+              <div className="w-10 h-10 rounded-base bg-yellow-400/10 text-yellow-400 border border-yellow-400/20 flex items-center justify-center">
                 <Users className="w-5 h-5" />
               </div>
-              <h3 className="font-heading font-bold text-base text-foreground">
+              <h3 className="font-heading font-bold text-base text-white group-hover:text-yellow-400 transition-colors">
                 3. Comunidade por Grau de Afinidade & IA Explicável
               </h3>
-              <p className="text-xs text-muted-foreground leading-relaxed">
-                Conexões recomendadas pelo <strong>grau de sobreposição de habilidades</strong> (1º, 2º e 3º grau) para destravar dúvidas técnicas, com entrevista opcional por IA auditável conforme o Art. 20 da LGPD.
+              <p className="text-xs text-slate-300 leading-relaxed">
+                Conexões recomendadas pelo <strong className="text-yellow-400 font-semibold">grau de sobreposição de habilidades</strong> (1º, 2º e 3º grau) para destravar dúvidas técnicas, com entrevista opcional por IA auditável conforme o Art. 20 da LGPD.
               </p>
             </div>
             <button
               type="button"
               onClick={() => openDemoModal('comunidade-rafael')}
-              className="text-xs font-bold text-primary hover:underline flex items-center gap-1 pt-2"
+              className="text-xs font-bold text-yellow-400 hover:text-yellow-300 hover:underline flex items-center gap-1.5 pt-2"
             >
               Explorar Comunidade Técnica <ArrowRight className="w-3.5 h-3.5" />
             </button>
@@ -475,21 +475,21 @@ export const PersonaSelectorView: React.FC<{ onEnterApp: () => void; initialAuth
       </section>
 
       {/* VITRINE DE VAGAS COM TRANSPARÊNCIA SALARIAL */}
-      <section id="vagas" className="py-10 bg-white border-y border-border">
+      <section id="vagas" className="py-12 bg-[#0D1017] border-y border-[#262F40]">
         <div className="max-w-[1320px] mx-auto px-4 sm:px-8 space-y-6">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
             <div>
-              <h2 className="text-lg sm:text-xl font-heading font-bold text-foreground">
+              <h2 className="text-lg sm:text-xl font-heading font-bold text-white">
                 Oportunidades em Destaque com Faixa Salarial Transparente
               </h2>
-              <p className="text-xs text-muted-foreground">
+              <p className="text-xs text-slate-400">
                 Todas as empresas parceiras divulgam remuneração aberta antes do seu aceite.
               </p>
             </div>
             <button
               type="button"
               onClick={openLoginModal}
-              className="text-xs font-bold text-primary hover:underline flex items-center gap-1"
+              className="text-xs font-bold text-yellow-400 hover:text-yellow-300 hover:underline flex items-center gap-1"
             >
               Entrar como candidato <ArrowRight className="w-3.5 h-3.5" />
             </button>
@@ -499,42 +499,42 @@ export const PersonaSelectorView: React.FC<{ onEnterApp: () => void; initialAuth
             {vacancies.slice(0, 4).map((vac) => {
               const comp = companies.find(c => c.id === vac.companyId);
               return (
-                <div key={vac.id} className="p-5 rounded-base bg-background border border-border flex flex-col justify-between gap-4">
+                <div key={vac.id} className="p-5 rounded-base bg-[#141824] border border-[#262F40] hover:border-yellow-400/40 flex flex-col justify-between gap-4 transition-all shadow-sm">
                   <div className="space-y-2">
                     <div className="flex items-center justify-between gap-2">
-                      <span className="text-[11px] font-bold text-primary bg-secondary px-2.5 py-0.5 rounded">
+                      <span className="text-[11px] font-bold text-yellow-400 bg-yellow-400/10 border border-yellow-400/20 px-2.5 py-0.5 rounded">
                         {vac.area} • {vac.seniority}
                       </span>
                       {vac.isUrgentMatchExpress && (
-                        <span className="text-[10px] bg-brandOrange/15 text-brandOrange font-bold px-2 py-0.5 rounded flex items-center gap-1">
+                        <span className="text-[10px] bg-yellow-400 text-black font-bold px-2 py-0.5 rounded flex items-center gap-1">
                           <Zap className="w-3 h-3" /> Match Express
                         </span>
                       )}
                     </div>
-                    <h3 className="font-heading font-bold text-sm text-foreground">{vac.title}</h3>
-                    <p className="text-xs text-muted-foreground">
+                    <h3 className="font-heading font-bold text-sm text-white">{vac.title}</h3>
+                    <p className="text-xs text-slate-400">
                       {comp?.name} • {vac.modality} ({vac.location})
                     </p>
                     <div className="flex flex-wrap gap-1.5 pt-1">
                       {vac.mandatorySkills.map((sk, idx) => (
-                        <span key={idx} className="text-[10px] bg-white border border-border px-2 py-0.5 rounded text-foreground font-medium">
+                        <span key={idx} className="text-[10px] bg-[#1E2536] border border-[#2D374D] px-2 py-0.5 rounded text-slate-200 font-medium">
                           {sk}
                         </span>
                       ))}
                     </div>
                   </div>
 
-                  <div className="flex items-center justify-between pt-3 border-t border-border">
+                  <div className="flex items-center justify-between pt-3 border-t border-[#262F40]">
                     <div>
-                      <span className="text-[10px] text-muted-foreground block">Faixa Salarial Mensal</span>
-                      <strong className="text-xs sm:text-sm font-bold text-foreground">
+                      <span className="text-[10px] text-slate-400 block">Faixa Salarial Mensal</span>
+                      <strong className="text-xs sm:text-sm font-bold text-white">
                         R$ {vac.salaryMin.toLocaleString('pt-BR')} — R$ {vac.salaryMax.toLocaleString('pt-BR')}
                       </strong>
                     </div>
                     <button
                       type="button"
                       onClick={openLoginModal}
-                      className="px-3.5 py-1.5 rounded-base bg-primary hover:bg-primary-dark text-white text-xs font-bold transition-all"
+                      className="px-3.5 py-1.5 rounded-base bg-yellow-400 hover:bg-yellow-300 text-black text-xs font-bold transition-all shadow-xs"
                     >
                       Ver Compatibilidade
                     </button>
@@ -548,12 +548,12 @@ export const PersonaSelectorView: React.FC<{ onEnterApp: () => void; initialAuth
 
       {/* PLANOS COMERCIAIS PARA EMPRESAS */}
       <section id="para-empresas" className="py-12 max-w-[1320px] mx-auto px-4 sm:px-8">
-        <div className="bg-brandNavy text-white rounded-base p-6 sm:p-10 flex flex-col lg:flex-row items-start lg:items-center justify-between gap-6">
+        <div className="bg-[#12161E] border border-[#262F40] text-white rounded-base p-6 sm:p-10 flex flex-col lg:flex-row items-start lg:items-center justify-between gap-6 shadow-xl">
           <div className="space-y-2 max-w-xl">
-            <h2 className="text-xl sm:text-2xl font-heading font-bold">
+            <h2 className="text-xl sm:text-2xl font-heading font-bold text-white">
               Recrutamento B2B sem mensalidade fixa obrigatória
             </h2>
-            <p className="text-xs sm:text-sm text-brandNavySub leading-relaxed">
+            <p className="text-xs sm:text-sm text-slate-300 leading-relaxed">
               Publique sua vaga com Match Express, receba o 1º candidato confirmado gratuitamente e desbloqueie novos perfis apenas quando quiser (R$ {commercialConfig.singleUnlockPriceBrl} avulso ou pacote de 5 créditos por R$ {commercialConfig.package5PriceBrl}).
             </p>
           </div>
@@ -561,38 +561,38 @@ export const PersonaSelectorView: React.FC<{ onEnterApp: () => void; initialAuth
             <button
               type="button"
               onClick={() => openSignupModal('empresa')}
-              className="px-5 py-3 rounded-base bg-brandOrange hover:opacity-95 text-white text-xs sm:text-sm font-bold flex items-center gap-2 shadow-md"
+              className="px-5 py-3 rounded-base bg-yellow-400 hover:bg-yellow-300 text-black text-xs sm:text-sm font-bold flex items-center gap-2 shadow-md transition-all"
             >
               <Building2 className="w-4 h-4" /> Criar Conta Empresa
             </button>
             <button
               type="button"
               onClick={() => openDemoModal('empresa-orion')}
-              className="px-4 py-3 rounded-base bg-white/10 hover:bg-white/15 border border-white/20 text-white text-xs font-bold flex items-center gap-1.5"
+              className="px-4 py-3 rounded-base bg-white/5 hover:bg-white/10 border border-white/20 text-white text-xs font-bold flex items-center gap-1.5 transition-all"
             >
-              <PlayCircle className="w-4 h-4 text-brandOrange" /> Ver Demo Empresa
+              <PlayCircle className="w-4 h-4 text-yellow-400" /> Ver Demo Empresa
             </button>
           </div>
         </div>
       </section>
 
       {/* RODAPÉ COMERCIAL */}
-      <footer className="bg-white border-t border-border py-6 text-xs text-muted-foreground">
+      <footer className="bg-[#0A0C10] border-t border-[#262F40] py-6 text-xs text-slate-400">
         <div className="max-w-[1320px] mx-auto px-4 sm:px-8 flex flex-col sm:flex-row items-center justify-between gap-2">
           <div className="flex items-center gap-2">
-            <div className="w-6 h-6 rounded bg-primary text-white font-heading font-bold text-xs flex items-center justify-center">
+            <div className="w-6 h-6 rounded bg-yellow-400 text-black font-heading font-bold text-xs flex items-center justify-center">
               Q
             </div>
-            <span className="font-bold text-foreground">Q.I. Tech</span>
+            <span className="font-bold text-white">Q.I. Tech</span>
             <span>© 2026 Todos os direitos reservados.</span>
           </div>
           <div className="flex items-center gap-4 text-[11px]">
-            <span>Privacidade & LGPD</span>
-            <span>Termos Corporativos</span>
+            <span className="hover:text-slate-300 cursor-pointer">Privacidade & LGPD</span>
+            <span className="hover:text-slate-300 cursor-pointer">Termos Corporativos</span>
             <button
               type="button"
               onClick={() => openDemoModal('admin-qitech')}
-              className="hover:text-primary font-semibold"
+              className="hover:text-yellow-400 text-slate-400 font-semibold transition-colors"
             >
               Acesso de Demonstração
             </button>
@@ -605,7 +605,7 @@ export const PersonaSelectorView: React.FC<{ onEnterApp: () => void; initialAuth
       {/* ===================================================================== */}
       {activeModal === 'login' && (
         <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-center justify-center p-4 animate-fadeIn">
-          <div className="bg-white rounded-base border border-border max-w-md w-full p-6 shadow-2xl space-y-5">
+          <div className="bg-[#12161E] rounded-base border border-[#262F40] max-w-md w-full p-6 shadow-2xl space-y-5 text-white">
             
             <div className="flex items-center justify-between border-b border-border pb-3">
               <div className="flex items-center gap-2.5">
@@ -672,7 +672,7 @@ export const PersonaSelectorView: React.FC<{ onEnterApp: () => void; initialAuth
 
               <button
                 type="submit"
-                className="w-full h-10 font-bold text-xs rounded-base flex items-center justify-center gap-2 text-white bg-primary hover:bg-primary-dark shadow-sm transition-all"
+                className="w-full h-10 font-bold text-xs rounded-base flex items-center justify-center gap-2 text-black bg-yellow-400 hover:bg-yellow-300 shadow-md transition-all"
               >
                 <LogIn className="w-4 h-4" /> Entrar na Plataforma
               </button>
@@ -710,7 +710,7 @@ export const PersonaSelectorView: React.FC<{ onEnterApp: () => void; initialAuth
       {/* ===================================================================== */}
       {activeModal === 'signup' && (
         <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-center justify-center p-4 animate-fadeIn">
-          <div className="bg-white rounded-base border border-border max-w-lg w-full p-6 shadow-2xl space-y-5 max-h-[92vh] overflow-y-auto">
+          <div className="bg-[#12161E] rounded-base border border-[#262F40] max-w-lg w-full p-6 shadow-2xl space-y-5 text-white max-h-[92vh] overflow-y-auto">
             
             <div className="flex items-center justify-between border-b border-border pb-3">
               <div className="flex items-center gap-2.5">
@@ -966,9 +966,7 @@ export const PersonaSelectorView: React.FC<{ onEnterApp: () => void; initialAuth
 
                 <button
                   type="submit"
-                  className={`w-full h-10 font-bold text-xs rounded-base flex items-center justify-center gap-2 text-white shadow-sm transition-all ${
-                    signupRole === 'empresa' ? 'bg-brandOrange hover:opacity-95' : 'bg-primary hover:bg-primary-dark'
-                  }`}
+                  className="w-full h-10 font-bold text-xs rounded-base flex items-center justify-center gap-2 text-black bg-yellow-400 hover:bg-yellow-300 shadow-md transition-all"
                 >
                   <UserPlus className="w-4 h-4" />
                   {signupRole === 'empresa'
@@ -998,7 +996,7 @@ export const PersonaSelectorView: React.FC<{ onEnterApp: () => void; initialAuth
       {/* ===================================================================== */}
       {activeModal === 'demo' && (
         <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-center justify-center p-4 animate-fadeIn">
-          <div className="bg-white rounded-base border border-border max-w-lg w-full p-6 shadow-2xl space-y-5 max-h-[92vh] overflow-y-auto">
+          <div className="bg-[#12161E] rounded-base border border-[#262F40] max-w-lg w-full p-6 shadow-2xl space-y-5 text-white max-h-[92vh] overflow-y-auto">
             
             <div className="flex items-center justify-between border-b border-border pb-3">
               <div className="flex items-center gap-2.5">
@@ -1030,8 +1028,8 @@ export const PersonaSelectorView: React.FC<{ onEnterApp: () => void; initialAuth
                     onClick={() => setSelectedDemoPersona(acc.id)}
                     className={`p-3.5 rounded-base border cursor-pointer transition-all flex items-start justify-between gap-3 ${
                       isSelected
-                        ? 'border-primary bg-secondary/50 shadow-2xs'
-                        : 'border-border bg-background hover:border-primary/40'
+                        ? 'border-yellow-400 bg-yellow-400/10 shadow-sm'
+                        : 'border-[#262F40] bg-[#161B26] hover:border-yellow-400/40'
                     }`}
                   >
                     <div className="space-y-1">
@@ -1060,7 +1058,7 @@ export const PersonaSelectorView: React.FC<{ onEnterApp: () => void; initialAuth
 
                     <div className="shrink-0 pt-0.5">
                       <div className={`w-4 h-4 rounded-full border flex items-center justify-center ${
-                        isSelected ? 'border-primary bg-primary text-white' : 'border-muted-foreground'
+                        isSelected ? 'border-yellow-400 bg-yellow-400 text-black' : 'border-muted-foreground'
                       }`}>
                         {isSelected && <CheckCircle2 className="w-3 h-3" />}
                       </div>
@@ -1073,7 +1071,7 @@ export const PersonaSelectorView: React.FC<{ onEnterApp: () => void; initialAuth
             <button
               type="button"
               onClick={handleEnterDemo}
-              className="w-full h-10 bg-primary hover:bg-primary-dark text-white font-bold text-xs rounded-base flex items-center justify-center gap-2 shadow-sm transition-all"
+              className="w-full h-10 bg-yellow-400 hover:bg-yellow-300 text-black font-bold text-xs rounded-base flex items-center justify-center gap-2 shadow-md transition-all"
             >
               <LogIn className="w-4 h-4" /> Entrar com Persona Selecionada
             </button>

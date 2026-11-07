@@ -266,7 +266,7 @@ export const CandidateInterviewView: React.FC<CandidateInterviewViewProps> = ({
     <div className="space-y-6">
       
       {/* CABEÇALHO UNIFICADO */}
-      <div className="bg-white p-5 rounded-base border border-border shadow-xs flex flex-col md:flex-row md:items-center justify-between gap-4">
+      <div className="bg-card p-5 rounded-base border border-border shadow-xs flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
           <div className="flex items-center gap-2 text-primary font-heading font-bold text-base">
             <Brain className="w-5 h-5 text-brandOrange" /> Entrevista de Triagem Técnica & Comportamental por IA
@@ -297,7 +297,7 @@ export const CandidateInterviewView: React.FC<CandidateInterviewViewProps> = ({
       </div>
 
       {/* SELETOR DE MODO */}
-      <div className="bg-white p-3 rounded-base border border-border shadow-xs flex flex-wrap items-center justify-between gap-3">
+      <div className="bg-card p-3 rounded-base border border-border shadow-xs flex flex-wrap items-center justify-between gap-3">
         <div className="flex items-center gap-2">
           <button
             type="button"
@@ -332,7 +332,7 @@ export const CandidateInterviewView: React.FC<CandidateInterviewViewProps> = ({
 
       {/* ==================== MODO 1: MOTOR IA COM VOZ OU TEXTO ==================== */}
       {interviewMode === 'engine' && (
-        <div className="bg-white p-5 rounded-base border border-border shadow-xs space-y-5">
+        <div className="bg-card p-5 rounded-base border border-border shadow-xs space-y-5">
           {apiError && (
             <div className="p-3.5 rounded-base bg-red-50 border border-red-200 text-red-700 text-xs font-medium flex items-center gap-2 shadow-xs">
               <AlertCircle className="w-4 h-4 shrink-0" /> {apiError}
@@ -362,7 +362,7 @@ export const CandidateInterviewView: React.FC<CandidateInterviewViewProps> = ({
                   className={`p-4 rounded-base border cursor-pointer transition-all space-y-1.5 ${
                     interviewType === 'TIPO_A_GERAL'
                       ? 'bg-secondary/40 border-primary ring-1 ring-primary/20'
-                      : 'bg-background border-border hover:bg-white'
+                      : 'bg-background border-border hover:bg-card'
                   }`}
                 >
                   <div className="flex items-center justify-between">
@@ -381,7 +381,7 @@ export const CandidateInterviewView: React.FC<CandidateInterviewViewProps> = ({
                   className={`p-4 rounded-base border cursor-pointer transition-all space-y-1.5 ${
                     interviewType === 'TIPO_B_VAGA'
                       ? 'bg-secondary/40 border-primary ring-1 ring-primary/20'
-                      : 'bg-background border-border hover:bg-white'
+                      : 'bg-background border-border hover:bg-card'
                   }`}
                 >
                   <div className="flex items-center justify-between">
@@ -402,7 +402,7 @@ export const CandidateInterviewView: React.FC<CandidateInterviewViewProps> = ({
                   <select
                     value={selectedJobId}
                     onChange={(e) => setSelectedJobId(e.target.value)}
-                    className="w-full h-10 px-3 rounded-base bg-white border border-border text-foreground font-medium"
+                    className="w-full h-10 px-3 rounded-base bg-card border border-border text-foreground font-medium"
                   >
                     {apiJobs.map((j) => (
                       <option key={j.id} value={j.id}>
@@ -515,7 +515,7 @@ export const CandidateInterviewView: React.FC<CandidateInterviewViewProps> = ({
                             value={textInput}
                             onChange={(e) => setTextInput(e.target.value)}
                             placeholder="Descreva seu exemplo real, ferramentas utilizadas, desafios enfrentados e resultados alcançados..."
-                            className="w-full bg-white border border-border rounded-base p-3 text-xs text-foreground focus:ring-1 focus:ring-primary leading-relaxed"
+                            className="w-full bg-card border border-border rounded-base p-3 text-xs text-foreground focus:ring-1 focus:ring-primary leading-relaxed"
                           />
                           <div className="flex items-center justify-between gap-2">
                             {activeAnswer ? (
@@ -525,7 +525,7 @@ export const CandidateInterviewView: React.FC<CandidateInterviewViewProps> = ({
                                   setEditedText(textInput);
                                   setIsEditingTranscript(true);
                                 }}
-                                className="px-3 py-1.5 rounded-base border border-border bg-white hover:bg-background text-xs font-semibold text-foreground flex items-center gap-1"
+                                className="px-3 py-1.5 rounded-base border border-border bg-card hover:bg-background text-xs font-semibold text-foreground flex items-center gap-1"
                               >
                                 <Edit3 className="w-3.5 h-3.5" /> Editar Texto
                               </button>
@@ -547,7 +547,7 @@ export const CandidateInterviewView: React.FC<CandidateInterviewViewProps> = ({
                             rows={4}
                             value={editedText}
                             onChange={(e) => setEditedText(e.target.value)}
-                            className="w-full bg-white border border-primary rounded-base p-3 text-xs text-foreground leading-relaxed"
+                            className="w-full bg-card border border-primary rounded-base p-3 text-xs text-foreground leading-relaxed"
                           />
                           <div className="flex justify-end gap-2">
                             <button
@@ -624,7 +624,7 @@ export const CandidateInterviewView: React.FC<CandidateInterviewViewProps> = ({
       {interviewMode === 'guided' && (
         <>
           {isCompleted && (
-            <div className="bg-white p-5 rounded-base border border-border shadow-xs space-y-4">
+            <div className="bg-card p-5 rounded-base border border-border shadow-xs space-y-4">
               <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-border pb-3">
                 <div>
                   <div className="flex items-center gap-2">
@@ -677,7 +677,7 @@ export const CandidateInterviewView: React.FC<CandidateInterviewViewProps> = ({
           )}
 
           {isContested && (
-            <div className="bg-white p-5 rounded-base border border-amber-300 shadow-xs space-y-3">
+            <div className="bg-card p-5 rounded-base border border-amber-300 shadow-xs space-y-3">
               <div className="flex items-center gap-2 text-amber-800 font-bold text-xs">
                 <AlertCircle className="w-4 h-4" /> Avaliação Contestada — Aguardando Revisão
               </div>
@@ -694,7 +694,7 @@ export const CandidateInterviewView: React.FC<CandidateInterviewViewProps> = ({
           )}
 
           {!isCompleted && !isContested && (
-            <div className="bg-white p-5 rounded-base border border-border shadow-xs space-y-4">
+            <div className="bg-card p-5 rounded-base border border-border shadow-xs space-y-4">
               <div className="flex items-center justify-between border-b border-border pb-3">
                 <span className="text-xs font-bold text-primary uppercase tracking-wider">
                   Pergunta {currentQuestionIndex + 1} de {activeQuestions.length}

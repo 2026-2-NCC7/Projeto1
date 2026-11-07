@@ -63,7 +63,7 @@ export const EcosystemTopBar: React.FC = () => {
               onClick={() => setActivePersona('empresa-orion')}
               className={`px-2.5 py-1 rounded font-semibold transition-all flex items-center gap-1 ${
                 activePersona === 'empresa-orion'
-                  ? 'bg-brandOrange text-white font-bold shadow-xs'
+                  ? 'bg-yellow-400 text-slate-950 font-bold shadow-xs'
                   : 'text-slate-300 hover:text-white'
               }`}
             >

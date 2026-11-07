@@ -191,7 +191,7 @@ export const CompanyDashboardView: React.FC<CompanyDashboardViewProps> = ({
     <div className="space-y-6">
       
       {/* 1. CABEÇALHO CORPORATIVO & AÇÃO PRINCIPAL */}
-      <div className="bg-white p-5 rounded-base border border-border shadow-xs flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+      <div className="bg-card p-5 rounded-base border border-border shadow-xs flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
           <div className="flex items-center gap-2 flex-wrap">
             <Building2 className="w-5 h-5 text-primary" />
@@ -212,7 +212,7 @@ export const CompanyDashboardView: React.FC<CompanyDashboardViewProps> = ({
               setModalStep(1);
               setShowNewVacancyModal(true);
             }}
-            className="px-4 py-2 bg-primary hover:bg-primary-dark text-white text-xs font-bold rounded-base flex items-center gap-1.5 shadow-xs transition-all"
+            className="px-4 py-2 bg-primary hover:bg-primary-dark text-black text-xs font-bold rounded-base flex items-center gap-1.5 shadow-xs transition-all"
           >
             <Plus className="w-4 h-4" /> Criar Nova Vaga
           </button>
@@ -232,7 +232,7 @@ export const CompanyDashboardView: React.FC<CompanyDashboardViewProps> = ({
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
         
         {/* Indicador 1: Vagas Ativas */}
-        <div className="bg-white p-4 rounded-base border border-border shadow-xs text-center space-y-1">
+        <div className="bg-card p-4 rounded-base border border-border shadow-xs text-center space-y-1">
           <span className="text-xs font-semibold text-muted-foreground block">Vagas Ativas</span>
           <span className="text-2xl font-heading font-black text-primary block">
             {myCompanyVacancies.length}
@@ -243,7 +243,7 @@ export const CompanyDashboardView: React.FC<CompanyDashboardViewProps> = ({
         </div>
 
         {/* Indicador 2: Convites Aguardando Resposta */}
-        <div className="bg-white p-4 rounded-base border border-border shadow-xs text-center space-y-1">
+        <div className="bg-card p-4 rounded-base border border-border shadow-xs text-center space-y-1">
           <span className="text-xs font-semibold text-muted-foreground block">Convites Aguardando Resposta</span>
           <span className="text-2xl font-heading font-black text-brandOrange block">
             {pendingInvitesCount}
@@ -254,7 +254,7 @@ export const CompanyDashboardView: React.FC<CompanyDashboardViewProps> = ({
         </div>
 
         {/* Indicador 3: Compartilhamento Autorizado */}
-        <div className="bg-white p-4 rounded-base border border-border shadow-xs text-center space-y-1">
+        <div className="bg-card p-4 rounded-base border border-border shadow-xs text-center space-y-1">
           <span className="text-xs font-semibold text-muted-foreground block">Compartilhamento Autorizado</span>
           <span className="text-2xl font-heading font-black text-emerald-700 block">
             {optInAcceptedCount}
@@ -267,7 +267,7 @@ export const CompanyDashboardView: React.FC<CompanyDashboardViewProps> = ({
       </div>
 
       {/* 3. LISTA DE VAGAS DA EMPRESA */}
-      <div className="bg-white p-5 rounded-base border border-border shadow-xs space-y-4">
+      <div className="bg-card p-5 rounded-base border border-border shadow-xs space-y-4">
         <div className="flex items-center justify-between border-b border-border pb-3">
           <div>
             <h3 className="font-heading font-bold text-sm text-foreground">Minhas Vagas & Shortlists</h3>
@@ -312,7 +312,7 @@ export const CompanyDashboardView: React.FC<CompanyDashboardViewProps> = ({
                     </p>
                     <div className="flex flex-wrap gap-1 pt-1">
                       {vac.mandatorySkills.slice(0, 4).map((sk, idx) => (
-                        <span key={idx} className="text-[10px] bg-white border border-border text-foreground px-2 py-0.5 rounded font-medium">
+                        <span key={idx} className="text-[10px] bg-card border border-border text-foreground px-2 py-0.5 rounded font-medium">
                           {sk}
                         </span>
                       ))}
@@ -331,7 +331,7 @@ export const CompanyDashboardView: React.FC<CompanyDashboardViewProps> = ({
 
                     <button
                       onClick={() => onSelectVacancy(vac.id)}
-                      className="px-3.5 py-2 bg-primary hover:bg-primary-dark text-white text-xs font-bold rounded-base flex items-center gap-1 transition-all shadow-xs"
+                      className="px-3.5 py-2 bg-primary hover:bg-primary-dark text-black text-xs font-bold rounded-base flex items-center gap-1 transition-all shadow-xs"
                     >
                       Gerenciar Vaga <ArrowRight className="w-3.5 h-3.5" />
                     </button>
@@ -344,7 +344,7 @@ export const CompanyDashboardView: React.FC<CompanyDashboardViewProps> = ({
       </div>
 
       {/* 4. ÁREA FINANCEIRA: GESTÃO DE CRÉDITOS & NFS-e (SIMULAÇÃO ACADÊMICA) */}
-      <div className="bg-white p-5 rounded-base border border-border shadow-xs space-y-4">
+      <div className="bg-card p-5 rounded-base border border-border shadow-xs space-y-4">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-border pb-3">
           <div>
             <div className="flex items-center gap-2">
@@ -367,7 +367,7 @@ export const CompanyDashboardView: React.FC<CompanyDashboardViewProps> = ({
             </button>
             <button
               onClick={() => buyCompanyCreditPackage(5, commercialConfig.package5PriceBrl, 'Pacote Scale-Up (5 Desbloqueios)')}
-              className="px-3.5 py-1.5 rounded-base bg-primary hover:bg-primary-dark text-white text-xs font-bold transition-all shadow-xs"
+              className="px-3.5 py-1.5 rounded-base bg-primary hover:bg-primary-dark text-black text-xs font-bold transition-all shadow-xs"
             >
               +5 Créditos (R$ {commercialConfig.package5PriceBrl})
             </button>
@@ -427,7 +427,7 @@ export const CompanyDashboardView: React.FC<CompanyDashboardViewProps> = ({
       {/* MODAL DE CADASTRO DE VAGA EM 3 ETAPAS PROGRESSIVAS (TELA E02) */}
       {showNewVacancyModal && (
         <div className="fixed inset-0 z-50 bg-black/40 flex items-center justify-center p-4">
-          <div className="bg-white rounded-base border border-border max-w-lg w-full p-6 space-y-4 shadow-xl">
+          <div className="bg-card rounded-base border border-border max-w-lg w-full p-6 space-y-4 shadow-xl">
             
             {/* CABEÇALHO DO MODAL COM INDICADOR DE ETAPAS */}
             <div className="flex items-center justify-between border-b border-border pb-3">
@@ -499,7 +499,7 @@ export const CompanyDashboardView: React.FC<CompanyDashboardViewProps> = ({
                         type="number"
                         value={salaryMin}
                         onChange={(e) => setSalaryMin(e.target.value)}
-                        className="w-full h-9 px-3 bg-white border border-border rounded-base font-bold"
+                        className="w-full h-9 px-3 bg-card border border-border rounded-base font-bold"
                       />
                     </div>
                     <div>
@@ -508,7 +508,7 @@ export const CompanyDashboardView: React.FC<CompanyDashboardViewProps> = ({
                         type="number"
                         value={salaryMax}
                         onChange={(e) => setSalaryMax(e.target.value)}
-                        className="w-full h-9 px-3 bg-white border border-border rounded-base font-bold"
+                        className="w-full h-9 px-3 bg-card border border-border rounded-base font-bold"
                       />
                     </div>
                   </div>
@@ -524,7 +524,7 @@ export const CompanyDashboardView: React.FC<CompanyDashboardViewProps> = ({
                   <button
                     type="button"
                     onClick={handleStep1Next}
-                    className="px-4 py-2 bg-primary hover:bg-primary-dark text-white font-bold rounded-base flex items-center gap-1"
+                    className="px-4 py-2 bg-primary hover:bg-primary-dark text-black font-bold rounded-base flex items-center gap-1"
                   >
                     Avançar para Requisitos <ArrowRight className="w-3.5 h-3.5" />
                   </button>
@@ -593,7 +593,7 @@ export const CompanyDashboardView: React.FC<CompanyDashboardViewProps> = ({
                   <button
                     type="button"
                     onClick={handleStep2Next}
-                    className="px-4 py-2 bg-primary hover:bg-primary-dark text-white font-bold rounded-base flex items-center gap-1"
+                    className="px-4 py-2 bg-primary hover:bg-primary-dark text-black font-bold rounded-base flex items-center gap-1"
                   >
                     Revisar Vaga <ArrowRight className="w-3.5 h-3.5" />
                   </button>
@@ -649,7 +649,7 @@ export const CompanyDashboardView: React.FC<CompanyDashboardViewProps> = ({
                   <button
                     type="submit"
                     disabled={isSavingVacancy}
-                    className="px-5 py-2.5 bg-primary hover:bg-primary-dark text-white font-bold rounded-base flex items-center gap-1.5 shadow-xs disabled:opacity-50"
+                    className="px-5 py-2.5 bg-primary hover:bg-primary-dark text-black font-bold rounded-base flex items-center gap-1.5 shadow-xs disabled:opacity-50"
                   >
                     {isSavingVacancy ? 'Publicando vaga...' : 'Confirmar e Publicar Vaga'}
                   </button>

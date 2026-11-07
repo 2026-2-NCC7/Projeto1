@@ -34,7 +34,7 @@ export const CommunityHelperView: React.FC = () => {
   return (
     <div className="space-y-6">
       
-      <div className="bg-white p-5 rounded-base border border-border shadow-xs space-y-3">
+      <div className="bg-card p-5 rounded-base border border-border shadow-xs space-y-3">
         <div className="flex items-center gap-2">
           <Sparkles className="w-5 h-5 text-brandOrange" />
           <h2 className="font-heading font-bold text-base text-foreground">Mentoria & Descoberta por Habilidade</h2>
@@ -86,7 +86,7 @@ export const CommunityHelperView: React.FC = () => {
       {/* RESULTADO DA BUSCA DE MEMBROS */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         {filtered.length === 0 ? (
-          <div className="col-span-2 p-8 text-center bg-white rounded-base border border-border text-xs text-muted-foreground">
+          <div className="col-span-2 p-8 text-center bg-card rounded-base border border-border text-xs text-muted-foreground">
             Nenhum especialista encontrado com a habilidade "{searchSkill}".
           </div>
         ) : (
@@ -102,7 +102,7 @@ export const CommunityHelperView: React.FC = () => {
             const sharedCount = person.skills.filter(s => mySkillsLower.includes(s.toLowerCase())).length;
 
             return (
-              <div key={person.id} className="bg-white p-5 rounded-base border border-border shadow-xs space-y-3.5 flex flex-col justify-between">
+              <div key={person.id} className="bg-card p-5 rounded-base border border-border shadow-xs space-y-3.5 flex flex-col justify-between">
                 <div className="space-y-3">
                   <div className="flex items-start justify-between gap-3">
                     <div className="flex items-center gap-3">

@@ -202,7 +202,7 @@ export const Header: React.FC<HeaderProps> = ({ currentViewTitle }) => {
             </button>
 
             {showUserMenu && (
-              <div className="absolute right-0 mt-2 w-64 bg-white border border-border rounded-base shadow-xl py-2 z-50">
+              <div className="absolute right-0 mt-2 w-64 bg-card border border-border rounded-base shadow-xl py-2 z-50">
                 <div className="px-3.5 py-2 border-b border-border bg-background/50">
                   <span className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground block">
                     Sessão Autenticada

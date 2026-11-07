@@ -72,7 +72,7 @@ export const CompanyVacancyDetailView: React.FC<CompanyVacancyDetailViewProps> =
     <div className="space-y-6">
       
       {/* TOPO DA VAGA */}
-      <div className="bg-white p-5 rounded-base border border-border shadow-xs flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+      <div className="bg-card p-5 rounded-base border border-border shadow-xs flex flex-col sm:flex-row sm:items-center justify-between gap-3">
         <div>
           <button onClick={onBack} className="text-xs text-primary font-bold hover:underline flex items-center gap-1 mb-1">
             <ArrowLeft className="w-3.5 h-3.5" /> Voltar para todas as vagas e financeiro
@@ -140,8 +140,8 @@ export const CompanyVacancyDetailView: React.FC<CompanyVacancyDetailViewProps> =
                 }}
                 className={`p-4 rounded-base border cursor-pointer transition-all ${
                   isSelected 
-                    ? 'bg-white border-primary shadow-xs ring-1 ring-primary/20' 
-                    : 'bg-white border-border hover:bg-background'
+                    ? 'bg-card border-primary shadow-xs ring-1 ring-primary/20' 
+                    : 'bg-card border-border hover:bg-background'
                 }`}
               >
                 <div className="flex items-start justify-between gap-2 mb-2">
@@ -190,7 +190,7 @@ export const CompanyVacancyDetailView: React.FC<CompanyVacancyDetailViewProps> =
         </div>
 
         {/* COLUNA DIREITA: DETALHE DO CANDIDATO SELECIONADO E GESTÃO DE ETAPAS */}
-        <div className="lg:col-span-7 bg-white p-5 rounded-base border border-border shadow-xs space-y-5">
+        <div className="lg:col-span-7 bg-card p-5 rounded-base border border-border shadow-xs space-y-5">
           {selectedProcess && selectedCandidate ? (
             <>
               {/* CABEÇALHO DO CANDIDATO */}
@@ -261,7 +261,7 @@ export const CompanyVacancyDetailView: React.FC<CompanyVacancyDetailViewProps> =
                     )}
                   </div>
                 ) : selectedProcess.doubleOptInStatus === 'aceito' ? (
-                  <div className="p-3 bg-white rounded-base border border-brandOrange/40 space-y-3">
+                  <div className="p-3 bg-card rounded-base border border-brandOrange/40 space-y-3">
                     <div className="flex items-start gap-2">
                       <CreditCard className="w-4 h-4 text-brandOrange shrink-0 mt-0.5" />
                       <div>
@@ -459,7 +459,7 @@ export const CompanyVacancyDetailView: React.FC<CompanyVacancyDetailViewProps> =
       {/* MODAL DE CONFIRMAÇÃO DE RECUSA */}
       {showRejectConfirm && selectedProcess && (
         <div className="fixed inset-0 z-50 bg-black/40 flex items-center justify-center p-4">
-          <div className="bg-white rounded-base border border-border p-5 max-w-sm w-full shadow-lg space-y-3">
+          <div className="bg-card rounded-base border border-border p-5 max-w-sm w-full shadow-lg space-y-3">
             <h4 className="font-heading font-bold text-sm text-destructive flex items-center gap-1.5">
               <AlertCircle className="w-4 h-4" /> Recusar Candidato
             </h4>

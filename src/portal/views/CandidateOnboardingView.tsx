@@ -132,7 +132,7 @@ export const CandidateOnboardingView: React.FC<{ onComplete: () => void }> = ({ 
         </div>
       </div>
 
-      <div className="bg-white p-6 rounded-base border border-border shadow-xs space-y-5">
+      <div className="bg-card p-6 rounded-base border border-border shadow-xs space-y-5">
 
         {/* ==================== ETAPA 1: PERFIL PROFISSIONAL ==================== */}
         {step === 1 && (
@@ -182,7 +182,7 @@ export const CandidateOnboardingView: React.FC<{ onComplete: () => void }> = ({ 
                       type="button"
                       onClick={() => toggleSkill(sk)}
                       className={`px-2.5 py-1 rounded text-[11px] font-medium transition-all ${isSelected
-                          ? 'bg-primary text-white font-bold shadow-xs'
+                          ? 'bg-primary text-black font-bold shadow-xs'
                           : 'bg-background border border-border text-muted-foreground hover:text-foreground'
                         }`}
                     >
@@ -222,7 +222,7 @@ export const CandidateOnboardingView: React.FC<{ onComplete: () => void }> = ({ 
               <button
                 type="button"
                 onClick={handleStep1Next}
-                className="px-5 py-2.5 bg-primary hover:bg-primary-dark text-white font-bold rounded-base flex items-center gap-1.5 shadow-xs transition-all"
+                className="px-5 py-2.5 bg-primary hover:bg-primary-dark text-black font-bold rounded-base flex items-center gap-1.5 shadow-xs transition-all"
               >
                 Avançar para Preferências <ArrowRight className="w-4 h-4" />
               </button>
@@ -331,7 +331,7 @@ export const CandidateOnboardingView: React.FC<{ onComplete: () => void }> = ({ 
               <button
                 type="button"
                 onClick={handleStep2Next}
-                className="px-5 py-2.5 bg-primary hover:bg-primary-dark text-white font-bold rounded-base flex items-center gap-1.5 shadow-xs transition-all"
+                className="px-5 py-2.5 bg-primary hover:bg-primary-dark text-black font-bold rounded-base flex items-center gap-1.5 shadow-xs transition-all"
               >
                 Revisar e Confirmar <ArrowRight className="w-4 h-4" />
               </button>
@@ -371,7 +371,7 @@ export const CandidateOnboardingView: React.FC<{ onComplete: () => void }> = ({ 
                 <span className="text-muted-foreground block mb-1">Competências cadastradas:</span>
                 <div className="flex flex-wrap gap-1">
                   {selectedSkills.map(s => (
-                    <span key={s} className="px-2 py-0.5 rounded bg-white border border-border text-foreground font-semibold text-[11px]">
+                    <span key={s} className="px-2 py-0.5 rounded bg-card border border-border text-foreground font-semibold text-[11px]">
                       {s}
                     </span>
                   ))}
@@ -401,7 +401,7 @@ export const CandidateOnboardingView: React.FC<{ onComplete: () => void }> = ({ 
               <button
                 type="button"
                 onClick={handleFinalSubmit}
-                className="px-6 py-2.5 bg-primary hover:bg-primary-dark text-white font-bold rounded-base shadow-xs flex items-center gap-2 transition-all"
+                className="px-6 py-2.5 bg-primary hover:bg-primary-dark text-black font-bold rounded-base shadow-xs flex items-center gap-2 transition-all"
               >
                 <Check className="w-4 h-4" /> Concluir Cadastro
               </button>

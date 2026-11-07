@@ -80,7 +80,7 @@ export const CommunityFeedView: React.FC = () => {
 
         {/* CARD DE ATIVAÇÃO DE CARREIRA PARA MEMBRO DA COMUNIDADE */}
         {activePersona === 'comunidade-rafael' && (
-          <div className="bg-white p-4 rounded-base border border-primary/40 shadow-xs flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+          <div className="bg-card p-4 rounded-base border border-primary/40 shadow-xs flex flex-col sm:flex-row sm:items-center justify-between gap-3">
             <div className="space-y-1">
               <div className="flex items-center gap-2 text-primary font-heading font-bold text-xs">
                 <Briefcase className="w-4 h-4 text-brandOrange" />
@@ -107,7 +107,7 @@ export const CommunityFeedView: React.FC = () => {
         )}
         
         {/* COMPOSITOR DE PUBLICAÇÃO */}
-        <div className="bg-white p-4 rounded-base border border-border shadow-xs space-y-3">
+        <div className="bg-card p-4 rounded-base border border-border shadow-xs space-y-3">
           <div className="flex items-center justify-between border-b border-border pb-2">
             <span className="font-heading font-bold text-xs text-foreground">Nova Publicação na Comunidade</span>
             <div className="flex gap-2 text-xs">
@@ -169,7 +169,7 @@ export const CommunityFeedView: React.FC = () => {
             const postComments = comments.filter(c => c.postId === post.id);
 
             return (
-              <div key={post.id} className="bg-white p-5 rounded-base border border-border shadow-xs space-y-3">
+              <div key={post.id} className="bg-card p-5 rounded-base border border-border shadow-xs space-y-3">
                 
                 {/* Autor */}
                 <div className="flex items-center justify-between">
@@ -250,7 +250,7 @@ export const CommunityFeedView: React.FC = () => {
                   <div className="pt-3 border-t border-border space-y-3 bg-background p-3 rounded-base">
                     <div className="space-y-2">
                       {postComments.map((c) => (
-                        <div key={c.id} className="text-xs bg-white p-2.5 rounded-base border border-border">
+                        <div key={c.id} className="text-xs bg-card p-2.5 rounded-base border border-border">
                           <strong className="text-[11px] text-primary block">{c.authorName}</strong>
                           <p className="text-foreground text-[11px] mt-0.5">{c.content}</p>
                         </div>
@@ -263,7 +263,7 @@ export const CommunityFeedView: React.FC = () => {
                         value={commentText}
                         onChange={(e) => setCommentText(e.target.value)}
                         placeholder="Escreva sua resposta técnica..."
-                        className="flex-1 h-8 bg-white border border-border rounded-base px-2.5 text-xs text-foreground"
+                        className="flex-1 h-8 bg-card border border-border rounded-base px-2.5 text-xs text-foreground"
                       />
                       <button
                         onClick={() => handleSendComment(post.id)}
@@ -286,7 +286,7 @@ export const CommunityFeedView: React.FC = () => {
       <div className="lg:col-span-4 space-y-4">
         
         {/* Sugestões de Conexão */}
-        <div className="bg-white p-4 rounded-base border border-border shadow-xs space-y-3">
+        <div className="bg-card p-4 rounded-base border border-border shadow-xs space-y-3">
           <div className="flex items-center justify-between border-b border-border pb-2">
             <h4 className="font-heading font-bold text-xs text-foreground flex items-center gap-1.5">
               <Sparkles className="w-3.5 h-3.5 text-brandOrange" /> Conexões por Grau de Afinidade
@@ -330,7 +330,7 @@ export const CommunityFeedView: React.FC = () => {
                           className={`text-[9px] px-1.5 py-0.2 rounded border ${
                             isCommon
                               ? 'bg-brandOrange/15 border-brandOrange/40 text-brandOrange font-bold'
-                              : 'bg-white border-border text-foreground'
+                              : 'bg-card border-border text-foreground'
                           }`}
                         >
                           {sk}
@@ -348,7 +348,7 @@ export const CommunityFeedView: React.FC = () => {
                     ) : (
                       <button
                         onClick={() => connectToUser(sug.userId)}
-                        className="px-2.5 py-1 bg-white hover:bg-secondary text-primary border border-border text-[10px] font-bold rounded flex items-center gap-1"
+                        className="px-2.5 py-1 bg-card hover:bg-secondary text-primary border border-border text-[10px] font-bold rounded flex items-center gap-1"
                       >
                         <UserPlus className="w-3 h-3" /> Conectar
                       </button>
@@ -361,7 +361,7 @@ export const CommunityFeedView: React.FC = () => {
         </div>
 
         {/* Tópicos em Alta */}
-        <div className="bg-white p-4 rounded-base border border-border shadow-xs space-y-2">
+        <div className="bg-card p-4 rounded-base border border-border shadow-xs space-y-2">
           <h4 className="font-heading font-bold text-xs text-foreground border-b border-border pb-2">Assuntos Técnicos em Alta</h4>
           <ul className="text-xs space-y-1.5 text-muted-foreground">
             <li className="flex justify-between items-center hover:text-primary cursor-pointer">

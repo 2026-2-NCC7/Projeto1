@@ -77,7 +77,7 @@ export const CandidateRewardsView: React.FC = () => {
     <div className="space-y-6">
       
       {/* CABEÇALHO DE SALDO E REGRAS DO PROGRAMA QUEM INDICA */}
-      <div className="bg-white p-5 rounded-base border border-border shadow-xs">
+      <div className="bg-card p-5 rounded-base border border-border shadow-xs">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div className="space-y-1">
             <div className="flex items-center gap-2">
@@ -106,7 +106,7 @@ export const CandidateRewardsView: React.FC = () => {
       </div>
 
       {/* MÓDULO 1: GERADOR DE LINKS RASTREÁVEIS DE INDICAÇÃO ("QUEM INDICA") */}
-      <div className="bg-white p-5 rounded-base border border-border shadow-xs space-y-4">
+      <div className="bg-card p-5 rounded-base border border-border shadow-xs space-y-4">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-border pb-3">
           <div>
             <h3 className="font-heading font-bold text-sm text-foreground flex items-center gap-2">
@@ -191,7 +191,7 @@ export const CandidateRewardsView: React.FC = () => {
               <button
                 type="button"
                 onClick={() => handleCopyLink(referralLinkGenerated)}
-                className="px-3 py-1.5 bg-white border border-border rounded-base text-[11px] font-bold text-foreground hover:bg-background flex items-center gap-1"
+                className="px-3 py-1.5 bg-card border border-border rounded-base text-[11px] font-bold text-foreground hover:bg-background flex items-center gap-1"
               >
                 {copiedLink ? <Check className="w-3.5 h-3.5 text-emerald-600" /> : <Copy className="w-3.5 h-3.5" />}
                 {copiedLink ? 'Copiado!' : 'Copiar Link'}
@@ -251,7 +251,7 @@ export const CandidateRewardsView: React.FC = () => {
       </div>
 
       {/* MÓDULO 2: LOJA DE RECOMPENSAS & VOUCHERS PARCEIROS */}
-      <div className="bg-white p-5 rounded-base border border-border shadow-xs space-y-4">
+      <div className="bg-card p-5 rounded-base border border-border shadow-xs space-y-4">
         <div className="border-b border-border pb-3">
           <h3 className="font-heading font-bold text-sm text-foreground flex items-center gap-2">
             <Gift className="w-4 h-4 text-primary" /> Loja de Benefícios & Vouchers Parceiros
@@ -313,7 +313,7 @@ export const CandidateRewardsView: React.FC = () => {
       </div>
 
       {/* MÓDULO 3: EXTRATO DA CARTEIRA DE ESTALECAS Q.I. */}
-      <div className="bg-white p-5 rounded-base border border-border shadow-xs space-y-3">
+      <div className="bg-card p-5 rounded-base border border-border shadow-xs space-y-3">
         <h3 className="font-heading font-bold text-sm text-foreground border-b border-border pb-2">
           Extrato da Carteira de Estalecas Q.I.
         </h3>

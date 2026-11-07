@@ -37,14 +37,14 @@ export const SidebarNav: React.FC<SidebarNavProps> = ({ currentTab, setCurrentTa
   const getItemClass = (tab: string) => `
     w-full flex items-center justify-between px-3 py-2 rounded-base text-xs font-medium transition-colors
     ${currentTab === tab 
-      ? 'bg-secondary text-primary font-bold shadow-xs' 
-      : 'text-muted-foreground hover:bg-background hover:text-foreground'
+      ? 'bg-yellow-400 text-black font-bold shadow-xs' 
+      : 'text-muted-foreground hover:bg-secondary/60 hover:text-foreground'
     }
   `;
 
   return (
     <aside className="w-full lg:w-[220px] shrink-0 space-y-4">
-      <div className="bg-white p-3 rounded-base border border-border shadow-xs space-y-1">
+      <div className="bg-card p-3 rounded-base border border-border shadow-xs space-y-1">
         
         {/* ==================== 1. CANDIDATO (ATÉ 5 ÁREAS PRINCIPAIS) ==================== */}
         {isCandidate && (
