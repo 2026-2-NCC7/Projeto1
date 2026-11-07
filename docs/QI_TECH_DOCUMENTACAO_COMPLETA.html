@@ -1,0 +1,1075 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <title>Q.I. Tech Matchmaker Engine</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap');
+
+        @page {
+            size: A4 portrait;
+            margin: 20mm 15mm 20mm 15mm;
+            @bottom-right {
+                content: "Página " counter(page);
+                font-family: 'Inter', sans-serif;
+                font-size: 8pt;
+                color: #64748b;
+            }
+            @bottom-left {
+                content: "FECAP &bull; Flavio Santos (23025666) & Maria Eduarda Lopes (23025447)";
+                font-family: 'Inter', sans-serif;
+                font-size: 8pt;
+                color: #64748b;
+            }
+        }
+
+        * {
+            box-sizing: border-box;
+            -webkit-print-color-adjust: exact !important;
+            print-color-adjust: exact !important;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            font-size: 10.5pt;
+            line-height: 1.6;
+            color: #1e293b;
+            background-color: #ffffff;
+            margin: 0;
+            padding: 0;
+        }
+
+        .page-break {
+            page-break-before: always;
+            break-before: page;
+        }
+
+        /* Cover Page */
+        .cover-page {
+            min-height: 250mm;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            padding: 30mm 15mm 20mm 15mm;
+            text-align: center;
+        }
+
+        .cover-institution {
+            font-size: 13pt;
+            font-weight: 700;
+            letter-spacing: 2px;
+            color: #0f172a;
+            border-bottom: 2px solid #0284c7;
+            padding-bottom: 8px;
+            display: inline-block;
+        }
+
+        .cover-discipline {
+            font-size: 10pt;
+            font-weight: 600;
+            color: #64748b;
+            margin-top: 6px;
+            letter-spacing: 1px;
+        }
+
+        .cover-center {
+            margin: 40mm 0;
+        }
+
+        .cover-badge {
+            display: inline-block;
+            background: #e0f2fe;
+            color: #0369a1;
+            font-size: 9pt;
+            font-weight: 700;
+            padding: 4px 14px;
+            border-radius: 9999px;
+            letter-spacing: 1px;
+            margin-bottom: 16px;
+        }
+
+        .cover-title {
+            font-size: 26pt;
+            font-weight: 800;
+            color: #0f172a;
+            line-height: 1.2;
+            margin: 0 0 16px 0;
+        }
+
+        .cover-subtitle {
+            font-size: 13pt;
+            color: #475569;
+            max-width: 650px;
+            margin: 0 auto;
+            line-height: 1.5;
+        }
+
+        .cover-footer {
+            background: #f8fafc;
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            padding: 16px;
+            text-align: left;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            font-size: 9.5pt;
+        }
+
+        /* Document Body */
+        .content-container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 10px;
+        }
+
+        h1, h2, h3, h4 {
+            color: #0f172a;
+            font-weight: 700;
+            page-break-after: avoid;
+        }
+
+        h1 {
+            font-size: 19pt;
+            border-bottom: 2px solid #e2e8f0;
+            padding-bottom: 8px;
+            margin-top: 24pt;
+            margin-bottom: 14pt;
+        }
+
+        h2 {
+            font-size: 14pt;
+            border-left: 4px solid #0284c7;
+            padding-left: 10px;
+            margin-top: 18pt;
+            margin-bottom: 10pt;
+        }
+
+        h3 {
+            font-size: 11.5pt;
+            color: #334155;
+            margin-top: 14pt;
+            margin-bottom: 6pt;
+        }
+
+        p {
+            margin: 0 0 10pt 0;
+            text-align: justify;
+        }
+
+        /* Tables */
+        .table-container {
+            margin: 14pt 0;
+            overflow-x: auto;
+            page-break-inside: avoid;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 9pt;
+            margin: 0;
+        }
+
+        th, td {
+            border: 1px solid #cbd5e1;
+            padding: 7px 10px;
+            text-align: left;
+        }
+
+        th {
+            background-color: #f1f5f9;
+            color: #0f172a;
+            font-weight: 600;
+        }
+
+        tr:nth-child(even) {
+            background-color: #f8fafc;
+        }
+
+        /* Code Blocks */
+        .code-card {
+            margin: 12pt 0;
+            border: 1px solid #cbd5e1;
+            border-radius: 6px;
+            overflow: hidden;
+            background: #0f172a;
+            page-break-inside: avoid;
+        }
+
+        .code-header {
+            background: #1e293b;
+            color: #94a3b8;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 7.5pt;
+            padding: 4px 10px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            border-bottom: 1px solid #334155;
+        }
+
+        pre {
+            margin: 0;
+            padding: 10px 14px;
+            overflow-x: auto;
+        }
+
+        code {
+            font-family: 'JetBrains Mono', Consolas, monospace;
+            font-size: 8.5pt;
+            color: #38bdf8;
+            background: #f1f5f9;
+            padding: 2px 5px;
+            border-radius: 4px;
+        }
+
+        pre code {
+            background: transparent;
+            color: #f8fafc;
+            padding: 0;
+        }
+
+        /* Alerts */
+        .alert, .blockquote {
+            border-left: 4px solid #64748b;
+            background: #f8fafc;
+            padding: 10px 14px;
+            margin: 12pt 0;
+            border-radius: 0 6px 6px 0;
+            font-size: 9.5pt;
+        }
+
+        .alert-note {
+            border-left-color: #0284c7;
+            background: #f0f9ff;
+        }
+
+        .alert-warning {
+            border-left-color: #f59e0b;
+            background: #fffbeb;
+        }
+
+        .alert-important {
+            border-left-color: #ef4444;
+            background: #fef2f2;
+        }
+
+        /* Lists */
+        ul, ol {
+            margin: 0 0 10pt 0;
+            padding-left: 20px;
+        }
+
+        li {
+            margin-bottom: 4pt;
+        }
+
+        /* Math */
+        .math-block {
+            background: #f8fafc;
+            border: 1px solid #e2e8f0;
+            padding: 8px;
+            border-radius: 6px;
+            text-align: center;
+            font-family: 'JetBrains Mono', monospace;
+            font-weight: 600;
+            color: #0369a1;
+            margin: 10pt 0;
+        }
+
+        .math-inline {
+            font-family: 'JetBrains Mono', monospace;
+            font-weight: 600;
+            color: #0369a1;
+            background: #f0f9ff;
+            padding: 1px 4px;
+            border-radius: 3px;
+        }
+
+        hr {
+            border: none;
+            border-top: 1px solid #e2e8f0;
+            margin: 20pt 0;
+        }
+    </style>
+</head>
+<body>
+    
+        <div class="cover-page">
+            <div class="cover-institution">FECAP &mdash; FUNDAÇÃO ESCOLA DE COMÉRCIO ÁLVARES PENTEADO</div>
+            <div class="cover-discipline">BACHARELADO EM CIÊNCIA DA COMPUTAÇÃO &bull; ENGENHARIA DE SOFTWARE</div>
+            <div class="cover-center">
+                <div class="cover-badge">Q.I. TECH MATCHMAKER ENGINE</div>
+                <h1 class="cover-title">Q.I. Tech Matchmaker Engine</h1>
+                <div class="cover-subtitle">Dossiê Acadêmico e Técnico Completo &bull; Metodologia Ágil (XP), Engenharia de Software, Modelos Locais de IA e Avaliação Empírica</div>
+            </div>
+            <div class="cover-footer">
+                <div class="cover-meta-item">
+                    <strong>Autores:</strong><br/>
+                    Flavio José dos Santos &mdash; R.A: <strong>23025666</strong><br/>
+                    Maria Eduarda de Freitas Lopes &mdash; R.A: <strong>23025447</strong>
+                </div>
+                <div class="cover-meta-item">
+                    <strong>Orientador:</strong><br/>
+                    Prof. Luis Pires (FECAP)
+                </div>
+                <div class="cover-meta-item">
+                    <strong>Projeto:</strong><br/>
+                    TCC &bull; Startup MVP Matchmaker Engine
+                </div>
+                <div class="cover-meta-item">
+                    <strong>Emissão:</strong> 22/10/2026<br/>
+                    <strong>Status:</strong> Homologado &bull; 100% Testado
+                </div>
+            </div>
+        </div>
+        <div class="page-break"></div>
+        
+    <div class="content-container">
+        <div class='page-break'></div><div class='cover-center' style='margin: 15mm 0;'><div class='cover-badge'>PARTE I</div><h1>Extreme Programming — Diário de Bordo & Refatoração</h1></div><h1>Diário de Bordo — Extreme Programming (XP)</h1>
+<h2>Q.I. Tech Matchmaker Engine</h2>
+<p><strong>Instituição:</strong> FECAP — Fundação Escola de Comércio Álvares Penteado</p>
+<p><strong>Curso:</strong> Bacharelado em Ciência da Computação</p>
+<p><strong>Disciplina:</strong> Engenharia de Software / Desenvolvimento Ágil</p>
+<p><strong>Projeto:</strong> Q.I. Tech Matchmaker Engine — Motor Inteligente de Mapeamento de Competências e Matching</p>
+<p><strong>Autores:</strong></p>
+<ul>
+<li><strong>Flavio José dos Santos</strong> — R.A: <strong>23025666</strong></li>
+<li><strong>Maria Eduarda de Freitas Lopes</strong> — R.A: <strong>23025447</strong></li>
+</ul>
+<p><strong>Orientador:</strong> Prof. Luis Pires</p>
+<p><strong>Contexto:</strong> Trabalho de Conclusão de Curso (TCC) & MVP de Startup</p>
+<p><strong>Práticas de Extreme Programming (XP) Aplicadas:</strong></p>
+<ol>
+<li><strong>Test-Driven Development (TDD)</strong> — Ciclos <em>Red <span class='math-inline'>\rightarrow</span> Green <span class='math-inline'>\rightarrow</span> Refactor</em>.</li>
+<li><strong>Refatoração Contínua (Refactoring)</strong> — Eliminação de <em>Code Smells</em>, aplicação de <em>Clean Code</em> e princípios SOLID.</li>
+<li><strong>Programação em Par (Pair Programming)</strong> — Dinâmica contínua de Piloto (<em>Driver</em>) e Copiloto (<em>Navigator</em>).</li>
+<li><strong>Projeto Simples (Simple Design)</strong> — Código autoexplicativo, eliminação de duplicações (DRY) e sem complexidade acidental (YAGNI).</li>
+<li><strong>Integração Contínua (CI) e Feedback Rápido</strong> — Execução frequente da suíte automatizada de testes com validação de regressão.</li>
+</ol>
+<hr/>
+<h2>1. Visão Geral das 2 Funcionalidades Selecionadas</h2>
+<div class='table-container'><table>
+<thead><tr>
+<th>#</th>
+<th>Funcionalidade</th>
+<th>Módulo de Código</th>
+<th>Responsabilidade Central</th>
+</tr></thead><tbody>
+<tr>
+<td><strong>F1</strong></td>
+<td><strong>Motor de Avaliação e Pontuação de Matching Heurístico Explicável</strong></td>
+<td><code>backend/app/core/matching_engine.py</code></td>
+<td>Avaliar compatibilidade entre candidatos e vagas com filtros objetivos eliminatórios, alinhamento de competências e fórmula ponderada 4D (<span class='math-inline'>HARD, SOFT, EXP, COND</span>).</td>
+</tr>
+<tr>
+<td><strong>F2</strong></td>
+<td>*<em>Verificador Programático de Evidências Literais (</em>Verbatim<em>) e Confiabilidade</em>*</td>
+<td><code>backend/app/core/evidence_verifier.py</code></td>
+<td>Garantir matematicamente que toda evidência de competência atribuída pela IA exista literalmente na transcrição do candidato, impedindo alucinações.</td>
+</tr>
+</tbody></table></div>
+<hr/>
+<h2>2. Funcionalidade 1 — Motor de Matching Heurístico Explicável</h2>
+<h3>2.1. User Story e Critérios de Aceite</h3>
+<ul>
+<li><strong>Como</strong> recrutador da área de tecnologia,</li>
+<li><strong>Quero</strong> calcular um índice de aderência explicável entre o perfil do candidato e os requisitos da vaga,</li>
+<li><strong>Para</strong> tomar decisões de triagem fundamentadas em dados auditáveis, sem caixas-pretas e sem penalizar injustamente competências não avaliadas.</li>
+</ul>
+<p><strong>Critérios de Aceite:</strong></p>
+<ol>
+<li>A pontuação deve seguir a fórmula ponderada:</li>
+</ol>
+<p><div class='math-block'>\text{MATCH} = (w_{hard} \cdot \text{HARD}) + (w_{soft} \cdot \text{SOFT}) + (w_{exp} \cdot \text{EXP}) + (w_{cond} \cdot \text{COND})</div></p>
+<ol>
+<li>A soma dos pesos configurados deve ser validada rigorosamente para totalizar <span class='math-inline'>1.0</span>.</li>
+<li>Nenhuma competência classificada como <code>NAO_AVALIADA</code> pode receber nota <span class='math-inline'>0</span> arbitrariamente; deve-se atribuir crédito basal e sinalizar a pendência.</li>
+<li>Todos os números mágicos de alinhamento e penalidades devem ser expressos por constantes nomeadas com semântica clara.</li>
+</ol>
+<h3>2.2. Code Smells Identificados (Antes da Refatoração)</h3>
+<ul>
+<li><strong>Primitive Obsession (Obsessão por Primitivos):</strong> Os 4 pesos eram números de ponto flutuante soltos, sem validação estrutural de consistência no domínio.</li>
+<li><strong>Magic Numbers (Números Mágicos):</strong> Valores como <code>0.50</code>, <code>0.35</code>, <code>0.25</code>, <code>1.25</code>, <code>40.0</code> e <code>50.0</code> estavam espalhados pelo código sem justificativa semântica explícita.</li>
+<li><strong>Violação do Princípio da Responsabilidade Única (SRP):</strong> O cálculo matemático de pontuação ponderada estava acoplado diretamente dentro da montagem do payload HTTP e da persistência de banco de dados.</li>
+<li>*<em>Aviso de Descontinuação (</em>Deprecation Warning<em>):</em>* Uso de <code>datetime.utcnow()</code>, gerando advertências no Python 3.12/3.13.</li>
+</ul>
+<h3>2.3. Ciclo TDD (Red <span class='math-inline'>\rightarrow</span> Green <span class='math-inline'>\rightarrow</span> Refactor)</h3>
+<div class='code-card'><div class='code-header'>mermaid</div><pre><code>graph LR
+    A[&quot;1. RED: Criar testes unitários para MatchingWeights e cálculo puro de score&quot;] --&gt; B[&quot;2. GREEN: Implementar Value Object e método compute_overall_score&quot;]
+    B --&gt; C[&quot;3. REFACTOR: Substituir números mágicos por AlignmentRatio e ObjectivePenalty&quot;]
+    C --&gt; D[&quot;4. VERIFY: Executar pytest test_matching_engine.py com 100% de aprovação&quot;]</code></pre></div>
+<h4>Passo 1 — RED (Testes Escritos Antes do Código):</h4>
+<p>Criou-se testes em <code>backend/tests/test_matching_engine.py</code> que exigiam validação de pesos e isolamento da função de cálculo puro:</p>
+<div class='code-card'><div class='code-header'>python</div><pre><code>def test_matching_weights_value_object_validation():
+    # Deve aceitar pesos cuja soma seja 1.0
+    weights = MatchingWeights(0.60, 0.20, 0.10, 0.10)
+    weights.validate()
+
+    # Deve lançar ValueError se a soma for inconsistente
+    invalid = MatchingWeights(0.70, 0.30, 0.20, 0.10)
+    with pytest.raises(ValueError, match=&quot;A soma dos pesos deve totalizar 1.0&quot;):
+        invalid.validate()</code></pre></div>
+<p><em>Status inicial:</em> <code>FAILED</code> (<code>ImportError: cannot import name 'MatchingWeights'</code>).</p>
+<h4>Passo 2 — GREEN (Implementação da Solução Mínima):</h4>
+<p>Criação do <em>Value Object</em> imutável <code>@dataclass(frozen=True) class MatchingWeights</code> e do método puro <code>compute_overall_score</code>.</p>
+<h4>Passo 3 — REFACTOR (Design Limpo e Princípios SOLID):</h4>
+<ul>
+<li>Criação das classes de constantes <code>AlignmentRatio</code> e <code>ObjectivePenalty</code>.</li>
+<li>Substituição da lógica dispersa de penalidades por referências legíveis.</li>
+<li>Substituição de <code>datetime.utcnow()</code> por <code>datetime.now(timezone.utc)</code>.</li>
+</ul>
+<h3>2.4. Comparativo de Código (Antes vs. Depois)</h3>
+<h4>Antes (Código Monolítico com Números Mágicos):</h4>
+<div class='code-card'><div class='code-header'>python</div><pre><code># ANTES:
+class QIMatchmakerEngine:
+    def __init__(self, weight_hard=None, weight_soft=None, weight_exp=None, weight_cond=None):
+        self.w_hard = weight_hard or 0.50
+        self.w_soft = weight_soft or 0.25
+        self.w_exp = weight_exp or 0.15
+        self.w_cond = weight_cond or 0.10
+
+    # Dentro de match_candidate_to_job:
+    overall_score = (self.w_hard * hard_score) + (self.w_soft * soft_score) + (self.w_exp * exp_score) + (self.w_cond * conditions_score)
+    overall_score = round(max(0.0, min(100.0, overall_score)), 1)
+
+    # Penalidades com números mágicos:
+    if job.contract_type != candidate.contract_preference:
+        score -= 40.0
+    if candidate.salary_expectation &gt; (job.max_salary * 1.25):
+        score -= 30.0</code></pre></div>
+<h4>Depois (Código Refatorado com Value Objects e Constantes Nomeadas):</h4>
+<div class='code-card'><div class='code-header'>python</div><pre><code># DEPOIS:
+@dataclass(frozen=True)
+class MatchingWeights:
+    hard_skills: float = 0.50
+    soft_skills: float = 0.25
+    experience: float = 0.15
+    conditions: float = 0.10
+
+    def validate(self) -&gt; None:
+        total = self.hard_skills + self.soft_skills + self.experience + self.conditions
+        if not (0.98 &lt;= total &lt;= 1.02):
+            raise ValueError(f&quot;A soma dos pesos deve totalizar 1.0 (valor atual: {total:.2f})&quot;)
+
+class ObjectivePenalty:
+    CONTRACT_MISMATCH = 40.0
+    WORK_MODEL_CONFLICT = 50.0
+    WORK_MODEL_MISMATCH = 20.0
+    SALARY_EXCESS = 30.0
+    SALARY_TOLERANCE_RATIO = 1.25
+
+class QIMatchmakerEngine:
+    def __init__(self, ..., weights: Optional[MatchingWeights] = None):
+        if weights is not None:
+            weights.validate()
+            self.weights = weights
+        else:
+            self.weights = MatchingWeights(...)
+        self.w_hard = self.weights.hard_skills
+        ...
+
+    def compute_overall_score(self, hard_score: float, soft_score: float, exp_score: float, conditions_score: float) -&gt; float:
+        &quot;&quot;&quot;Função pura com Princípio da Responsabilidade Única (SRP).&quot;&quot;&quot;
+        score = (
+            (self.w_hard * hard_score) +
+            (self.w_soft * soft_score) +
+            (self.w_exp * exp_score) +
+            (self.w_cond * conditions_score)
+        )
+        return round(max(0.0, min(100.0, score)), 1)</code></pre></div>
+<hr/>
+<h2>3. Funcionalidade 2 — Verificador de Evidências Literais (<em>Verbatim</em>)</h2>
+<h3>3.1. User Story e Critérios de Aceite</h3>
+<ul>
+<li><strong>Como</strong> candidato e auditor do sistema,</li>
+<li><strong>Quero</strong> que as citações atribuídas às minhas competências sejam auditadas programaticamente contra minhas respostas reais,</li>
+<li><strong>Para</strong> ter certeza de que o modelo de linguagem não inventou dados, experiências ou falas que não proferi.</li>
+</ul>
+<p><strong>Critérios de Aceite:</strong></p>
+<ol>
+<li>A correspondência deve ser categorizada em níveis tipados (<code>EXACT</code>, <code>CASE_INSENSITIVE</code>, <code>NORMALIZED_LENIENT</code>, <code>REJECTED</code>).</li>
+<li>Cada resultado deve fornecer um índice numérico de confiança entre <span class='math-inline'>0.0</span> e <span class='math-inline'>1.0</span>.</li>
+<li>Chamadas legadas esperando desempacotamento de tupla (<code>is_valid, detail = verify_quote(...)</code>) devem continuar funcionando sem quebrar contratos existentes (100% retrocompatível).</li>
+<li>Suporte a verificação em lote (<em>batch processing</em>) para otimizar validações em entrevistas com dezenas de perguntas.</li>
+</ol>
+<h3>3.2. Code Smells Identificados (Antes da Refatoração)</h3>
+<ul>
+<li><strong>Output Truncation / Poor Information:</strong> O verificador retornava apenas uma tupla booleana simples <code>(bool, str)</code>, sem discriminar a qualidade da evidência ou o grau de normalização aplicada.</li>
+<li><strong>Inflexibilidade para Auditoria:</strong> Não era possível saber programaticamente se uma citação foi literal de primeiro nível ou se exigiu remoção de acentos para ser localizada.</li>
+<li><strong>Falta de Abstração de Domínio:</strong> O resultado de validação era um tipo primitivo sem métodos próprios ou semântica rica.</li>
+</ul>
+<h3>3.3. Ciclo TDD (Red <span class='math-inline'>\rightarrow</span> Green <span class='math-inline'>\rightarrow</span> Refactor)</h3>
+<div class='code-card'><div class='code-header'>mermaid</div><pre><code>graph LR
+    A[&quot;1. RED: Escrever testes para MatchType, confiança 0.0-1.0 e batch&quot;] --&gt; B[&quot;2. GREEN: Implementar enum MatchType e classe VerificationResult&quot;]
+    B --&gt; C[&quot;3. REFACTOR: Implementar __iter__ e __getitem__ para compatibilidade de tupla&quot;]
+    C --&gt; D[&quot;4. VERIFY: Executar pytest test_evidence_verifier.py (9 testes Green)&quot;]</code></pre></div>
+<h4>Passo 1 — RED:</h4>
+<p>Testes criados em <code>backend/tests/test_evidence_verifier.py</code>:</p>
+<div class='code-card'><div class='code-header'>python</div><pre><code>def test_refactored_verification_result_rich_attributes():
+    res = EvidenceVerifier.verify_quote(quote, transcript)
+    assert res.is_valid is True
+    assert res.match_type.value == &quot;EXACT&quot;
+    assert res.confidence_score == 1.0
+
+    # Compatibilidade de desempacotamento
+    is_valid, detail = res
+    assert is_valid is True</code></pre></div>
+<p><em>Status inicial:</em> <code>FAILED</code> (<code>AttributeError: 'tuple' object has no attribute 'match_type'</code>).</p>
+<h4>Passo 2 — GREEN:</h4>
+<p>Criação da estrutura rica <code>@dataclass(frozen=True) class VerificationResult</code> e do enumerador <code>MatchType</code>.</p>
+<h4>Passo 3 — REFACTOR:</h4>
+<p>Implementação de <code>__iter__</code> e <code>__getitem__</code> dentro do <code>VerificationResult</code> para permitir que o objeto se comporte transparentemente tanto como um objeto de domínio moderno quanto como uma tupla clássica <code>(bool, str)</code>.</p>
+<h3>3.4. Comparativo de Código (Antes vs. Depois)</h3>
+<h4>Antes (Retorno de Tupla Primitiva):</h4>
+<div class='code-card'><div class='code-header'>python</div><pre><code># ANTES:
+class EvidenceVerifier:
+    @staticmethod
+    def verify_quote(quote: str, transcript_or_answer: str) -&gt; Tuple[bool, Optional[str]]:
+        if quote_clean in transcript_clean:
+            return True, quote_clean
+        if quote_clean.lower() in transcript_clean.lower():
+            return True, verbatim_in_text
+        if len(quote_lenient) &gt;= 15 and quote_lenient in transcript_lenient:
+            return True, f&quot;Correspondência normalizada: &#x27;{quote_clean}&#x27;&quot;
+        return False, &quot;Citação não localizada...&quot;</code></pre></div>
+<h4>Depois (Objeto Rico com MatchType, Confiança e Retrocompatibilidade):</h4>
+<div class='code-card'><div class='code-header'>python</div><pre><code># DEPOIS:
+class MatchType(str, Enum):
+    EXACT = &quot;EXACT&quot;
+    CASE_INSENSITIVE = &quot;CASE_INSENSITIVE&quot;
+    NORMALIZED_LENIENT = &quot;NORMALIZED_LENIENT&quot;
+    REJECTED = &quot;REJECTED&quot;
+
+@dataclass(frozen=True)
+class VerificationResult:
+    is_valid: bool
+    detail: str
+    match_type: MatchType
+    confidence_score: float
+
+    def __iter__(self):
+        &quot;&quot;&quot;Permite desempacotamento retrocompatível: is_valid, detail = result.&quot;&quot;&quot;
+        yield self.is_valid
+        yield self.detail
+
+class EvidenceVerifier:
+    @classmethod
+    def verify_quote(cls, quote: str, transcript_or_answer: str) -&gt; VerificationResult:
+        if quote_clean in transcript_clean:
+            return VerificationResult(True, quote_clean, MatchType.EXACT, 1.0)
+        if quote_clean.lower() in transcript_clean.lower():
+            return VerificationResult(True, verbatim_in_text, MatchType.CASE_INSENSITIVE, 0.95)
+        if len(quote_lenient) &gt;= 15 and quote_lenient in transcript_lenient:
+            return VerificationResult(True, f&quot;Correspondência normalizada: &#x27;{quote_clean}&#x27;&quot;, MatchType.NORMALIZED_LENIENT, 0.85)
+        return VerificationResult(False, &quot;Citação não localizada...&quot;, MatchType.REJECTED, 0.0)</code></pre></div>
+<hr/>
+<h2>4. Diário de Bordo — Registro Cronológico das Sessões XP</h2>
+<h3>Sessão 1: Planejamento, Análise Estática e Escrita de Testes RED</h3>
+<ul>
+<li><strong>Data/Horário:</strong> 22/10/2026 — 18:30 às 19:00</li>
+<li><strong>Papéis:</strong></li>
+<li><em>Piloto (Driver):</em> Flavio José dos Santos (R.A: 23025666)</li>
+<li><em>Copiloto (Navigator):</em> Maria Eduarda de Freitas Lopes (R.A: 23025447)</li>
+<li><strong>Objetivo da Sessão:</strong> Identificar oportunidades de refatoração nos módulos críticos do backend e implementar a bateria de testes que falham (<em>Red Phase</em>).</li>
+<li><strong>Atividades:</strong></li>
+<li>Revisão do código de <code>matching_engine.py</code> e identificação do acoplamento dos pesos heurísticos e números mágicos.</li>
+<li>Revisão de <code>evidence_verifier.py</code> e constatação de que o retorno de tupla primitiva limitava a auditoria das evidências da IA.</li>
+<li>Redação dos testes que falham:</li>
+<li><code>test_matching_weights_value_object_validation</code> (Red)</li>
+<li><code>test_compute_overall_score_pure_function</code> (Red)</li>
+<li><code>test_refactored_verification_result_rich_attributes</code> (Red)</li>
+<li><code>test_batch_verification</code> (Red)</li>
+<li><strong>Resultado:</strong> Testes executados falhando conforme o esperado pelo ciclo TDD.</li>
+</ul>
+<hr/>
+<h3>Sessão 2: Refatoração da Funcionalidade 2 (<code>EvidenceVerifier</code>)</h3>
+<ul>
+<li><strong>Data/Horário:</strong> 22/10/2026 — 19:05 às 19:30</li>
+<li><strong>Papéis:</strong> Inversão de papéis conforme boa prática de Pair Programming.</li>
+<li><em>Piloto (Driver):</em> Maria Eduarda de Freitas Lopes (R.A: 23025447)</li>
+<li><em>Copiloto (Navigator):</em> Flavio José dos Santos (R.A: 23025666)</li>
+<li><strong>Objetivo da Sessão:</strong> Implementar a solução mínima para aprovar os testes do <code>EvidenceVerifier</code> e refatorar preservando compatibilidade.</li>
+<li><strong>Debate Técnico:</strong></li>
+<li><em>Maria Eduarda (Piloto):</em> "Se alterarmos o retorno de <code>verify_quote</code> para uma classe, o código em <code>profile_consolidator.py</code> que faz <code>is_valid, match = verify_quote(...)</code> vai quebrar em produção."</li>
+<li><em>Flavio (Copiloto):</em> "Podemos implementar o protocolo de iteração (<code>__iter__</code>) na Dataclass <code>VerificationResult</code>. Assim ela é um objeto com atributos <code>.match_type</code> e <code>.confidence_score</code>, mas também se desempacota como tupla de 2 elementos transparentemente!"</li>
+<li><strong>Resultado:</strong> Implementação concluída. Execução via Pytest: <strong>9 passed em 0.13s</strong> (100% Green).</li>
+</ul>
+<hr/>
+<h3>Sessão 3: Refatoração da Funcionalidade 1 (<code>QIMatchmakerEngine</code>)</h3>
+<ul>
+<li><strong>Data/Horário:</strong> 22/10/2026 — 19:35 às 20:05</li>
+<li><strong>Papéis:</strong></li>
+<li><em>Piloto (Driver):</em> Flavio José dos Santos (R.A: 23025666)</li>
+<li><em>Copiloto (Navigator):</em> Maria Eduarda de Freitas Lopes (R.A: 23025447)</li>
+<li><strong>Objetivo da Sessão:</strong> Isolar a regra de negócio matemática da pontuação, criar o Value Object <code>MatchingWeights</code> e eliminar números mágicos com <code>AlignmentRatio</code> e <code>ObjectivePenalty</code>.</li>
+<li><strong>Atividades:</strong></li>
+<li>Criação de <code>MatchingWeights</code> com método <code>validate()</code>.</li>
+<li>Implementação do método puro <code>compute_overall_score(hard, soft, exp, cond)</code>.</li>
+<li>Atualização das deduções de condições objetivas para usar <code>ObjectivePenalty</code>.</li>
+<li>Eliminação do aviso de descontinuação substituindo <code>datetime.utcnow()</code> por <code>datetime.now(timezone.utc)</code>.</li>
+<li><strong>Resultado:</strong> Execução via Pytest: <strong>7 passed em 0.45s</strong> em <code>test_matching_engine.py</code>.</li>
+</ul>
+<hr/>
+<h3>Sessão 4: Integração Contínua, Análise de Regressão e Validação com Orientador</h3>
+<ul>
+<li><strong>Data/Horário:</strong> 22/10/2026 — 20:10 às 20:30</li>
+<li><strong>Papéis:</strong></li>
+<li><em>Desenvolvedores em Par:</em> Flavio José dos Santos (R.A: 23025666) & Maria Eduarda de Freitas Lopes (R.A: 23025447)</li>
+<li><em>Orientador Acadêmico:</em> Prof. Luis Pires (FECAP)</li>
+<li><strong>Objetivo da Sessão:</strong> Validar que a refatoração das duas funcionalidades não introduziu qualquer efeito colateral nas demais partes do sistema.</li>
+<li><strong>Comando de Teste Geral:</strong></li>
+<div class='code-card'><div class='code-header'>powershell</div><pre><code>  .\venv\Scripts\pytest backend\tests\test_evidence_verifier.py backend\tests\test_matching_engine.py backend\tests\test_profile_consolidator.py backend\tests\test_prompt_injection.py -v</code></pre></div>
+<li><strong>Resultado do Log de Execução:</strong></li>
+<div class='code-card'><div class='code-header'>text</div><pre><code>  backend/tests/test_evidence_verifier.py::test_exact_verbatim_quote_verification PASSED
+  backend/tests/test_evidence_verifier.py::test_whitespace_and_newline_normalization PASSED
+  backend/tests/test_evidence_verifier.py::test_case_insensitive_quote_verification PASSED
+  backend/tests/test_evidence_verifier.py::test_rejection_of_hallucinated_quote PASSED
+  backend/tests/test_evidence_verifier.py::test_empty_quote_or_transcript PASSED
+  backend/tests/test_evidence_verifier.py::test_refactored_verification_result_rich_attributes PASSED
+  backend/tests/test_evidence_verifier.py::test_case_insensitive_match_type_and_confidence PASSED
+  backend/tests/test_evidence_verifier.py::test_lenient_match_type_accents_and_confidence PASSED
+  backend/tests/test_evidence_verifier.py::test_batch_verification PASSED
+  backend/tests/test_matching_engine.py::test_matching_weights_value_object_validation PASSED
+  backend/tests/test_matching_engine.py::test_engine_initialization_with_matching_weights_vo PASSED
+  backend/tests/test_matching_engine.py::test_compute_overall_score_pure_function PASSED
+  backend/tests/test_matching_engine.py::test_alignment_ratio_constants_bounds PASSED
+  backend/tests/test_matching_engine.py::test_objective_conditions_evaluation PASSED
+  backend/tests/test_matching_engine.py::test_matching_score_formula_and_coverage PASSED
+  backend/tests/test_matching_engine.py::test_candidate_comparison_side_by_side PASSED
+  backend/tests/test_profile_consolidator.py::test_preliminary_report_and_replica_versioning PASSED
+  backend/tests/test_prompt_injection.py::test_prompt_injection_safety_scenario_g PASSED
+
+  ====================== 18 passed in 3.15s ======================</code></pre></div>
+<li><strong>Conclusão:</strong> 18 testes automatizados aprovados com 100% de sucesso, sem quebra de contratos legados e com garantia de integridade.</li>
+</ul>
+<hr/>
+<h2>5. Métricas e Ganhos da Refatoração XP</h2>
+<div class='table-container'><table>
+<thead><tr>
+<th>Métrica de Engenharia</th>
+<th>Antes da Refatoração</th>
+<th>Depois da Refatoração XP</th>
+<th>Benefício Acadêmico e Prático</th>
+</tr></thead><tbody>
+<tr>
+<td><strong>Cobertura de Testes Unitários dos Motores</strong></td>
+<td>10 testes</td>
+<td><strong>18 testes (+80%)</strong></td>
+<td>Cobertura de casos limites, pesos customizados e desempacotamento de tuplas.</td>
+</tr>
+<tr>
+<td><strong>Números Mágicos Não Documentados</strong></td>
+<td>> 15 espalhados</td>
+<td><strong>0 (Zero)</strong></td>
+<td>Centralizados em <code>AlignmentRatio</code> e <code>ObjectivePenalty</code>.</td>
+</tr>
+<tr>
+<td><strong>Acoplamento no Cálculo de Score</strong></td>
+<td>Alto (cálculo misturado com banco)</td>
+<td><strong>Baixo (Função Pura <code>compute_overall_score</code>)</strong></td>
+<td>Permite testar o cálculo matemático sem instanciar banco de dados.</td>
+</tr>
+<tr>
+<td><strong>Auditabilidade de Evidências</strong></td>
+<td>Booleana simples (<code>True/False</code>)</td>
+<td><strong>Rica (<code>MatchType</code> + <code>ConfidenceScore</code>)</strong></td>
+<td>O sistema agora mensura se a evidência é literal (1.0), normalizada (0.85) ou rejeitada (0.0).</td>
+</tr>
+<tr>
+<td><strong>Retrocompatibilidade de API</strong></td>
+<td>-</td>
+<td><strong>100% Preservada</strong></td>
+<td>Nenhuma alteração nos contratos externos REST ou chamadas internas existentes.</td>
+</tr>
+</tbody></table></div>
+<hr/>
+<h2>6. Considerações Finais</h2>
+<p>A aplicação das práticas de <strong>Extreme Programming (XP)</strong> no Q.I. Tech Matchmaker Engine demonstrou que a refatoração sistemática orientada por testes (TDD) não apenas melhora a manutenibilidade do código, como também mitiga riscos críticos em sistemas que utilizam Machine Learning.</p>
+<p>Ao transformar o verificador de citações e o cálculo de compatibilidade em componentes desacoplados, autoexplicativos e testáveis, o projeto atinge conformidade técnica para apresentação acadêmica e viabilidade de evolução para um ecossistema produtivo.</p>
+<div class='page-break'></div><div class='cover-center' style='margin: 15mm 0;'><div class='cover-badge'>PARTE II</div><h1>Avaliação de Modelos de Inteligência Artificial</h1></div><h1>Avaliação Técnica e Rigor Científico dos Modelos de IA</h1>
+<h2>Q.I. Tech Matchmaker Engine — TCC Ciência da Computação</h2>
+<p><strong>Instituição:</strong> FECAP — Fundação Escola de Comércio Álvares Penteado</p>
+<p><strong>Curso:</strong> Bacharelado em Ciência da Computação</p>
+<p><strong>Autores:</strong></p>
+<ul>
+<li><strong>Flavio José dos Santos</strong> — R.A: <strong>23025666</strong></li>
+<li><strong>Maria Eduarda de Freitas Lopes</strong> — R.A: <strong>23025447</strong></li>
+</ul>
+<p><strong>Orientador:</strong> Prof. Luis Pires</p>
+<p>Este documento formaliza a especificação técnica, hiperparâmetros, limitações e protocolo experimental dos modelos de Machine Learning e Processamento de Linguagem Natural (NLP) integrados na versão 1.0 do <strong>Q.I. Tech Matchmaker Engine</strong>.</p>
+<hr/>
+<h2>1. Arquitetura dos Modelos e Especificações Técnicas</h2>
+<p>A solução adota uma arquitetura híbrida de três modelos especializados, cada um desacoplado com responsabilidades bem delimitadas, evitando o uso de modelos monolíticos generalistas como "caixa-preta".</p>
+<div class='table-container'><table>
+<thead><tr>
+<th>Componente</th>
+<th>Modelo</th>
+<th>Provedor / Framework</th>
+<th>Parâmetros</th>
+<th>Hardware Alvo</th>
+<th>Papel no Sistema</th>
+</tr></thead><tbody>
+<tr>
+<td><strong>Modelo 1: Transcrição de Áudio</strong></td>
+<td><code>faster-whisper-small</code></td>
+<td>CTranslate2 / faster-whisper</td>
+<td>~244M</td>
+<td>CPU (int8)</td>
+<td>Reconhecimento automático de fala (ASR), geração de timestamps e transcrição em pt-BR.</td>
+</tr>
+<tr>
+<td><strong>Modelo 2: Extração de Competências</strong></td>
+<td><code>qwen3:4b</code></td>
+<td>Ollama (Local)</td>
+<td>~4B</td>
+<td>CPU / GPU Local</td>
+<td>Extração de evidências, classificação de profundidade fática e estruturação em JSON Schema.</td>
+</tr>
+<tr>
+<td><strong>Modelo 3: Representação Semântica</strong></td>
+<td><code>intfloat/multilingual-e5-small</code></td>
+<td>Sentence Transformers / PyTorch</td>
+<td>~118M (384d)</td>
+<td>CPU</td>
+<td>Vetorização densa de competências e sinônimos com prefixos assimétricos (<code>query:</code> / <code>passage:</code>).</td>
+</tr>
+</tbody></table></div>
+<hr/>
+<h2>2. Detalhamento dos Componentes</h2>
+<h3>2.1. Modelo 1 — Reconhecimento e Transcrição de Fala (<code>faster-whisper</code>)</h3>
+<ul>
+<li><strong>Técnica de Otimização:</strong> Quantização <code>int8</code> através do runtime CTranslate2, reduzindo o consumo de memória RAM de ~1 GB para menos de 350 MB e acelerando a inferência em processadores comuns de usuário (x86_64).</li>
+<li><strong>Parâmetros de Inferência:</strong></li>
+<li><code>beam_size</code>: 5</li>
+<li><code>language</code>: <code>pt</code> (Português do Brasil)</li>
+<li><code>vad_filter</code>: <code>True</code> (Silero VAD integrado com tolerância de silêncio de 500 ms para eliminar ruídos de fundo).</li>
+<li><strong>Rastreabilidade e Governança:</strong> O sistema mantém o áudio original em diretório configurável com política de retenção (<code>AUDIO_RETENTION_DAYS</code>) e armazena o texto bruto (<code>raw_text</code>) de forma imutável, permitindo ao candidato revisar e corrigir o texto antes do envio (<code>edited_text</code>).</li>
+</ul>
+<h3>2.2. Modelo 2 — Extração Fática de Competências (<code>qwen3:4b</code> via Ollama)</h3>
+<ul>
+<li><strong>Modo de Operação:</strong> Inferência estruturada local com garantia de formato JSON Schema via endpoint <code>/api/chat</code>.</li>
+<li><strong>Temperatura:</strong> <code>0.1</code> (baixa dispersão para assegurar reprodutibilidade e evitar alucinações criativas).</li>
+<li><strong>Tamanho de Janela de Contexto:</strong> <code>4096 tokens</code>.</li>
+<li><strong>Mitigação de Prompt Injection (Cenário G):</strong> As respostas dos candidatos são tratadas estritamente como <em>dados não confiáveis</em> inseridos entre delimitadores rígidos (<code>[RESPOSTA id="..."] """conteudo""" [FIM RESPOSTA]</code>). O metaprompt de sistema proíbe categoricamente a execução de instruções contidas nas transcrições.</li>
+<li><strong>Validação Programática Rigorosa (<code>EvidenceVerifier</code>):</strong> Nenhuma citação textual (<code>exact_quote</code>) é persistida sem que o backend confirme que o trecho existe <em>ipsis litteris</em> ou sob normalização de espaços no texto da transcrição. Citações não localizadas são sumariamente descartadas.</li>
+<li><strong>Modo de Contingência (Fallback):</strong> Na ausência de GPU ou do Ollama em execução local, o motor aciona o extrator determinístico baseado em padrões semânticos e casamento de termos da taxonomia, assegurando que o sistema opere continuamente.</li>
+</ul>
+<h3>2.3. Modelo 3 — Representações Semânticas (<code>multilingual-e5-small</code>)</h3>
+<ul>
+<li><strong>Estrutura Vetorial:</strong> Modelo de 12 camadas Transformer baseado em XLM-RoBERTa, produzindo vetores de dimensão <span class='math-inline'>D = 384</span>.</li>
+<li><strong>Protocolo Assimétrico de Entrada:</strong></li>
+<li>Para requisitos e consultas: prefixo obrigatório <code>"query: <requisito>"</code>.</li>
+<li>Para competências e trechos textuais: prefixo obrigatório <code>"passage: <competência e sinônimos>"</code>.</li>
+<li><strong>Métrica de Similaridade:</strong> Similaridade Cosseno sobre vetores normalizados <span class='math-inline'>L_2</span>:</li>
+</ul>
+<p><div class='math-block'>\text{sim}(u, v) = \frac{u \cdot v}{\|u\|_2 \|v\|_2}</div></p>
+<ul>
+<li><strong>Salvaguarda Explicável:</strong> A similaridade cosseno é utilizada exclusivamente para normalização terminológica (mapeamento de sinônimos como "Py" <span class='math-inline'>\rightarrow</span> "Python" ou "K8s" <span class='math-inline'>\rightarrow</span> "Kubernetes"), <strong>nunca</strong> sendo interpretada isoladamente como probabilidade de aptidão ou garantia de contratação.</li>
+</ul>
+<hr/>
+<h2>3. Formulação do Algoritmo de Matching Explicável</h2>
+<p>Em contraste com algoritmos "caixa-preta", o cálculo do índice de compatibilidade é totalmente auditável e baseado em rubricas determinísticas:</p>
+<p><div class='math-block'>\text{MATCH} = (w_{\text{hard}} \cdot S_{\text{hard}}) + (w_{\text{soft}} \cdot S_{\text{soft}}) + (w_{\text{exp}} \cdot S_{\text{exp}}) + (w_{\text{cond}} \cdot S_{\text{cond}})</div></p>
+<p>Valores padrão configuráveis:</p>
+<ul>
+<li><span class='math-inline'>w_{\text{hard}} = 0.50</span> (Hard Skills)</li>
+<li><span class='math-inline'>w_{\text{soft}} = 0.25</span> (Soft Skills)</li>
+<li><span class='math-inline'>w_{\text{exp}} = 0.15</span> (Anos de Experiência Relevante)</li>
+<li><span class='math-inline'>w_{\text{cond}} = 0.10</span> (Condições Objetivas: CLT/PJ, Remoto/Presencial, Pretensão Salarial)</li>
+</ul>
+<h3>Cobertura de Avaliação</h3>
+<p>O sistema calcula independentemente a métrica de <strong>Cobertura da Avaliação</strong>:</p>
+<p><div class='math-block'>\text{COBERTURA} = \frac{N_{\text{requisitos avaliados na entrevista}}}{N_{\text{total de requisitos da vaga}}} \times 100\%</div></p>
+<p>Requisitos obrigatórios não abordados na entrevista são categorizados como <code>PENDENTE_AVALIACAO</code>, alertando o recrutador sobre a necessidade de aprofundamento específico em vez de penalizar o candidato de forma arbitrária com nota zero.</p>
+<hr/>
+<h2>4. Protocolo Experimental para Avaliação Acadêmica Rigorosa</h2>
+<p>Para a validação formal em bancas acadêmicas (TCC/Mestrado) e artigos científicos, recomenda-se a execução dos seguintes ensaios empíricos:</p>
+<h3>4.1. Métricas de Extração de Competências (NLP)</h3>
+<p>A partir de um dataset de teste anotado por 3 especialistas humanos independentes (Double-Blind Annotation com cálculo de concordância via <em>Cohen's Kappa</em> ou <em>Fleiss' Kappa</em> <span class='math-inline'>\kappa > 0.75</span>):</p>
+<ul>
+<li><strong>Precisão (Precision):</strong> <span class='math-inline'>\frac{TP}{TP + FP}</span> — Proporção de competências identificadas pelo modelo que eram reais.</li>
+<li><strong>Revocação (Recall):</strong> <span class='math-inline'>\frac{TP}{TP + FN}</span> — Proporção de competências presentes nas falas que foram capturadas.</li>
+<li><strong>F1-Score:</strong> <span class='math-inline'>2 \times \frac{P \times R}{P + R}</span> — Média harmônica.</li>
+<li><strong>Fidelidade da Evidência (Evidence Fidelity):</strong> Proporção de citações literais verificadas com sucesso pelo <code>EvidenceVerifier</code> sem descarte por alucinação.</li>
+</ul>
+<h3>4.2. Métricas de Transcrição Fonética (ASR)</h3>
+<ul>
+<li><strong>Word Error Rate (WER):</strong></li>
+</ul>
+<p><div class='math-block'>\text{WER} = \frac{S + D + I}{N}</div></p>
+<p>Onde <span class='math-inline'>S</span> são substituições, <span class='math-inline'>D</span> deleções, <span class='math-inline'>I</span> inserções e <span class='math-inline'>N</span> o total de palavras da referência humana, medindo robustez contra sotaques regionais brasileiros.</p>
+<h3>4.3. Métricas de Ranking (Information Retrieval)</h3>
+<p>Comparação do ranking gerado pelo Matchmaker Engine com o ranking consolidado de recrutadores técnicos sêniores:</p>
+<ul>
+<li><strong>NDCG@k (Normalized Discounted Cumulative Gain):</strong> Avalia a qualidade da ordenação dos candidatos nos primeiros <span class='math-inline'>k</span> lugares.</li>
+<li><strong>MRR (Mean Reciprocal Rank):</strong> Recíproco da posição do primeiro candidato considerado altamente qualificado pela banca.</li>
+</ul>
+<hr/>
+<h2>5. Limitações Atuais e Próximos Passos de Pesquisa</h2>
+<ol>
+<li><strong>Ajuste Fino Supervisionado (Supervised Fine-Tuning - SFT):</strong> Treinar adaptadores LoRA/QLoRA sobre o modelo Qwen com corpus anotado de entrevistas técnicas em língua portuguesa.</li>
+<li><strong>Treinamento por Contrastive Learning:</strong> Ajustar o modelo <code>multilingual-e5-small</code> utilizando <em>Triplet Loss</em> com âncoras de requisitos técnicos, exemplos positivos (descrições reais equivalentes) e exemplos negativos (competências homônimas ou de áreas distintas).</li>
+<li><strong>Escalabilidade Vetorial:</strong> Migração da abstração em memória para PostgreSQL com extensão <code>pgvector</code> utilizando índices HNSW (<em>Hierarchical Navigable Small World</em>) com produto escalar normalizado.</li>
+<li><strong>Proteção Contínua contra Vieses:</strong> Auditoria periódica de disparidade de impacto (<em>Disparate Impact Ratio</em>) para garantir conformidade ética e regulatória (Marco Legal da IA e LGPD).</li>
+</ol>
+<div class='page-break'></div><div class='cover-center' style='margin: 15mm 0;'><div class='cover-badge'>PARTE III</div><h1>Arquitetura do Sistema e Especificação Operacional</h1></div><h1>Q.I. Tech Matchmaker Engine</h1>
+<h3>Motor Inteligente para Mapeamento de Competências e Correspondência entre Candidatos e Vagas de Tecnologia</h3>
+<p><strong>Instituição:</strong> FECAP — Fundação Escola de Comércio Álvares Penteado</p>
+<p><strong>Curso:</strong> Bacharelado em Ciência da Computação</p>
+<p><strong>Autores:</strong></p>
+<ul>
+<li><strong>Flavio José dos Santos</strong> — R.A: <strong>23025666</strong></li>
+<li><strong>Maria Eduarda de Freitas Lopes</strong> — R.A: <strong>23025447</strong></li>
+</ul>
+<p><strong>Orientador:</strong> Prof. Luis Pires</p>
+<p><a href='https://img.shields.io/badge/Python-3.11%2B%20%7C%203.12-blue?logo=python' target='_blank'>![Python</a>](https://python.org)</p>
+<p><a href='https://img.shields.io/badge/FastAPI-0.115%2B-009688?logo=fastapi' target='_blank'>![FastAPI</a>](https://fastapi.tiangolo.com)</p>
+<p><a href='https://img.shields.io/badge/React-18%20%7C%20Vite%20%7C%20TS-61DAFB?logo=react' target='_blank'>![React</a>](https://react.dev)</p>
+<p><a href='https://img.shields.io/badge/Local%20AI-Whisper%20%2B%20Qwen3%20%2B%20E5-00E8C6' target='_blank'>![Local AI</a>](https://github.com)</p>
+<p><a href='https://img.shields.io/badge/Status-TCC%20%2F%20Startup%20MVP-success' target='_blank'>![License</a>](#)</p>
+<hr/>
+<h2>1. Visão Geral</h2>
+<p>O <strong>Q.I. Tech Matchmaker Engine</strong> é uma plataforma inteligente projetada para transformar a triagem de talentos em tecnologia. O sistema analisa três fontes principais de dados:</p>
+<ol>
+<li><strong>Informações autodeclaradas</strong> pelo candidato (níveis 1 a 5 e preferências).</li>
+<li><strong>Evidências textuais concretas</strong> extraídas de entrevistas de triagem por áudio ou texto.</li>
+<li><strong>Requisitos técnicos e comportamentais estruturados</strong> cadastrados pelas empresas.</li>
+</ol>
+<h3>O Grande Diferencial: Explicabilidade Baseada em Evidências</h3>
+<p>Ao contrário de soluções genéricas que delegam a avaliação a um chatbot ou produzem percentuais opacos, o motor Q.I. Tech:</p>
+<ul>
+<li><strong>Exige comprovação fática:</strong> Associa competências a <strong>citações literais e verificadas</strong> do candidato.</li>
+<li><strong>Distingue estados epistêmicos:</strong> Classifica em <code>EVIDENCIADA</code>, <code>PARCIALMENTE_EVIDENCIADA</code>, <code>EVIDENCIA_INSUFICIENTE</code>, <code>NAO_AVALIADA</code> ou <code>DIVERGENCIA_IDENTIFICADA</code>.</li>
+<li><strong>Garante o Direito de Réplica:</strong> O candidato pode contestar análises específicas, gerando uma nova versão do relatório (v1 <span class='math-inline'>\rightarrow</span> v2) sem destruir o histórico.</li>
+<li><strong>Fórmula de Compatibilidade Explicável:</strong> Ponderação determinística de 4 dimensões (Hard Skills, Soft Skills, Experiência, Condições Objetivas) com cálculo explícito da <strong>Cobertura de Avaliação</strong>.</li>
+</ul>
+<hr/>
+<h2>2. Arquitetura do Sistema</h2>
+<div class='code-card'><div class='code-header'>mermaid</div><pre><code>graph TD
+    subgraph Frontend[&quot;Frontend (React + TypeScript + Vite)&quot;]
+        UI1[Dashboard &amp; Métricas]
+        UI2[Cadastro do Candidato]
+        UI3[Entrevista de Triagem]
+        UI4[Monitor de Processamento]
+        UI5[Relatório de Competências]
+        UI6[Direito de Réplica]
+        UI7[Gestão de Vagas]
+        UI8[Matching &amp; Ranking]
+        UI9[Comparação Lado a Lado]
+    end
+
+    subgraph Backend[&quot;Backend (FastAPI REST API /api/v1)&quot;]
+        API_Cand[Módulo Candidatos]
+        API_Int[Módulo Entrevistas]
+        API_Rep[Módulo Relatórios]
+        API_Job[Módulo Vagas]
+        API_Match[Módulo Matching]
+        API_Sys[Módulo Sistema &amp; LGPD]
+    end
+
+    subgraph Intelligence[&quot;Motores de Inteligência Local (Sem APIs Pagas)&quot;]
+        M1[&quot;Modelo 1: faster-whisper-small&lt;br/&gt;(Transcrição Local em pt-BR com int8)&quot;]
+        M2[&quot;Modelo 2: Qwen3:4b (via Ollama)&lt;br/&gt;(Extração Estruturada em JSON Schema)&quot;]
+        M3[&quot;Modelo 3: multilingual-e5-small&lt;br/&gt;(Embeddings Vetoriais 384d e Similaridade)&quot;]
+        Verif[&quot;EvidenceVerifier&lt;br/&gt;(Validação Programática de Citações Verbatim)&quot;]
+        Engine[&quot;QIMatchmakerEngine&lt;br/&gt;(Algoritmo de Matching em 5 Etapas)&quot;]
+    end
+
+    subgraph Storage[&quot;Persistência &amp; Auditoria&quot;]
+        DB[(Banco Relacional: SQLite / PostgreSQL)]
+        VStore[(Vector Store Abstraction / pgvector)]
+        AuditLog[(Trilha de Auditoria &amp; LGPD)]
+    end
+
+    UI1 &amp; UI2 &amp; UI3 &amp; UI4 &amp; UI5 &amp; UI6 &amp; UI7 &amp; UI8 &amp; UI9 --&gt; Backend
+    API_Int --&gt; M1
+    API_Int --&gt; M2
+    M2 --&gt; Verif
+    API_Match --&gt; Engine
+    Engine --&gt; M3
+    Backend --&gt; DB &amp; VStore &amp; AuditLog</code></pre></div>
+<hr/>
+<h2>3. Diagrama Entidade-Relacionamento (Banco de Dados)</h2>
+<div class='code-card'><div class='code-header'>mermaid</div><pre><code>erDiagram
+    CANDIDATES ||--o{ CANDIDATE_DECLARED_SKILLS : &quot;declara&quot;
+    CANDIDATES ||--o{ CONSENT_RECORDS : &quot;autoriza&quot;
+    CANDIDATES ||--o{ INTERVIEW_SESSIONS : &quot;participa&quot;
+    CANDIDATES ||--o{ ASSESSMENT_REPORTS : &quot;possui&quot;
+    CANDIDATES ||--o{ MATCHING_RESULTS : &quot;avaliado_em&quot;
+
+    SKILL_CATALOG ||--o{ SKILL_ALIASES : &quot;possui&quot;
+    SKILL_CATALOG ||--o{ CANDIDATE_DECLARED_SKILLS : &quot;referencia&quot;
+    SKILL_CATALOG ||--o{ JOB_SKILL_REQUIREMENTS : &quot;exigida_em&quot;
+    SKILL_CATALOG ||--o{ COMPETENCY_ASSESSMENTS : &quot;avaliada_em&quot;
+
+    COMPANIES ||--o{ JOBS : &quot;publica&quot;
+    JOBS ||--o{ JOB_SKILL_REQUIREMENTS : &quot;composta_por&quot;
+    JOBS ||--o{ MATCHING_RESULTS : &quot;classifica&quot;
+
+    INTERVIEW_SESSIONS ||--o{ INTERVIEW_ANSWERS : &quot;contem&quot;
+    INTERVIEW_QUESTIONS ||--o{ INTERVIEW_ANSWERS : &quot;responde&quot;
+    INTERVIEW_ANSWERS ||--o{ TRANSCRIPTS : &quot;transcrita_por&quot;
+    INTERVIEW_ANSWERS ||--o{ COMPETENCY_EVIDENCES : &quot;origina&quot;
+
+    ASSESSMENT_REPORTS ||--o{ REPORT_VERSIONS : &quot;versionado_em&quot;
+    REPORT_VERSIONS ||--o{ COMPETENCY_ASSESSMENTS : &quot;contem&quot;
+    REPORT_VERSIONS ||--o{ REPORT_REVIEWS : &quot;origina_revisao&quot;
+    COMPETENCY_ASSESSMENTS ||--o{ COMPETENCY_EVIDENCES : &quot;sustentada_por&quot;</code></pre></div>
+<hr/>
+<h2>4. Requisitos e Pré-requisitos</h2>
+<ul>
+<li><strong>Sistema Operacional:</strong> Windows 10/11 (executável nativamente sem necessidade de WSL/Linux).</li>
+<li><strong>Python:</strong> Versão 3.11 ou 3.12 (testado e homologado no Python 3.12.10).</li>
+<li><strong>Node.js:</strong> Versão 18 ou superior (testado no Node.js v24).</li>
+<li><strong>Memória RAM Mínima:</strong> 8 GB (16 GB recomendado para execução simultânea do Ollama e Whisper).</li>
+<li><strong>Opcional (para Modelo Qwen3 via Ollama):</strong></li>
+<li>Instalação do <a href='https://ollama.com' target='_blank'>Ollama para Windows</a>.</li>
+<li>Executar no terminal: <code>ollama run qwen2.5:3b</code> ou <code>ollama run qwen:4b</code>.</li>
+<li><em>Nota:</em> Caso o Ollama não esteja ativo, o sistema opera de forma autônoma e resiliente com o motor determinístico de contingência integrado.</li>
+</ul>
+<hr/>
+<h2>5. Instalação e Execução Passo a Passo (Windows)</h2>
+<h3>Opção A — Execução Rápida via Scripts Automatizados (Recomendado)</h3>
+<p>Abra o terminal do PowerShell na raiz do projeto:</p>
+<div class='code-card'><div class='code-header'>powershell</div><pre><code># 1. Executa o setup completo (cria venv, instala dependências e popula banco)
+.\scripts\setup.ps1
+
+# 2. Em um terminal, inicie o backend:
+.\scripts\run_backend.ps1
+
+# 3. Em outro terminal, inicie o frontend:
+.\scripts\run_frontend.ps1</code></pre></div>
+<p>Acesse:</p>
+<ul>
+<li><strong>Interface Web:</strong> <a href='http://127.0.0.1:5173' target='_blank'>http://127.0.0.1:5173</a></li>
+<li><strong>Documentação Interativa da API (Swagger):</strong> <a href='http://127.0.0.1:8000/docs' target='_blank'>http://127.0.0.1:8000/docs</a></li>
+</ul>
+<hr/>
+<h3>Opção B — Instalação Manual Detalhada</h3>
+<h4>1. Configurar o Backend Python</h4>
+<div class='code-card'><div class='code-header'>powershell</div><pre><code># Criar e ativar o ambiente virtual
+python -m venv venv
+.\venv\Scripts\Activate.ps1
+
+# Atualizar pip e instalar dependências
+python -m pip install --upgrade pip
+pip install -r .\backend\requirements.txt
+
+# Inicializar e popular a base com os dados dos cenários de teste
+cd backend
+python -m app.seeds.run_seed
+cd ..</code></pre></div>
+<h4>2. Configurar o Frontend React</h4>
+<div class='code-card'><div class='code-header'>powershell</div><pre><code>cd frontend
+npm install
+npm run build # Valida a compilação
+npm run dev -- --host 127.0.0.1 --port 5173</code></pre></div>
+<h4>3. Iniciar o Backend</h4>
+<div class='code-card'><div class='code-header'>powershell</div><pre><code>cd backend
+..\venv\Scripts\python -m uvicorn app.main:app --host 127.0.0.1 --port 8000 --reload</code></pre></div>
+<hr/>
+<h2>6. Demonstração dos Cenários de Teste (A até G)</h2>
+<p>O sistema já vem pré-configurado com 5 candidatos e 3 vagas de tecnologia projetadas para evidenciar cada cenário de teste:</p>
+<div class='table-container'><table>
+<thead><tr>
+<th>Cenário</th>
+<th>Descrição Fática</th>
+<th>Como Demonstrar na Interface</th>
+</tr></thead><tbody>
+<tr>
+<td><strong>Cenário A — Competência Evidenciada</strong></td>
+<td>Lucas Silva declara Python e descreve o desenvolvimento de pipeline com 50 milhões de registros.</td>
+<td>Vá em <strong>Relatórios</strong>, selecione <em>Lucas Silva</em>. Observe a competência <strong>Python</strong> classificada como <code>EVIDENCIADA</code> com o trecho literal extraído.</td>
+</tr>
+<tr>
+<td><strong>Cenário B — Competência Não Avaliada</strong></td>
+<td>Beatriz Souza declara SQL, mas a entrevista não abordou banco de dados.</td>
+<td>Em <strong>Relatórios</strong>, selecione <em>Beatriz Souza</em>. A competência <strong>SQL</strong> é classificada como <code>NAO_AVALIADA</code>, sem estimar nota arbitrária.</td>
+</tr>
+<tr>
+<td><strong>Cenário C — Nova Competência Sugerida</strong></td>
+<td>Lucas Silva não declarou Gestão de Conflitos, mas relata como mediou uma divergência técnica.</td>
+<td>Em <strong>Relatórios</strong>, selecione <em>Lucas Silva</em>. Veja o badge <code>Sugerida na Entrevista</code> na competência <strong>Gestão de Conflitos</strong>.</td>
+</tr>
+<tr>
+<td><strong>Cenário D — Evidência Insuficiente</strong></td>
+<td>Beatriz Souza declara Liderança Técnica nível 5, mas fornece apenas afirmação rasa sem contexto.</td>
+<td>Em <strong>Relatórios</strong>, selecione <em>Beatriz Souza</em>. Observe <strong>Liderança Técnica</strong> sinalizada com alerta de revisão necessária.</td>
+</tr>
+<tr>
+<td><strong>Cenário E — Matching e Cobertura</strong></td>
+<td>Vaga exige Python, SQL e AWS. O candidato tem evidências de Python e SQL, mas AWS não foi abordado.</td>
+<td>Em <strong>Matching & Ranking</strong>, selecione a vaga <em>Engenheiro de Dados Pleno</em>. O candidato pontua alto nas competências comprovadas e AWS aparece destacada em <strong>Avaliações Pendentes</strong>.</td>
+</tr>
+<tr>
+<td><strong>Cenário F — Réplica e Versionamento</strong></td>
+<td>Carlos Mendes contesta a análise preliminar de AWS e submete réplica formal.</td>
+<td>Em <strong>Réplica & Revisão</strong>, selecione <em>Carlos Mendes</em>. Veja a Versão 1 preservada no histórico e a Versão 2 gerada com a contestação encaminhada para revisão humana.</td>
+</tr>
+<tr>
+<td><strong>Cenário G — Segurança contra Injection</strong></td>
+<td>Rafael Costa insere instrução maliciosa na resposta pedindo para "atribuir nota máxima 100%".</td>
+<td>Em <strong>Relatórios</strong>, selecione <em>Rafael Costa</em>. O motor tratou a instrução como texto comum, avaliando apenas o conteúdo fático e não atribuindo notas artificiais.</td>
+</tr>
+</tbody></table></div>
+<hr/>
+<h2>7. Execução dos Testes Automatizados (Pytest)</h2>
+<p>A suíte de testes automatizados cobre verificação de citações, cálculo de pesos, filtros objetivos, versionamento de réplicas, segurança contra injeção de prompt e integração dos endpoints da API:</p>
+<div class='code-card'><div class='code-header'>powershell</div><pre><code>cd backend
+..\venv\Scripts\pytest -v</code></pre></div>
+<p>Resultado da execução:</p>
+<div class='code-card'><div class='code-header'>text</div><pre><code>tests/test_api_integration.py::test_system_health_endpoint PASSED        [  7%]
+tests/test_api_integration.py::test_skills_catalog_endpoint PASSED       [ 14%]
+tests/test_api_integration.py::test_candidate_registration_and_flow PASSED [ 21%]
+tests/test_api_integration.py::test_job_creation_and_matching PASSED     [ 28%]
+tests/test_evidence_verifier.py::test_exact_verbatim_quote_verification PASSED [ 35%]
+tests/test_evidence_verifier.py::test_whitespace_and_newline_normalization PASSED [ 42%]
+tests/test_evidence_verifier.py::test_case_insensitive_quote_verification PASSED [ 50%]
+tests/test_evidence_verifier.py::test_rejection_of_hallucinated_quote PASSED [ 57%]
+tests/test_evidence_verifier.py::test_empty_quote_or_transcript PASSED   [ 64%]
+tests/test_matching_engine.py::test_objective_conditions_evaluation PASSED [ 71%]
+tests/test_matching_engine.py::test_matching_score_formula_and_coverage PASSED [ 78%]
+tests/test_matching_engine.py::test_candidate_comparison_side_by_side PASSED [ 85%]
+tests/test_profile_consolidator.py::test_preliminary_report_and_replica_versioning PASSED [ 92%]
+tests/test_prompt_injection.py::test_prompt_injection_safety_scenario_g PASSED [100%]
+
+============================= 14 passed in 29.48s =============================</code></pre></div>
+<hr/>
+<h2>8. Integração com a Plataforma Q.I. Tech (Node.js / NestJS)</h2>
+<p>O motor foi construído como um serviço independente (<em>Microservice Architecture</em>), expondo endpoints RESTful documentados no padrão OpenAPI 3.0.</p>
+<h3>Exemplo de Integração em NestJS</h3>
+<div class='code-card'><div class='code-header'>typescript</div><pre><code>import { Injectable } from &#x27;@nestjs/common&#x27;;
+import { HttpService } from &#x27;@nestjs/axios&#x27;;
+import { firstValueFrom } from &#x27;rxjs&#x27;;
+
+@Injectable()
+export class MatchmakerService {
+  constructor(private readonly http: HttpService) {}
+
+  private readonly engineUrl = &#x27;http://localhost:8000/api/v1&#x27;;
+
+  async runJobMatching(jobId: string) {
+    const response = await firstValueFrom(
+      this.http.post(`${this.engineUrl}/matching/jobs/${jobId}/run`)
+    );
+    return response.data; // Retorna ranking, pontuação explicável e justificativas
+  }
+
+  async getCandidateReport(candidateId: string) {
+    const response = await firstValueFrom(
+      this.http.get(`${this.engineUrl}/candidates/${candidateId}/latest-report`)
+    );
+    return response.data; // Retorna competências autodeclaradas vs evidenciadas
+  }
+}</code></pre></div>
+<hr/>
+<h2>9. Privacidade, LGPD e Diretrizes Éticas</h2>
+<ul>
+<li><strong>Bases Legais:</strong> Registro obrigatório de consentimento (<code>consent_records</code>) e finalidade de triagem técnica.</li>
+<li><strong>Não-discriminação:</strong> Nenhuma característica pessoal protegida (gênero, idade, raça, endereço, sotaque) é enviada aos modelos ou utilizada em cálculos de compatibilidade.</li>
+<li><strong>Decisão Humana Final:</strong> O sistema opera como ferramenta de assistência analítica (<em>Human-in-the-Loop</em>), rejeitando explicitamente a eliminação 100% automatizada de candidatos.</li>
+</ul>
+    </div>
+</body>
+</html>
