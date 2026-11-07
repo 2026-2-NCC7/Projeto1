@@ -19,3 +19,4 @@ Garantir que os princípios de Privacy by Design, Double Opt-In e direitos do ti
 - [ ] O diálogo de autorização detalha explicitamente os dados liberados.
 - [ ] A recusa mantém a identidade 100% anônima e encerra o processo de forma segura.
 - [ ] O laudo de avaliação por IA possui opção acessível de solicitação de revisão.
+

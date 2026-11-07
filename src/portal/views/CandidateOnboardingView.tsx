@@ -107,7 +107,7 @@ export const CandidateOnboardingView: React.FC<{ onComplete: () => void }> = ({ 
 
   return (
     <div className="max-w-xl mx-auto py-6 space-y-5">
-      
+
       {/* INDICADOR DE ETAPAS */}
       <div className="flex items-center justify-between text-xs px-1">
         <div className={`flex items-center gap-1.5 font-bold ${step >= 1 ? 'text-primary' : 'text-muted-foreground'}`}>
@@ -133,7 +133,7 @@ export const CandidateOnboardingView: React.FC<{ onComplete: () => void }> = ({ 
       </div>
 
       <div className="bg-white p-6 rounded-base border border-border shadow-xs space-y-5">
-        
+
         {/* ==================== ETAPA 1: PERFIL PROFISSIONAL ==================== */}
         {step === 1 && (
           <div className="space-y-4 text-xs">
@@ -181,11 +181,10 @@ export const CandidateOnboardingView: React.FC<{ onComplete: () => void }> = ({ 
                       key={sk}
                       type="button"
                       onClick={() => toggleSkill(sk)}
-                      className={`px-2.5 py-1 rounded text-[11px] font-medium transition-all ${
-                        isSelected
+                      className={`px-2.5 py-1 rounded text-[11px] font-medium transition-all ${isSelected
                           ? 'bg-primary text-white font-bold shadow-xs'
                           : 'bg-background border border-border text-muted-foreground hover:text-foreground'
-                      }`}
+                        }`}
                     >
                       {sk} {isSelected && '✓'}
                     </button>

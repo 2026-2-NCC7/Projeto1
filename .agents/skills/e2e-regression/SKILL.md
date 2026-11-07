@@ -24,3 +24,4 @@ Garantir que as melhorias visuais e de usabilidade não introduzam regressões n
 - [ ] Vagas publicadas aparecem na shortlist e no motor de matching.
 - [ ] O fluxo de autorização de compartilhamento atualiza o status de forma transparente.
 - [ ] `npm run build` executa sem erros em modo de produção.
+

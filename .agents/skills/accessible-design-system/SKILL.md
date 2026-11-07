@@ -20,3 +20,4 @@ Assegurar padrões consistentes de layout, espaçamento, tipografia, cores semâ
 - [ ] Formulários possuem `<label>` associado semanticamente a cada `<input>` ou `<textarea>`.
 - [ ] Botões e áreas de toque possuem alvos confortáveis (mínimo 44x44px em mobile).
 - [ ] Não há perda de legibilidade no alternador de temas Claro / Escuro.
+

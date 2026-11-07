@@ -24,3 +24,4 @@ Identificar problemas de usabilidade, sobrecarga cognitiva e fricções visuais 
 - [ ] Verificar se há jargões de backend (ex: nomes de endpoints, IDs de banco, siglas internas).
 - [ ] Avaliar se os cards contêm entre 3 e 5 informações prioritárias.
 - [ ] Confirmar que dados detalhados estão ocultos sob demanda (disclosure).
+

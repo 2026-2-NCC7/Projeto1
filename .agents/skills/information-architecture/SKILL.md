@@ -22,3 +22,4 @@ Garantir que a navegação e a hierarquia de conteúdo do sistema Q.I. Tech seja
 - [ ] Sub-seções analíticas estão aninhadas no fluxo correspondente.
 - [ ] A tela possui um cabeçalho único, limpo e contextual.
 - [ ] Não há bifurcações de rota ou telas concorrentes para a mesma finalidade.
+

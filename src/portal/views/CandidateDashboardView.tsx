@@ -262,3 +262,4 @@ export const CandidateDashboardView: React.FC<CandidateDashboardViewProps> = ({
     </div>
   );
 };
+

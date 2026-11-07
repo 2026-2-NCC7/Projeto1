@@ -20,3 +20,4 @@ Realizar refatorações limpas e modulares nos componentes React da plataforma Q
 - [ ] Props e contratos de funções permanecem compatíveis.
 - [ ] Os estados de carregamento, erro e dados vazios são tratados explicitamente.
 - [ ] Nenhum mock silencioso substitui dados reais do backend.
+
