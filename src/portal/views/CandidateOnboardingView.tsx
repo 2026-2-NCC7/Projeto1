@@ -488,8 +488,8 @@ export const CandidateOnboardingView: React.FC<{ onComplete: () => void }> = ({ 
                     <Gamepad2 className="w-7 h-7" />
                   </div>
                 </div>
-                <span className="absolute -bottom-1 -right-1 px-1.5 py-0.2 bg-amber-400 text-black font-extrabold text-[10px] rounded-md font-mono shadow">
-                  LVL {seniority === 'Júnior' ? '1' : seniority === 'Pleno' ? '2' : '3'}
+                <span className="absolute -bottom-1 -right-1 px-1.5 py-0.5 bg-amber-400 text-black font-extrabold text-[9px] rounded-md font-mono shadow whitespace-nowrap">
+                  LVL {seniority === 'Júnior' ? '1' : seniority === 'Pleno' ? '2' : '3'} • {seniority === 'Júnior' ? 'Rank C' : seniority === 'Pleno' ? 'Rank B' : 'Rank A'}
                 </span>
               </div>
 
@@ -685,11 +685,22 @@ export const CandidateOnboardingView: React.FC<{ onComplete: () => void }> = ({ 
                     {/* Header do Card */}
                     <div>
                       <div className="flex items-center justify-between mb-2">
-                        <span className={`text-[11px] font-mono px-2.5 py-0.5 rounded-md font-bold ${
-                          isSelected ? 'bg-amber-400 text-black' : 'bg-[#1F2737] text-slate-400'
-                        }`}>
-                          {card.level}
-                        </span>
+                        <div className="flex items-center gap-1.5">
+                          <span className={`text-[11px] font-mono px-2.5 py-0.5 rounded-md font-bold ${
+                            isSelected ? 'bg-amber-400 text-black' : 'bg-[#1F2737] text-slate-400'
+                          }`}>
+                            {card.level}
+                          </span>
+                          <span className={`text-[10px] font-mono font-bold px-2 py-0.5 rounded-md ${
+                            card.level === 'Júnior' 
+                              ? 'bg-purple-500/15 text-purple-300 border border-purple-500/30' 
+                              : card.level === 'Pleno' 
+                              ? 'bg-amber-400/15 text-amber-300 border border-amber-400/30' 
+                              : 'bg-emerald-400/15 text-emerald-300 border border-emerald-400/30'
+                          }`}>
+                            {card.level === 'Júnior' ? 'Rank C' : card.level === 'Pleno' ? 'Rank B' : 'Rank A'}
+                          </span>
+                        </div>
                         <span className="text-xs font-mono font-bold text-amber-400">
                           {card.xp}
                         </span>

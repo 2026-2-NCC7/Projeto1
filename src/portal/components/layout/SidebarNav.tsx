@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { useApp } from '../../context/AppContext';
+import { getCandidateLevelInfo } from '../../utils/candidateRanking';
 import {
   Smartphone,
   Building2,
@@ -66,8 +67,8 @@ export const SidebarNav: React.FC<SidebarNavProps> = ({ currentTab, setCurrentTa
   const isCandidate = !isCompany && !isAdmin && !isCommunityExternal;
 
   const currentProfile = candidates[currentCandidateId];
-  const seniority = currentProfile?.seniority || currentUser?.seniority || 'Pleno';
-  const lvl = seniority === 'Júnior' ? 1 : seniority === 'Pleno' ? 2 : 3;
+  const levelInfo = getCandidateLevelInfo(currentProfile, currentUser?.seniority);
+  const { lvl, seniority, tier, xpPercentage } = levelInfo;
 
   // Itens Minimalistas e Mais Encorpados com Ícones Lucide 20px (w-5 h-5)
   const candidateItems: NavItem[] = [
@@ -259,13 +260,13 @@ export const SidebarNav: React.FC<SidebarNavProps> = ({ currentTab, setCurrentTa
           <div className="pt-3 border-t border-[#1E2638] flex flex-col items-center gap-2.5">
             <div 
               className="w-10 h-10 rounded-xl bg-[#121722] border border-[#1E2638] flex items-center justify-center font-mono font-bold text-xs text-amber-400 shadow-sm"
-              title={`Nível ${lvl} • ${seniority} (Rank ${lvl === 3 ? 'A' : 'B'})`}
+              title={`Nível ${lvl} • ${seniority} (${tier})`}
             >
               L{lvl}
             </div>
             <div 
               className="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-pulse" 
-              title="Motor IA & Whisper Ativo • LGPD Conforme" 
+              title={`Motor IA Ativo • ${tier}`} 
             />
           </div>
         ) : (
@@ -278,8 +279,8 @@ export const SidebarNav: React.FC<SidebarNavProps> = ({ currentTab, setCurrentTa
                     <Award className="w-3.5 h-3.5 text-amber-400" />
                     <span>Nível {lvl} • {seniority}</span>
                   </span>
-                  <span className="text-amber-400 font-bold text-[10px] px-1.5 py-0.5 rounded bg-amber-400/10 border border-amber-400/25">
-                    Rank {lvl === 3 ? 'A' : 'B'}
+                  <span className={`text-[10px] font-mono font-bold px-1.5 py-0.5 rounded border ${levelInfo.badgeBg} ${levelInfo.badgeBorder} ${levelInfo.badgeText}`}>
+                    {tier}
                   </span>
                 </div>
 
@@ -287,12 +288,12 @@ export const SidebarNav: React.FC<SidebarNavProps> = ({ currentTab, setCurrentTa
                 <div>
                   <div className="flex justify-between text-[10px] font-mono text-slate-400 mb-1">
                     <span>XP Técnico</span>
-                    <span className="text-amber-400 font-semibold">{lvl === 3 ? '95%' : lvl === 2 ? '85%' : '65%'}</span>
+                    <span className="text-amber-400 font-semibold">{xpPercentage}%</span>
                   </div>
                   <div className="w-full h-1.5 bg-[#1B2230] rounded-full overflow-hidden">
                     <div 
-                      className="h-full bg-gradient-to-r from-amber-400 to-emerald-400 rounded-full" 
-                      style={{ width: lvl === 3 ? '95%' : lvl === 2 ? '85%' : '65%' }}
+                      className="h-full bg-gradient-to-r from-amber-400 to-emerald-400 rounded-full transition-all duration-300" 
+                      style={{ width: `${xpPercentage}%` }}
                     />
                   </div>
                 </div>

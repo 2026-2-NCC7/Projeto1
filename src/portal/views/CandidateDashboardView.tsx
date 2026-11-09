@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { useApp } from '../context/AppContext';
+import { getCandidateLevelInfo } from '../utils/candidateRanking';
 import {
   Sparkles,
   ArrowRight,
@@ -49,6 +50,7 @@ export const CandidateDashboardView: React.FC<CandidateDashboardViewProps> = ({
   } = useApp();
 
   const candidate = candidates[currentCandidateId] || candidates['cand-lucas'];
+  const levelInfo = getCandidateLevelInfo(candidate);
   const myProcesses = selectionProcesses.filter(p => p.candidateId === currentCandidateId);
   const pendingInvites = myProcesses.filter(p => p.doubleOptInStatus === 'aguardando');
   const acceptedProcesses = myProcesses.filter(p => p.doubleOptInStatus === 'aceito');
@@ -151,9 +153,12 @@ export const CandidateDashboardView: React.FC<CandidateDashboardViewProps> = ({
       {/* 1. SAUDAÇÃO & HEADER DO DASHBOARD */}
       <div className="bg-[#121722] p-6 rounded-2xl border border-[#232D3F] flex flex-col lg:flex-row lg:items-center justify-between gap-6">
         <div className="space-y-1.5">
-          <div className="flex items-center gap-2">
+          <div className="flex flex-wrap items-center gap-2">
             <span className="font-mono text-xs text-amber-400 font-semibold px-2.5 py-0.5 rounded-full bg-amber-400/10 border border-amber-400/20">
               Painel do Candidato • ID #{candidateIdShort}
+            </span>
+            <span className={`text-xs font-mono font-bold px-2.5 py-0.5 rounded-full border ${levelInfo.badgeBg} ${levelInfo.badgeBorder} ${levelInfo.badgeText}`}>
+              {levelInfo.tier} • Nível {levelInfo.lvl}
             </span>
             <span className="text-xs text-emerald-400 bg-emerald-500/10 px-2 py-0.5 rounded-full border border-emerald-500/20">
               Protocolo Invertido Ativo
@@ -257,14 +262,16 @@ export const CandidateDashboardView: React.FC<CandidateDashboardViewProps> = ({
           <div>
             <div className="flex items-center justify-between text-slate-400 mb-2">
               <span className="text-xs font-medium">Benchmark Técnico</span>
-              <TrendingUp className="w-4 h-4 text-amber-400" />
+              <span className={`text-[10px] font-mono font-bold px-2 py-0.5 rounded border ${levelInfo.badgeBg} ${levelInfo.badgeBorder} ${levelInfo.badgeText}`}>
+                {levelInfo.tier}
+              </span>
             </div>
             <div className="flex items-baseline gap-2">
-              <span className="text-3xl font-black text-white">Top 8%</span>
-              <span className="text-xs text-amber-400 font-semibold">da stack</span>
+              <span className="text-3xl font-black text-white">{levelInfo.tier}</span>
+              <span className="text-xs text-amber-400 font-semibold font-mono">Nível {levelInfo.lvl}</span>
             </div>
             <p className="text-xs text-slate-400 mt-2">
-              Nível <strong>{candidate?.seniority || 'Pleno'}</strong> validado por Whisper e Qwen
+              Perfil <strong>{levelInfo.seniority}</strong> ({levelInfo.title}) validado por IA
             </p>
           </div>
 

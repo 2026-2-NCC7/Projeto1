@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useApp } from '../context/AppContext';
 import { CandidateSkill, SkillMastery } from '../types';
+import { getCandidateLevelInfo } from '../utils/candidateRanking';
 import { 
   Plus, 
   Trash2, 
@@ -104,38 +105,11 @@ export const CandidateProfileView: React.FC = () => {
   }
 
   // =========================================================================
-  // CÁLCULO DE MÉTRICAS RPG & FICHA TÉCNICA
+  // CÁLCULO DE MÉTRICAS RPG & FICHA TÉCNICA (UNIFICADO COM TODAS AS TELAS)
   // =========================================================================
-  const getLevelInfo = (seniority: string) => {
-    switch (seniority) {
-      case 'Júnior':
-        return { lvl: 1, title: 'Aprendiz Ágil', tier: 'Rank C', maxScore: 75, power: 72 };
-      case 'Pleno':
-        return { lvl: 2, title: 'Operador Tático', tier: 'Rank B', maxScore: 88, power: 85 };
-      case 'Sênior':
-        return { lvl: 3, title: 'Mestre Arquiteto', tier: 'Rank A', maxScore: 98, power: 94 };
-      default:
-        return { lvl: 2, title: 'Engenheiro de Sistemas', tier: 'Rank B', maxScore: 85, power: 82 };
-    }
-  };
-
-  const levelInfo = getLevelInfo(profile.seniority);
-
-  // Cálculo de XP do personagem
-  const calculateXp = () => {
-    let xp = 450;
-    if (profile.seniority === 'Sênior') xp += 300;
-    else if (profile.seniority === 'Pleno') xp += 200;
-    else xp += 100;
-
-    xp += profile.skills.length * 45;
-    if (profile.githubUrl) xp += 100;
-    if (profile.isCommunityMember) xp += 75;
-    return Math.min(1000, xp);
-  };
-
-  const currentXp = calculateXp();
-  const xpPercentage = Math.round((currentXp / 1000) * 100);
+  const levelInfo = getCandidateLevelInfo(profile);
+  const currentXp = levelInfo.currentXp;
+  const xpPercentage = levelInfo.xpPercentage;
 
   // Atributos de Engenharia (com Ícones Vetoriais Minimalistas Lucide)
   const stats = [

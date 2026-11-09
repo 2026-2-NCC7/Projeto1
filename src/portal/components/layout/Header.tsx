@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { useApp, ActivePersona } from '../../context/AppContext';
+import { getCandidateLevelInfo } from '../../utils/candidateRanking';
 import { Bell, Search, User, LogOut, ChevronDown, Check, Sun, Moon, PlayCircle, Brain, ShieldCheck, Lock } from 'lucide-react';
 import { AnimatedIcon } from '../common/AnimatedIcon';
 
@@ -57,9 +58,10 @@ export const Header: React.FC<HeaderProps> = ({ currentViewTitle }) => {
     currentUserId = 'user-rafael-externo';
   } else {
     const cand = candidates[currentCandidateId];
+    const levelInfo = getCandidateLevelInfo(cand, currentUser?.seniority);
     userDisplayName = cand?.name || currentUser?.name || 'Profissional';
     userAvatar = cand?.avatar || '';
-    userBadge = cand?.seniority ? `Candidato ${cand.seniority}` : 'Perfil Candidato';
+    userBadge = `Candidato ${levelInfo.seniority} • ${levelInfo.tier}`;
     currentUserId = currentUser?.id || 'user-lucas';
   }
 
