@@ -31,40 +31,43 @@ import {
   FileCode,
   Terminal,
   Compass,
-  Cpu
+  Cpu,
+  Users,
+  Lock,
+  Activity
 } from 'lucide-react';
 
 const SKILL_CATALOG_SAMPLES = [
   // Linguagens
-  { name: 'JavaScript', category: 'Linguagens', icon: '⚡' },
-  { name: 'TypeScript', category: 'Linguagens', icon: '📘' },
-  { name: 'Python', category: 'Linguagens', icon: '🐍' },
-  { name: 'Java', category: 'Linguagens', icon: '☕' },
-  { name: 'Go', category: 'Linguagens', icon: '🐹' },
-  { name: 'Rust', category: 'Linguagens', icon: '🦀' },
-  { name: 'C#', category: 'Linguagens', icon: '🔷' },
+  { name: 'JavaScript', category: 'Linguagens' },
+  { name: 'TypeScript', category: 'Linguagens' },
+  { name: 'Python', category: 'Linguagens' },
+  { name: 'Java', category: 'Linguagens' },
+  { name: 'Go', category: 'Linguagens' },
+  { name: 'Rust', category: 'Linguagens' },
+  { name: 'C#', category: 'Linguagens' },
   // Frontend
-  { name: 'React', category: 'Frontend', icon: '⚛️' },
-  { name: 'Next.js', category: 'Frontend', icon: '▲' },
-  { name: 'Tailwind CSS', category: 'Frontend', icon: '🎨' },
-  { name: 'Vue.js', category: 'Frontend', icon: '🟢' },
-  { name: 'HTML/CSS', category: 'Frontend', icon: '🌐' },
+  { name: 'React', category: 'Frontend' },
+  { name: 'Next.js', category: 'Frontend' },
+  { name: 'Tailwind CSS', category: 'Frontend' },
+  { name: 'Vue.js', category: 'Frontend' },
+  { name: 'HTML/CSS', category: 'Frontend' },
   // Backend
-  { name: 'Node.js', category: 'Backend/APIs', icon: '🟢' },
-  { name: 'NestJS', category: 'Backend/APIs', icon: '🦁' },
-  { name: 'Express', category: 'Backend/APIs', icon: '🚂' },
-  { name: 'Spring Boot', category: 'Backend/APIs', icon: '🍃' },
-  { name: 'FastAPI', category: 'Backend/APIs', icon: '⚡' },
+  { name: 'Node.js', category: 'Backend/APIs' },
+  { name: 'NestJS', category: 'Backend/APIs' },
+  { name: 'Express', category: 'Backend/APIs' },
+  { name: 'Spring Boot', category: 'Backend/APIs' },
+  { name: 'FastAPI', category: 'Backend/APIs' },
   // Bancos
-  { name: 'PostgreSQL', category: 'Bancos e Dados', icon: '🐘' },
-  { name: 'MongoDB', category: 'Bancos e Dados', icon: '🍃' },
-  { name: 'Redis', category: 'Bancos e Dados', icon: '🔴' },
-  { name: 'SQL', category: 'Bancos e Dados', icon: '🗄️' },
+  { name: 'PostgreSQL', category: 'Bancos e Dados' },
+  { name: 'MongoDB', category: 'Bancos e Dados' },
+  { name: 'Redis', category: 'Bancos e Dados' },
+  { name: 'SQL', category: 'Bancos e Dados' },
   // Cloud & DevOps
-  { name: 'AWS', category: 'Cloud', icon: '☁️' },
-  { name: 'Docker', category: 'DevOps/Infra', icon: '🐳' },
-  { name: 'Kubernetes', category: 'DevOps/Infra', icon: '☸️' },
-  { name: 'Git', category: 'DevOps/Infra', icon: '🐙' }
+  { name: 'AWS', category: 'Cloud' },
+  { name: 'Docker', category: 'DevOps/Infra' },
+  { name: 'Kubernetes', category: 'DevOps/Infra' },
+  { name: 'Git', category: 'DevOps/Infra' }
 ];
 
 export const CandidateProfileView: React.FC = () => {
@@ -80,11 +83,10 @@ export const CandidateProfileView: React.FC = () => {
   
   const profile = candidates[currentCandidateId] || candidates['cand-lucas'];
 
-  // Estados locais para adição de skill
+  // Estados locais para adição de skill (somente anos de experiência)
   const [selectedSkillName, setSelectedSkillName] = useState(SKILL_CATALOG_SAMPLES[0].name);
   const [selectedMastery, setSelectedMastery] = useState<SkillMastery>('Intermediário');
   const [experienceYears, setExperienceYears] = useState(2);
-  const [experienceMonths, setExperienceMonths] = useState(0);
 
   // Sugestão de nova habilidade
   const [customSkillInput, setCustomSkillInput] = useState('');
@@ -98,7 +100,7 @@ export const CandidateProfileView: React.FC = () => {
   const [profileNotice, setProfileNotice] = useState<string | null>(null);
 
   if (!profile) {
-    return <div className="p-6 text-xs text-slate-400">Perfil não localizado para a persona ativa.</div>;
+    return <div className="p-6 text-xs text-slate-400 font-mono">Perfil não localizado para a persona ativa.</div>;
   }
 
   // =========================================================================
@@ -121,7 +123,7 @@ export const CandidateProfileView: React.FC = () => {
 
   // Cálculo de XP do personagem
   const calculateXp = () => {
-    let xp = 450; // Base de cadastro
+    let xp = 450;
     if (profile.seniority === 'Sênior') xp += 300;
     else if (profile.seniority === 'Pleno') xp += 200;
     else xp += 100;
@@ -135,14 +137,44 @@ export const CandidateProfileView: React.FC = () => {
   const currentXp = calculateXp();
   const xpPercentage = Math.round((currentXp / 1000) * 100);
 
-  // Atributos de Engenharia (Hexágono de Stats RPG)
+  // Atributos de Engenharia (com Ícones Vetoriais Minimalistas Lucide)
   const stats = [
-    { label: 'Autonomia Técnica', value: profile.seniority === 'Sênior' ? 95 : profile.seniority === 'Pleno' ? 82 : 68, color: 'from-amber-400 to-amber-600', icon: '⚔️' },
-    { label: 'Resiliência & Padrões', value: profile.seniority === 'Sênior' ? 92 : profile.seniority === 'Pleno' ? 78 : 64, color: 'from-emerald-400 to-emerald-600', icon: '🛡️' },
-    { label: 'Velocidade & CI/CD', value: profile.skills.some(s => s.category.toLowerCase().includes('devops') || s.name.toLowerCase().includes('git')) ? 88 : 72, color: 'from-sky-400 to-sky-600', icon: '⚡' },
-    { label: 'Resolução de Problemas', value: 89, color: 'from-purple-400 to-purple-600', icon: '🧠' },
-    { label: 'Colaboração & Squad', value: profile.isCommunityMember ? 94 : 84, color: 'from-pink-400 to-pink-600', icon: '🤝' },
-    { label: 'Segurança & Clean Code', value: 91, color: 'from-teal-400 to-teal-600', icon: '🔒' },
+    { 
+      label: 'Autonomia Técnica', 
+      value: profile.seniority === 'Sênior' ? 95 : profile.seniority === 'Pleno' ? 82 : 68, 
+      color: 'from-amber-400 to-amber-600', 
+      icon: <Swords className="w-3.5 h-3.5 text-amber-400 shrink-0" /> 
+    },
+    { 
+      label: 'Resiliência & Padrões', 
+      value: profile.seniority === 'Sênior' ? 92 : profile.seniority === 'Pleno' ? 78 : 64, 
+      color: 'from-emerald-400 to-emerald-600', 
+      icon: <ShieldCheck className="w-3.5 h-3.5 text-emerald-400 shrink-0" /> 
+    },
+    { 
+      label: 'Velocidade & CI/CD', 
+      value: profile.skills.some(s => s.category.toLowerCase().includes('devops') || s.name.toLowerCase().includes('git')) ? 88 : 72, 
+      color: 'from-sky-400 to-sky-600', 
+      icon: <Zap className="w-3.5 h-3.5 text-sky-400 shrink-0" /> 
+    },
+    { 
+      label: 'Resolução de Problemas', 
+      value: 89, 
+      color: 'from-purple-400 to-purple-600', 
+      icon: <Brain className="w-3.5 h-3.5 text-purple-400 shrink-0" /> 
+    },
+    { 
+      label: 'Colaboração & Squad', 
+      value: profile.isCommunityMember ? 94 : 84, 
+      color: 'from-pink-400 to-pink-600', 
+      icon: <Users className="w-3.5 h-3.5 text-pink-400 shrink-0" /> 
+    },
+    { 
+      label: 'Segurança & Clean Code', 
+      value: 91, 
+      color: 'from-teal-400 to-teal-600', 
+      icon: <Lock className="w-3.5 h-3.5 text-teal-400 shrink-0" /> 
+    },
   ];
 
   // Cálculo de completude do perfil
@@ -161,24 +193,25 @@ export const CandidateProfileView: React.FC = () => {
   const filledCount = fields.filter(Boolean).length;
   const completenessPercent = Math.round((filledCount / fields.length) * 100);
 
-  // Ícone por categoria de skill
+  // Ícones Vetoriais Minimalistas por categoria de skill (Estilo Menu Lateral)
   const getCategoryIcon = (category: string) => {
     const cat = category.toLowerCase();
-    if (cat.includes('front')) return <Code2 className="w-4 h-4 text-sky-400" />;
-    if (cat.includes('back') || cat.includes('api')) return <Server className="w-4 h-4 text-emerald-400" />;
-    if (cat.includes('cloud') || cat.includes('devops')) return <Cloud className="w-4 h-4 text-amber-400" />;
-    if (cat.includes('banco') || cat.includes('dado')) return <Database className="w-4 h-4 text-purple-400" />;
-    if (cat.includes('ia') || cat.includes('ml')) return <Brain className="w-4 h-4 text-pink-400" />;
-    if (cat.includes('mobile')) return <Smartphone className="w-4 h-4 text-blue-400" />;
-    return <Cpu className="w-4 h-4 text-slate-400" />;
+    if (cat.includes('front')) return <Code2 className="w-4 h-4 text-sky-400 shrink-0" />;
+    if (cat.includes('back') || cat.includes('api')) return <Server className="w-4 h-4 text-emerald-400 shrink-0" />;
+    if (cat.includes('cloud') || cat.includes('devops')) return <Cloud className="w-4 h-4 text-amber-400 shrink-0" />;
+    if (cat.includes('banco') || cat.includes('dado')) return <Database className="w-4 h-4 text-purple-400 shrink-0" />;
+    if (cat.includes('ia') || cat.includes('ml')) return <Brain className="w-4 h-4 text-pink-400 shrink-0" />;
+    if (cat.includes('mobile')) return <Smartphone className="w-4 h-4 text-blue-400 shrink-0" />;
+    if (cat.includes('lingua')) return <Terminal className="w-4 h-4 text-amber-400 shrink-0" />;
+    return <Cpu className="w-4 h-4 text-slate-400 shrink-0" />;
   };
 
   const getMasteryColor = (mastery: SkillMastery) => {
     switch (mastery) {
-      case 'Especialista': return 'bg-purple-500/20 text-purple-300 border-purple-500/40';
-      case 'Avançado': return 'bg-amber-500/20 text-amber-300 border-amber-500/40';
-      case 'Intermediário': return 'bg-sky-500/20 text-sky-300 border-sky-500/40';
-      default: return 'bg-emerald-500/20 text-emerald-300 border-emerald-500/40';
+      case 'Especialista': return 'bg-purple-500/15 text-purple-300 border-purple-500/30';
+      case 'Avançado': return 'bg-amber-500/15 text-amber-300 border-amber-500/30';
+      case 'Intermediário': return 'bg-sky-500/15 text-sky-300 border-sky-500/30';
+      default: return 'bg-emerald-500/15 text-emerald-300 border-emerald-500/30';
     }
   };
 
@@ -194,7 +227,6 @@ export const CandidateProfileView: React.FC = () => {
   const handleAddSkill = () => {
     const catalogItem = SKILL_CATALOG_SAMPLES.find(s => s.name === selectedSkillName);
     const safeYears = Math.max(0, Number(experienceYears) || 0);
-    const safeMonths = Math.max(0, Math.min(11, Number(experienceMonths) || 0));
 
     const newSkill: CandidateSkill = {
       id: `sk-${Date.now()}`,
@@ -202,7 +234,7 @@ export const CandidateProfileView: React.FC = () => {
       category: catalogItem?.category || 'Geral',
       mastery: selectedMastery,
       years: safeYears,
-      months: safeMonths
+      months: 0 // Captura exclusivamente anos conforme solicitado
     };
     addCandidateSkill(currentCandidateId, newSkill);
     setProfileNotice(`✓ Habilidade "${selectedSkillName}" incorporada ao grimório técnico (+50 XP).`);
@@ -212,13 +244,14 @@ export const CandidateProfileView: React.FC = () => {
   const handleSuggestCustom = () => {
     if (!customSkillInput.trim()) return;
     suggestNewSkill(customSkillInput);
+    const safeYears = Math.max(0, Number(experienceYears) || 0);
     const newSkill: CandidateSkill = {
       id: `sk-custom-${Date.now()}`,
       name: customSkillInput.trim(),
       category: 'Especialidade Sugerida',
       mastery: selectedMastery,
-      years: Math.max(0, Number(experienceYears) || 0),
-      months: Math.max(0, Math.min(11, Number(experienceMonths) || 0)),
+      years: safeYears,
+      months: 0,
       isCustom: true,
       status: 'pendente_revisao'
     };
@@ -246,7 +279,7 @@ export const CandidateProfileView: React.FC = () => {
       links: true
     });
     setShowCommunityModal(false);
-    setProfileNotice('🎉 Perfil na Comunidade Técnica ativado com sucesso! +100 XP desbloqueados.');
+    setProfileNotice('✓ Perfil na Comunidade Técnica ativado com sucesso! +100 XP desbloqueados.');
     setTimeout(() => setProfileNotice(null), 4000);
   };
 
@@ -354,13 +387,13 @@ export const CandidateProfileView: React.FC = () => {
       </div>
 
       {/* =========================================================================
-          2. RADAR DE ATRIBUTOS TÉCNICOS (HEXÁGONO DE STATS RPG)
+          2. RADAR DE ATRIBUTOS TÉCNICOS (HEXÁGONO DE STATS RPG COM ÍCONES MINIMALISTAS)
          ========================================================================= */}
       <div className="bg-[#101522] border border-[#222C3E] rounded-2xl p-5 sm:p-6 shadow-xl space-y-4">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-[#222C3E] pb-3">
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2.5">
             <div className="w-7 h-7 rounded-lg bg-amber-400/10 border border-amber-400/30 text-amber-400 flex items-center justify-center font-bold text-xs">
-              ⚡
+              <Activity className="w-3.5 h-3.5 text-amber-400" />
             </div>
             <div>
               <h2 className="text-sm font-bold text-white uppercase tracking-wider font-mono">
@@ -376,7 +409,7 @@ export const CandidateProfileView: React.FC = () => {
           </span>
         </div>
 
-        {/* Grid de Barras de Atributos */}
+        {/* Grid de Barras de Atributos com Ícones Minimalistas */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3.5">
           {stats.map((stat, idx) => (
             <div 
@@ -384,8 +417,8 @@ export const CandidateProfileView: React.FC = () => {
               className="p-3.5 rounded-xl bg-[#0B0E17] border border-[#1E2638] flex flex-col justify-between gap-2 hover:border-[#2D3A50] transition-colors"
             >
               <div className="flex items-center justify-between text-xs font-mono">
-                <span className="text-slate-300 flex items-center gap-1.5 font-medium">
-                  <span>{stat.icon}</span>
+                <span className="text-slate-300 flex items-center gap-2 font-medium">
+                  {stat.icon}
                   <span>{stat.label}</span>
                 </span>
                 <strong className="text-amber-400 font-bold">{stat.value} / 100</strong>
@@ -426,16 +459,16 @@ export const CandidateProfileView: React.FC = () => {
       )}
 
       {/* =========================================================================
-          4. GRIMÓRIO DE HABILIDADES (SKILL TREE & INVENTÁRIO TÉCNICO)
+          4. GRIMÓRIO DE HABILIDADES (SKILL TREE & INVENTÁRIO TÉCNICO MINIMALISTA)
          ========================================================================= */}
       <div className="bg-[#101522] border border-[#222C3E] rounded-2xl p-5 sm:p-6 shadow-xl space-y-6">
         
         {/* Cabeçalho da Seção de Skills */}
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-[#222C3E] pb-3">
           <div>
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-2.5">
               <div className="w-7 h-7 rounded-lg bg-emerald-400/10 border border-emerald-400/30 text-emerald-400 flex items-center justify-center font-bold text-xs">
-                ⚔️
+                <Layers className="w-3.5 h-3.5 text-emerald-400" />
               </div>
               <h3 className="text-sm font-bold text-white uppercase tracking-wider font-mono">
                 Grimório de Habilidades Técnicas ({profile.skills.length} Ativas)
@@ -455,13 +488,14 @@ export const CandidateProfileView: React.FC = () => {
           </button>
         </div>
 
-        {/* FORJA DE HABILIDADES (ADICIONAR SKILL) */}
+        {/* FORJA DE HABILIDADES (ADICIONAR SKILL - APENAS ANOS) */}
         <div className="bg-[#0B0E17] p-4 sm:p-5 rounded-xl border border-[#1E2638] space-y-3">
           <span className="text-[11px] font-mono text-amber-400 uppercase tracking-wider font-bold block">
             Forjar Nova Habilidade no Perfil (+50 XP)
           </span>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 text-xs">
+            {/* Seletor de Tecnologia (Sem Emojis, Texto Limpo) */}
             <div>
               <label className="block text-slate-400 font-mono text-[11px] mb-1">Tecnologia do Catálogo:</label>
               <select
@@ -470,11 +504,12 @@ export const CandidateProfileView: React.FC = () => {
                 className="w-full h-10 bg-[#121722] border border-[#232D3F] rounded-xl px-3 text-white text-xs font-mono focus:border-amber-400 focus:outline-none"
               >
                 {SKILL_CATALOG_SAMPLES.map(s => (
-                  <option key={s.name} value={s.name}>{s.icon} {s.name} ({s.category})</option>
+                  <option key={s.name} value={s.name}>{s.name} ({s.category})</option>
                 ))}
               </select>
             </div>
 
+            {/* Nível de Maestria */}
             <div>
               <label className="block text-slate-400 font-mono text-[11px] mb-1">Nível de Maestria:</label>
               <select
@@ -489,27 +524,22 @@ export const CandidateProfileView: React.FC = () => {
               </select>
             </div>
 
+            {/* Tempo de Prática (EXCLUSIVAMENTE ANOS) */}
             <div>
               <label className="block text-slate-400 font-mono text-[11px] mb-1">Tempo de Prática Comprovada:</label>
-              <div className="flex gap-2">
+              <div className="relative">
                 <input
                   type="number"
                   min="0"
                   max="40"
                   value={experienceYears}
                   onChange={(e) => setExperienceYears(Math.max(0, Number(e.target.value) || 0))}
-                  className="w-1/2 h-10 bg-[#121722] border border-[#232D3F] rounded-xl px-3 text-white text-xs font-mono focus:border-amber-400 focus:outline-none"
-                  placeholder="Anos"
+                  className="w-full h-10 bg-[#121722] border border-[#232D3F] rounded-xl px-3 pr-14 text-white text-xs font-mono focus:border-amber-400 focus:outline-none"
+                  placeholder="Ex: 2"
                 />
-                <input
-                  type="number"
-                  min="0"
-                  max="11"
-                  value={experienceMonths}
-                  onChange={(e) => setExperienceMonths(Math.max(0, Math.min(11, Number(e.target.value) || 0)))}
-                  className="w-1/2 h-10 bg-[#121722] border border-[#232D3F] rounded-xl px-3 text-white text-xs font-mono focus:border-amber-400 focus:outline-none"
-                  placeholder="Meses"
-                />
+                <span className="absolute right-3 top-2.5 text-xs font-mono text-slate-500 pointer-events-none">
+                  {experienceYears === 1 ? 'ano' : 'anos'}
+                </span>
               </div>
             </div>
 
@@ -526,7 +556,7 @@ export const CandidateProfileView: React.FC = () => {
           </div>
         </div>
 
-        {/* VITRINE DE CARDS DE HABILIDADE (RUNAS DE PODER) */}
+        {/* VITRINE DE CARDS DE HABILIDADE (COM ÍCONES MINIMALISTAS E TEMPO EM ANOS) */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3.5">
           {profile.skills.length === 0 ? (
             <div className="col-span-full p-8 text-center text-slate-500 border border-dashed border-[#232D3F] rounded-xl font-mono text-xs">
@@ -540,6 +570,7 @@ export const CandidateProfileView: React.FC = () => {
               >
                 <div className="flex items-start justify-between gap-2">
                   <div className="flex items-center gap-2.5">
+                    {/* Ícone Minimalista Lucide correspondente à categoria */}
                     <div className="w-8 h-8 rounded-lg bg-[#161D2B] border border-[#232D3F] flex items-center justify-center shrink-0">
                       {getCategoryIcon(sk.category)}
                     </div>
@@ -573,8 +604,9 @@ export const CandidateProfileView: React.FC = () => {
                     </span>
                   </div>
 
-                  <span className="text-slate-400">
-                    {sk.years}a {sk.months ? `${sk.months}m` : ''}
+                  {/* Exibição apenas de anos */}
+                  <span className="text-slate-400 font-mono">
+                    {sk.years} {sk.years === 1 ? 'ano' : 'anos'}
                   </span>
                 </div>
 
@@ -595,9 +627,9 @@ export const CandidateProfileView: React.FC = () => {
          ========================================================================= */}
       <div className="bg-[#101522] border border-[#222C3E] rounded-2xl p-5 sm:p-6 shadow-xl space-y-4">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-[#222C3E] pb-3">
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2.5">
             <div className="w-7 h-7 rounded-lg bg-sky-400/10 border border-sky-400/30 text-sky-400 flex items-center justify-center font-bold text-xs">
-              ⚖️
+              <Shield className="w-3.5 h-3.5 text-sky-400" />
             </div>
             <div>
               <h3 className="text-sm font-bold text-white uppercase tracking-wider font-mono">
