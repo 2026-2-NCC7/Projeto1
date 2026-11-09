@@ -18,7 +18,11 @@ import {
   CreditCard,
   Briefcase,
   PanelLeftClose,
-  PanelLeft
+  PanelLeft,
+  Zap,
+  Lock,
+  Flame,
+  Award
 } from 'lucide-react';
 
 interface SidebarNavProps {
@@ -35,7 +39,7 @@ interface NavItem {
 }
 
 export const SidebarNav: React.FC<SidebarNavProps> = ({ currentTab, setCurrentTab }) => {
-  const { activePersona, session, currentUser, companyCredits } = useApp();
+  const { activePersona, session, currentUser, companyCredits, candidates, currentCandidateId } = useApp();
 
   const [isCollapsed, setIsCollapsed] = useState<boolean>(() => {
     try {
@@ -61,48 +65,52 @@ export const SidebarNav: React.FC<SidebarNavProps> = ({ currentTab, setCurrentTa
   const isCommunityExternal = activePersona === 'comunidade-rafael';
   const isCandidate = !isCompany && !isAdmin && !isCommunityExternal;
 
-  // Itens Minimalistas e Profissionais com Ícones Vetoriais Lucide (Sem Emojis)
+  const currentProfile = candidates[currentCandidateId];
+  const seniority = currentProfile?.seniority || currentUser?.seniority || 'Pleno';
+  const lvl = seniority === 'Júnior' ? 1 : seniority === 'Pleno' ? 2 : 3;
+
+  // Itens Minimalistas e Mais Encorpados com Ícones Lucide 20px (w-5 h-5)
   const candidateItems: NavItem[] = [
-    { id: 'candidato-inicio', label: 'Dashboard Dev', icon: <Smartphone className="w-4 h-4" /> },
-    { id: 'candidato-entrevista', label: 'Entrevista IA', icon: <Bot className="w-4 h-4" /> },
-    { id: 'candidato-perfil', label: 'Meu Perfil Técnico', icon: <Contact className="w-4 h-4" /> },
-    { id: 'candidato-vagas', label: 'Oportunidades', icon: <Briefcase className="w-4 h-4" /> },
-    { id: 'candidato-processos', label: 'Meus Processos', icon: <FileText className="w-4 h-4" /> },
-    { id: 'candidato-estalecas', label: 'Tech Points', icon: <Hexagon className="w-4 h-4" /> },
-    { id: 'candidato-relatorio', label: 'Laudo da IA', icon: <ShieldCheck className="w-4 h-4" /> }
+    { id: 'candidato-inicio', label: 'Dashboard Dev', icon: <Smartphone className="w-5 h-5" /> },
+    { id: 'candidato-entrevista', label: 'Entrevista IA', icon: <Bot className="w-5 h-5" /> },
+    { id: 'candidato-perfil', label: 'Meu Perfil Técnico', icon: <Contact className="w-5 h-5" /> },
+    { id: 'candidato-vagas', label: 'Oportunidades', icon: <Briefcase className="w-5 h-5" /> },
+    { id: 'candidato-processos', label: 'Meus Processos', icon: <FileText className="w-5 h-5" /> },
+    { id: 'candidato-estalecas', label: 'Tech Points', icon: <Hexagon className="w-5 h-5" /> },
+    { id: 'candidato-relatorio', label: 'Laudo da IA', icon: <ShieldCheck className="w-5 h-5" /> }
   ];
 
   const companyItems: NavItem[] = [
     { 
       id: 'empresa-vagas', 
       label: 'Painel de Vagas', 
-      icon: <Building2 className="w-4 h-4" />,
+      icon: <Building2 className="w-5 h-5" />,
       badge: `${companyCredits} slots`,
-      badgeColor: 'bg-amber-400/15 text-amber-400 border-amber-400/25'
+      badgeColor: 'bg-amber-400/20 text-amber-300 border-amber-400/30'
     },
-    { id: 'empresa-matching-ia', label: 'Análise de Matching', icon: <Target className="w-4 h-4" /> },
-    { id: 'empresa-comparacao', label: 'Comparar Perfis', icon: <FileText className="w-4 h-4" /> },
+    { id: 'empresa-matching-ia', label: 'Análise de Matching', icon: <Target className="w-5 h-5" /> },
+    { id: 'empresa-comparacao', label: 'Comparar Perfis', icon: <FileText className="w-5 h-5" /> },
     { 
       id: 'vitrine-planos', 
       label: 'Planos & Slots B2B', 
-      icon: <CreditCard className="w-4 h-4" />,
+      icon: <CreditCard className="w-5 h-5" />,
       badge: 'Gestão',
       badgeColor: 'bg-emerald-500/15 text-emerald-400 border-emerald-500/25'
     }
   ];
 
   const adminItems: NavItem[] = [
-    { id: 'admin-dashboard', label: 'Governança & Dados', icon: <ShieldCheck className="w-4 h-4" /> },
-    { id: 'vitrine-planos', label: 'Planos & Slots B2B', icon: <Store className="w-4 h-4" /> },
-    { id: 'admin-revisoes', label: 'Revisões (Art. 20)', icon: <RotateCcw className="w-4 h-4" /> },
-    { id: 'admin-laboratorio', label: 'Laboratório TCC', icon: <Database className="w-4 h-4" /> },
-    { id: 'admin-monitor', label: 'Pipeline & Logs IA', icon: <Bot className="w-4 h-4" /> }
+    { id: 'admin-dashboard', label: 'Governança & Dados', icon: <ShieldCheck className="w-5 h-5" /> },
+    { id: 'vitrine-planos', label: 'Planos & Slots B2B', icon: <Store className="w-5 h-5" /> },
+    { id: 'admin-revisoes', label: 'Revisões (Art. 20)', icon: <RotateCcw className="w-5 h-5" /> },
+    { id: 'admin-laboratorio', label: 'Laboratório TCC', icon: <Database className="w-5 h-5" /> },
+    { id: 'admin-monitor', label: 'Pipeline & Logs IA', icon: <Bot className="w-5 h-5" /> }
   ];
 
   const communityItems: NavItem[] = [
-    { id: 'comunidade-feed', label: 'Feed de Artigos', icon: <Share2 className="w-4 h-4" /> },
-    { id: 'comunidade-rede', label: 'Rede de Conexões', icon: <Users className="w-4 h-4" /> },
-    { id: 'comunidade-ajuda', label: 'Mentoria & Dúvidas', icon: <Search className="w-4 h-4" /> }
+    { id: 'comunidade-feed', label: 'Feed de Artigos', icon: <Share2 className="w-5 h-5" /> },
+    { id: 'comunidade-rede', label: 'Rede de Conexões', icon: <Users className="w-5 h-5" /> },
+    { id: 'comunidade-ajuda', label: 'Mentoria & Dúvidas', icon: <Search className="w-5 h-5" /> }
   ];
 
   const currentItems = isCandidate
@@ -124,29 +132,30 @@ export const SidebarNav: React.FC<SidebarNavProps> = ({ currentTab, setCurrentTa
   return (
     <aside 
       className={`shrink-0 transition-all duration-300 ease-in-out border-r border-[#1E2638] bg-[#0A0D14] flex flex-col justify-between ${
-        isCollapsed ? 'w-full lg:w-[64px]' : 'w-full lg:w-[240px]'
+        isCollapsed ? 'w-full lg:w-[72px]' : 'w-full lg:w-[264px]'
       }`}
     >
-      <div className="p-3 space-y-4">
+      <div className="p-4 space-y-6">
+        
         {/* Cabeçalho do Menu Lateral */}
-        <div className="flex items-center justify-between pb-3 border-b border-[#1E2638]">
+        <div className="flex items-center justify-between pb-4 border-b border-[#1E2638]">
           {!isCollapsed ? (
-            <div className="flex items-center gap-2.5 min-w-0">
-              <div className="w-7 h-7 rounded-lg bg-amber-400 text-black font-black font-heading text-xs flex items-center justify-center shrink-0 shadow-sm">
+            <div className="flex items-center gap-3 min-w-0">
+              <div className="w-9 h-9 rounded-xl bg-amber-400 text-black font-black font-heading text-sm flex items-center justify-center shrink-0 shadow-md shadow-amber-500/20">
                 Q
               </div>
               <div className="min-w-0">
-                <span className="font-heading font-extrabold text-xs text-white block truncate leading-tight">
+                <span className="font-heading font-extrabold text-sm text-white block truncate leading-tight">
                   Q.I. Match
                 </span>
-                <span className="font-mono text-[9px] uppercase tracking-wider text-amber-400 block font-semibold truncate">
+                <span className="font-mono text-[10px] uppercase tracking-wider text-amber-400 block font-bold truncate mt-0.5">
                   {roleLabel}
                 </span>
               </div>
             </div>
           ) : (
-            <div className="w-full flex justify-center py-0.5">
-              <div className="w-7 h-7 rounded-lg bg-amber-400 text-black font-black font-heading text-xs flex items-center justify-center shadow-sm">
+            <div className="w-full flex justify-center py-1">
+              <div className="w-9 h-9 rounded-xl bg-amber-400 text-black font-black font-heading text-sm flex items-center justify-center shadow-md shadow-amber-500/20">
                 Q
               </div>
             </div>
@@ -157,7 +166,7 @@ export const SidebarNav: React.FC<SidebarNavProps> = ({ currentTab, setCurrentTa
             type="button"
             onClick={toggleCollapsed}
             title={isCollapsed ? 'Estender Menu Lateral' : 'Recolher Menu Lateral'}
-            className="p-1 rounded-md text-slate-400 hover:text-white hover:bg-[#161D2B] transition-colors shrink-0"
+            className="p-1.5 rounded-lg text-slate-400 hover:text-white hover:bg-[#161D2B] transition-colors shrink-0"
           >
             {isCollapsed ? (
               <PanelLeft className="w-4 h-4 text-amber-400" />
@@ -169,40 +178,41 @@ export const SidebarNav: React.FC<SidebarNavProps> = ({ currentTab, setCurrentTa
 
         {/* Rótulo de Seção (Apenas quando expandido) */}
         {!isCollapsed && (
-          <div className="px-2 text-[10px] font-mono font-bold text-slate-500 uppercase tracking-wider">
-            Navegação
+          <div className="px-2 text-[11px] font-mono font-bold text-slate-500 uppercase tracking-widest flex items-center justify-between">
+            <span>Navegação</span>
+            <span className="text-[10px] text-emerald-400 font-mono font-semibold">Ativa</span>
           </div>
         )}
 
-        {/* Lista de Itens do Menu */}
-        <nav className="space-y-1">
+        {/* Lista de Itens do Menu (Mais espaçados e maiores) */}
+        <nav className="space-y-2">
           {currentItems.map(item => {
             const isActive = currentTab === item.id;
 
             if (isCollapsed) {
-              // ==================== MODO RECOLHIDO (Ícones Minimalistas + Tooltip) ====================
+              // ==================== MODO RECOLHIDO (Ícones Maiores + Tooltip) ====================
               return (
-                <div key={item.id} className="relative group flex justify-center">
+                <div key={item.id} className="relative group flex justify-center py-0.5">
                   <button
                     type="button"
                     onClick={() => setCurrentTab(item.id)}
-                    className={`w-10 h-10 rounded-lg flex items-center justify-center transition-all relative ${
+                    className={`w-11 h-11 rounded-xl flex items-center justify-center transition-all relative ${
                       isActive
-                        ? 'bg-amber-400/15 text-amber-400 border border-amber-400/30'
-                        : 'text-slate-400 hover:text-white hover:bg-[#141B28]'
+                        ? 'bg-amber-400/15 text-amber-400 border border-amber-400/40 shadow-sm scale-105'
+                        : 'text-slate-400 hover:text-white hover:bg-[#151C2A]'
                     }`}
                   >
                     {item.icon}
                     {isActive && (
-                      <span className="absolute -left-3 top-2 bottom-2 w-1 bg-amber-400 rounded-r-full" />
+                      <span className="absolute -left-4 top-2 bottom-2 w-1.5 bg-amber-400 rounded-r-full shadow-sm" />
                     )}
                   </button>
 
                   {/* Tooltip flutuante minimalista */}
-                  <div className="absolute left-12 top-1/2 -translate-y-1/2 ml-2 px-2.5 py-1.5 bg-[#101522] border border-[#232D3F] text-white text-xs font-medium rounded-md shadow-xl opacity-0 pointer-events-none group-hover:opacity-100 transition-opacity z-50 whitespace-nowrap flex items-center gap-2">
+                  <div className="absolute left-14 top-1/2 -translate-y-1/2 ml-2 px-3 py-1.5 bg-[#101522] border border-[#232D3F] text-white text-xs font-semibold rounded-lg shadow-2xl opacity-0 pointer-events-none group-hover:opacity-100 transition-opacity z-50 whitespace-nowrap flex items-center gap-2">
                     <span>{item.label}</span>
                     {item.badge && (
-                      <span className="text-[9px] font-mono font-bold px-1.5 py-0.2 rounded bg-amber-400/20 text-amber-300">
+                      <span className="text-[10px] font-mono font-bold px-1.5 py-0.5 rounded bg-amber-400/20 text-amber-300">
                         {item.badge}
                       </span>
                     )}
@@ -211,20 +221,20 @@ export const SidebarNav: React.FC<SidebarNavProps> = ({ currentTab, setCurrentTa
               );
             }
 
-            // ==================== MODO ESTENDIDO (Layout Lateral Autêntico) ====================
+            // ==================== MODO ESTENDIDO (Mais espaçado e maior) ====================
             return (
               <button
                 key={item.id}
                 type="button"
                 onClick={() => setCurrentTab(item.id)}
-                className={`w-full flex items-center justify-between px-3 py-2 rounded-lg text-xs transition-all group text-left relative ${
+                className={`w-full flex items-center justify-between px-3.5 py-3 rounded-xl text-sm transition-all group text-left relative ${
                   isActive
-                    ? 'bg-[#151C2A] text-amber-400 font-bold border-l-2 border-amber-400'
-                    : 'text-slate-300 hover:text-white hover:bg-[#121722] font-medium'
+                    ? 'bg-[#161E2E] text-amber-400 font-bold border-l-4 border-amber-400 shadow-sm'
+                    : 'text-slate-300 hover:text-white hover:bg-[#121824] font-medium'
                 }`}
               >
-                <div className="flex items-center gap-2.5 min-w-0">
-                  <span className={`shrink-0 ${isActive ? 'text-amber-400' : 'text-slate-400 group-hover:text-white'}`}>
+                <div className="flex items-center gap-3 min-w-0">
+                  <span className={`shrink-0 transition-colors ${isActive ? 'text-amber-400' : 'text-slate-400 group-hover:text-white'}`}>
                     {item.icon}
                   </span>
                   <span className="truncate">
@@ -233,7 +243,7 @@ export const SidebarNav: React.FC<SidebarNavProps> = ({ currentTab, setCurrentTa
                 </div>
 
                 {item.badge && (
-                  <span className={`text-[9px] font-mono font-bold px-1.5 py-0.5 rounded border shrink-0 ${item.badgeColor || 'bg-amber-400/10 text-amber-400 border-amber-400/20'}`}>
+                  <span className={`text-[10px] font-mono font-bold px-2 py-0.5 rounded border shrink-0 ${item.badgeColor || 'bg-amber-400/10 text-amber-400 border-amber-400/20'}`}>
                     {item.badge}
                   </span>
                 )}
@@ -241,25 +251,69 @@ export const SidebarNav: React.FC<SidebarNavProps> = ({ currentTab, setCurrentTa
             );
           })}
         </nav>
+
       </div>
 
-      {/* Rodapé Lateral */}
-      <div className={`p-3 border-t border-[#1E2638] ${isCollapsed ? 'flex justify-center' : 'space-y-1'}`}>
+      {/* =========================================================================
+          RODAPÉ LATERAL (APROVEITA O ESPAÇO EM BAIXO COM INFORMAÇÕES RELEVANTES)
+         ========================================================================= */}
+      <div className="p-4 border-t border-[#1E2638] space-y-3 bg-[#0B0E16]">
         {isCollapsed ? (
-          <div className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" title="Motor IA & Whisper Ativo" />
+          <div className="flex flex-col items-center gap-3 py-2">
+            <span className="w-8 h-8 rounded-lg bg-[#161D2B] border border-[#232D3F] flex items-center justify-center font-mono font-bold text-xs text-amber-400" title={`Nível ${lvl}`}>
+              L{lvl}
+            </span>
+            <div className="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-pulse" title="Motor IA & Whisper Ativo" />
+          </div>
         ) : (
           <>
-            <div className="flex items-center gap-1.5 text-[10px] font-mono text-emerald-400">
-              <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 shrink-0 animate-pulse" />
-              <span className="truncate">Motor IA & Whisper Ativo</span>
-            </div>
-            <div className="flex items-center gap-1.5 text-[10px] font-mono text-slate-500">
-              <span className="w-1.5 h-1.5 rounded-full bg-amber-400/70 shrink-0" />
-              <span className="truncate">LGPD Art. 20 Conforme</span>
+            {/* Widget Informativo do Usuário / Ficha Técnica */}
+            {isCandidate && (
+              <div className="p-3 rounded-xl bg-[#121722] border border-[#1E2638] space-y-2">
+                <div className="flex items-center justify-between text-xs font-mono">
+                  <span className="text-slate-300 font-bold flex items-center gap-1.5">
+                    <Award className="w-3.5 h-3.5 text-amber-400" />
+                    <span>Nível {lvl} • {seniority}</span>
+                  </span>
+                  <span className="text-amber-400 font-bold text-[11px]">Rank B</span>
+                </div>
+
+                {/* Mini Barra de XP */}
+                <div>
+                  <div className="flex justify-between text-[10px] font-mono text-slate-400 mb-1">
+                    <span>XP Técnico</span>
+                    <span className="text-amber-400">85%</span>
+                  </div>
+                  <div className="w-full h-1.5 bg-[#1B2230] rounded-full overflow-hidden">
+                    <div className="h-full bg-gradient-to-r from-amber-400 to-emerald-400 rounded-full w-[85%]" />
+                  </div>
+                </div>
+
+                <div className="flex items-center justify-between text-[10px] font-mono text-slate-400 pt-1 border-t border-[#1F2737]">
+                  <span className="flex items-center gap-1 text-emerald-400">
+                    <Lock className="w-3 h-3" />
+                    <span>Modo Ghost</span>
+                  </span>
+                  <span>LGPD Art. 20</span>
+                </div>
+              </div>
+            )}
+
+            {/* Badges de Status da Plataforma */}
+            <div className="space-y-1.5 pt-1">
+              <div className="flex items-center gap-2 text-[11px] font-mono text-emerald-400 font-medium">
+                <span className="w-2 h-2 rounded-full bg-emerald-400 shrink-0 animate-pulse" />
+                <span className="truncate">Motor IA & Whisper Ativo</span>
+              </div>
+              <div className="flex items-center gap-2 text-[10px] font-mono text-slate-400">
+                <span className="w-1.5 h-1.5 rounded-full bg-amber-400/80 shrink-0" />
+                <span className="truncate">Criptografia & Double Opt-In</span>
+              </div>
             </div>
           </>
         )}
       </div>
+
     </aside>
   );
 };
