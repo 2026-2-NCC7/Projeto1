@@ -1,4 +1,5 @@
 import { evaluatePasswordStrength } from '../utils/security';
+import { calculateDetailedMatch } from '../utils/matchingEngine';
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import { 
   CandidateProfile, 
@@ -1041,14 +1042,8 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
       return;
     }
 
-    const candSkills = cand.skills || [];
-    const matchedSkills = vac.mandatorySkills.filter(req =>
-      candSkills.some(cs => cs.name.toLowerCase().includes(req.toLowerCase()))
-    );
-    const hardScore = Math.min(100, Math.max(35, Math.round((matchedSkills.length / Math.max(1, vac.mandatorySkills.length)) * 100)));
-    const softScore = cand.interviewSummary?.length ? 88 : 80;
-    const expScore = 78;
-    const finalScore = Math.round(hardScore * 0.4 + softScore * 0.3 + expScore * 0.3);
+    const matchResult = calculateDetailedMatch(cand, vac, cand.interviewSummary);
+    const finalScore = matchResult.globalScore;
 
     const newProc: SelectionProcess = {
       id: `proc-${candidateId}-${vacancyId}-${Date.now()}`,

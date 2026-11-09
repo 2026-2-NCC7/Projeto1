@@ -27,21 +27,34 @@ import {
   Calendar,
   Layers,
   Award,
-  ShieldCheck
+  ShieldCheck,
+  Calculator
 } from 'lucide-react';
 import { Vacancy } from '../types';
+import { calculateDetailedMatch, DetailedMatchResult } from '../utils/matchingEngine';
 
 export interface EvaluatedVacancyItem {
   vacancy: Vacancy;
   company?: any;
   process?: any;
+  match?: DetailedMatchResult;
   matchedSkills: string[];
   missingSkills: string[];
+  matchedDesirable?: string[];
+  missingDesirable?: string[];
   hardScore: number;
   softScore: number;
   expScore: number;
+  condScore?: number;
   score: number;
   isHighMatch: boolean;
+  statusLabel?: string;
+  formula?: {
+    equation: string;
+    substitution: string;
+    weightsExplanation: string;
+    lgpdAuditNotice: string;
+  };
 }
 
 interface CandidateOpportunitiesViewProps {
@@ -122,41 +135,38 @@ export const CandidateOpportunitiesView: React.FC<CandidateOpportunitiesViewProp
     }
   };
 
-  // Cálculo de afinidade e separação de skills para cada vaga
+  // Cálculo de afinidade matemática multidimensional para cada vaga (Artigo 20 LGPD)
   const evaluatedVacancies = useMemo(() => {
     return vacancies.map((vac) => {
       const company = companies.find(c => c.id === vac.companyId);
       const proc = selectionProcesses.find(p => p.candidateId === currentCandidateId && p.vacancyId === vac.id);
 
-      const matchedSkills = vac.mandatorySkills.filter(req =>
-        candSkills.some(cs => cs.name.toLowerCase().includes(req.toLowerCase()))
+      const match = calculateDetailedMatch(
+        candidate,
+        vac,
+        candidate?.interviewSummary
       );
-      const missingSkills = vac.mandatorySkills.filter(req =>
-        !candSkills.some(cs => cs.name.toLowerCase().includes(req.toLowerCase()))
-      );
-
-      const hardScore = Math.min(100, Math.max(35, Math.round((matchedSkills.length / Math.max(1, vac.mandatorySkills.length)) * 100)));
-      const softScore = candidate?.interviewSummary?.length ? 90 : 82;
-      const expYears = candSkills.reduce((acc, curr) => acc + (curr.years || 0), 0) / Math.max(1, candSkills.length);
-      const expScore = Math.min(100, Math.max(70, Math.round(expYears >= 4 ? 95 : expYears >= 2 ? 85 : 75)));
-      
-      const calculatedScore = proc?.demonstrativeScore || Math.round(hardScore * 0.4 + softScore * 0.3 + expScore * 0.3);
-      const isHighMatch = calculatedScore >= 75;
 
       return {
         vacancy: vac,
         company,
         process: proc,
-        matchedSkills,
-        missingSkills,
-        hardScore,
-        softScore,
-        expScore,
-        score: calculatedScore,
-        isHighMatch
+        match,
+        matchedSkills: match.dimensions.hardSkills.matchedMandatory,
+        missingSkills: match.dimensions.hardSkills.missingMandatory,
+        matchedDesirable: match.dimensions.hardSkills.matchedDesirable,
+        missingDesirable: match.dimensions.hardSkills.missingDesirable,
+        hardScore: match.dimensions.hardSkills.score,
+        softScore: match.dimensions.softSkills.score,
+        expScore: match.dimensions.experience.score,
+        condScore: match.dimensions.conditions.score,
+        score: match.globalScore,
+        isHighMatch: match.isHighMatch,
+        statusLabel: match.statusLabel,
+        formula: match.formula
       };
     });
-  }, [vacancies, companies, selectionProcesses, currentCandidateId, candSkills, candidate]);
+  }, [vacancies, companies, selectionProcesses, currentCandidateId, candidate]);
 
   // Filtros aplicados
   const filteredVacancies = evaluatedVacancies.filter(item => {
@@ -363,39 +373,44 @@ export const CandidateOpportunitiesView: React.FC<CandidateOpportunitiesViewProp
 
                   {/* SCORE GLOBAL EM DESTAQUE */}
                   <div className="flex sm:flex-col items-center sm:items-end justify-between sm:justify-center border-t sm:border-t-0 pt-2 sm:pt-0 border-[#262F40]">
-                    <div className="flex items-baseline gap-1">
+                    <div className="flex items-baseline gap-1.5">
                       <span className={`text-2xl font-heading font-black leading-none ${
-                        isHighMatch ? 'text-[#facc15]' : 'text-amber-400'
+                        score >= 85 ? 'text-[#facc15]' : score >= 70 ? 'text-amber-400' : 'text-slate-400'
                       }`}>
                         {score}%
                       </span>
                     </div>
-                    <span className="text-[10px] uppercase tracking-wider text-slate-400 font-mono font-bold">
-                      {isHighMatch ? 'Compatibilidade' : 'Afinidade Inicial'}
+                    <span className={`text-[10px] uppercase tracking-wider font-mono font-bold mt-0.5 ${
+                      isHighMatch ? 'text-emerald-400' : score >= 50 ? 'text-amber-400' : 'text-slate-400'
+                    }`}>
+                      {item.statusLabel || (isHighMatch ? 'Alta Afinidade' : 'Afinidade Inicial')}
                     </span>
                   </div>
                 </div>
 
-                {/* MÉTRICAS EM LINHA & COMPETÊNCIAS */}
+                {/* MÉTRICAS EM LINHA & 4 DIMENSÕES PONDERADAS */}
                 <div className="flex flex-wrap items-center gap-2 pt-3 text-xs border-t border-[#262F40]/60 mt-3">
-                  <span className="px-2.5 py-1 rounded-lg bg-[#161B26] border border-[#262F40] text-slate-300">
-                    Hard Skills: <strong className="text-white font-mono">{hardScore}%</strong>
+                  <span className="px-2.5 py-1 rounded-lg bg-[#161B26] border border-[#262F40] text-slate-300" title="Peso 50% no cálculo de afinidade">
+                    Hard Skills (50%): <strong className="text-white font-mono">{hardScore}%</strong>
                   </span>
-                  <span className="px-2.5 py-1 rounded-lg bg-[#161B26] border border-[#262F40] text-slate-300">
-                    Soft Skills: <strong className="text-white font-mono">{softScore}%</strong>
+                  <span className="px-2.5 py-1 rounded-lg bg-[#161B26] border border-[#262F40] text-slate-300" title="Peso 25% no cálculo de afinidade">
+                    Soft Skills (25%): <strong className="text-white font-mono">{softScore}%</strong>
                   </span>
-                  <span className="px-2.5 py-1 rounded-lg bg-[#161B26] border border-[#262F40] text-slate-300">
-                    Experiência: <strong className="text-white font-mono">{expScore}%</strong>
+                  <span className="px-2.5 py-1 rounded-lg bg-[#161B26] border border-[#262F40] text-slate-300" title="Peso 15% no cálculo de afinidade">
+                    Experiência (15%): <strong className="text-white font-mono">{expScore}%</strong>
+                  </span>
+                  <span className="px-2.5 py-1 rounded-lg bg-[#161B26] border border-[#262F40] text-slate-300" title="Peso 10% no cálculo de afinidade">
+                    Condições (10%): <strong className="text-white font-mono">{item.condScore ?? 90}%</strong>
                   </span>
 
                   <button
                     type="button"
                     onClick={() => setExpandedMatchId(isExpanded ? null : vacancy.id)}
-                    className="ml-auto text-[11px] text-[#facc15] hover:underline font-semibold flex items-center gap-1"
+                    className="ml-auto text-[11px] text-[#facc15] hover:underline font-semibold flex items-center gap-1.5 bg-[#facc15]/10 hover:bg-[#facc15]/20 border border-[#facc15]/30 px-3 py-1 rounded-lg transition-all"
                   >
-                    <Sparkles className="w-3 h-3" />
-                    {isExpanded ? 'Ocultar Detalhes da IA' : 'Ver Análise de Competências'}
-                    {isExpanded ? <ChevronUp className="w-3 h-3" /> : <ChevronDown className="w-3 h-3" />}
+                    <Calculator className="w-3.5 h-3.5 text-[#facc15]" />
+                    <span>{isExpanded ? 'Ocultar Memória de Cálculo' : 'Ver Fórmula & Memória de Cálculo'}</span>
+                    {isExpanded ? <ChevronUp className="w-3.5 h-3.5" /> : <ChevronDown className="w-3.5 h-3.5" />}
                   </button>
                 </div>
 
@@ -414,28 +429,129 @@ export const CandidateOpportunitiesView: React.FC<CandidateOpportunitiesViewProp
                   ))}
                 </div>
 
-                {/* DETALHES EXPANDIDOS */}
+                {/* MEMÓRIA DE CÁLCULO & FÓRMULA MATEMÁTICA DETALHADA */}
                 {isExpanded && (
-                  <div className="mt-3 p-3.5 rounded-xl bg-[#161B26] border border-[#262F40] text-xs space-y-2">
-                    <div className="flex items-center gap-2">
-                      <Sparkles className="w-3.5 h-3.5 text-[#facc15]" />
-                      <strong className="text-[11px] text-[#facc15] font-bold">
-                        Síntese Explicável do Algoritmo:
-                      </strong>
-                    </div>
-                    <p className="text-slate-300 text-xs leading-relaxed">
-                      {isHighMatch
-                        ? `Forte correspondência com as competências comprovadas na entrevista. O candidato demonstrou domínio nos requisitos obrigatórios (${matchedSkills.join(', ')}) com excelente alinhamento ao calibre exigido.`
-                        : `O candidato atende aos fundamentos técnicos gerais, contudo a vaga exige competências específicas adicionais não identificadas no perfil atual (${missingSkills.join(', ')}). A candidatura direta está liberada com avaliação de potencial de aprendizado.`}
-                    </p>
-                    <div className="pt-1 text-[11px] text-slate-400">
-                      <strong>Sobre a Vaga:</strong> {vacancy.description}
-                    </div>
-                    {vacancy.conditions && (
-                      <div className="text-[11px] text-slate-400">
-                        <strong>Benefícios & Condições:</strong> {vacancy.conditions}
+                  <div className="mt-4 p-4 rounded-2xl bg-[#161B26] border-2 border-[#facc15]/30 text-xs space-y-4 animate-fade-in shadow-xl">
+                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-[#262F40] pb-3">
+                      <div className="flex items-center gap-2">
+                        <div className="w-8 h-8 rounded-lg bg-[#facc15]/10 border border-[#facc15]/30 flex items-center justify-center text-[#facc15]">
+                          <Calculator className="w-4 h-4" />
+                        </div>
+                        <div>
+                          <strong className="text-xs text-white font-heading font-bold block">
+                            Memória de Cálculo de Compatibilidade • Algoritmo Auditável
+                          </strong>
+                          <span className="text-[10px] text-slate-400 font-mono">
+                            Conformidade Estrita com o Artigo 20 da LGPD (Transparência Algorítmica)
+                          </span>
+                        </div>
                       </div>
-                    )}
+
+                      <span className="px-2.5 py-1 rounded-full bg-emerald-500/15 border border-emerald-500/30 text-emerald-300 font-mono text-[10px] font-bold self-start sm:self-auto">
+                        100% Determinístico
+                      </span>
+                    </div>
+
+                    {/* Caixa da Fórmula Teórica e Substituição Numérica */}
+                    <div className="p-3.5 rounded-xl bg-[#0D111A] border border-[#262F40] space-y-2">
+                      <span className="text-[10px] font-mono text-[#facc15] font-bold uppercase tracking-wider block">
+                        Fórmula Ponderada Oficial:
+                      </span>
+                      <div className="p-2.5 rounded-lg bg-[#111318] border border-[#232D3F] font-mono text-xs text-slate-200 overflow-x-auto">
+                        <code className="text-[#facc15] font-bold">
+                          S_global = (0.50 × S_hard) + (0.25 × S_soft) + (0.15 × S_exp) + (0.10 × S_cond)
+                        </code>
+                      </div>
+
+                      <span className="text-[10px] font-mono text-slate-400 font-bold uppercase tracking-wider block pt-1">
+                        Substituição com as Métricas Desta Oportunidade:
+                      </span>
+                      <div className="p-2.5 rounded-lg bg-[#111318] border border-[#232D3F] font-mono text-xs text-slate-200 overflow-x-auto">
+                        <code>
+                          S_global = (0.50 × <span className="text-emerald-400 font-bold">{hardScore}%</span>) + (0.25 × <span className="text-blue-400 font-bold">{softScore}%</span>) + (0.15 × <span className="text-purple-400 font-bold">{expScore}%</span>) + (0.10 × <span className="text-amber-400 font-bold">{item.condScore ?? 90}%</span>) = <span className="text-[#facc15] font-black text-sm">{score}%</span>
+                        </code>
+                      </div>
+                    </div>
+
+                    {/* Decomposição em 4 Barras de Progresso com Explicações */}
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-3 pt-1">
+                      {/* Hard Skills */}
+                      <div className="p-3 rounded-xl bg-[#111318] border border-[#262F40] space-y-1.5">
+                        <div className="flex items-center justify-between text-xs">
+                          <span className="font-bold text-white flex items-center gap-1.5">
+                            <span className="w-2 h-2 rounded-full bg-emerald-400"></span>
+                            1. Hard Skills (Peso 50%)
+                          </span>
+                          <span className="font-mono font-bold text-emerald-400">{hardScore}%</span>
+                        </div>
+                        <div className="w-full bg-[#1e2638] h-1.5 rounded-full overflow-hidden">
+                          <div className="bg-emerald-400 h-full rounded-full transition-all duration-500" style={{ width: `${hardScore}%` }}></div>
+                        </div>
+                        <p className="text-[11px] text-slate-300 leading-relaxed">
+                          {matchedSkills.length} de {vacancy.mandatorySkills.length} requisitos obrigatórios atendidos ({matchedSkills.join(', ') || 'Nenhum'}).
+                          {missingSkills.length > 0 && ` Gaps identificados: ${missingSkills.join(', ')}.`}
+                        </p>
+                      </div>
+
+                      {/* Soft Skills */}
+                      <div className="p-3 rounded-xl bg-[#111318] border border-[#262F40] space-y-1.5">
+                        <div className="flex items-center justify-between text-xs">
+                          <span className="font-bold text-white flex items-center gap-1.5">
+                            <span className="w-2 h-2 rounded-full bg-blue-400"></span>
+                            2. Soft Skills (Peso 25%)
+                          </span>
+                          <span className="font-mono font-bold text-blue-400">{softScore}%</span>
+                        </div>
+                        <div className="w-full bg-[#1e2638] h-1.5 rounded-full overflow-hidden">
+                          <div className="bg-blue-400 h-full rounded-full transition-all duration-500" style={{ width: `${softScore}%` }}></div>
+                        </div>
+                        <p className="text-[11px] text-slate-300 leading-relaxed">
+                          Competências comportamentais validadas nas respostas da entrevista técnica com IA (comunicação, colaboração e resolução de problemas).
+                        </p>
+                      </div>
+
+                      {/* Experiência & Senioridade */}
+                      <div className="p-3 rounded-xl bg-[#111318] border border-[#262F40] space-y-1.5">
+                        <div className="flex items-center justify-between text-xs">
+                          <span className="font-bold text-white flex items-center gap-1.5">
+                            <span className="w-2 h-2 rounded-full bg-purple-400"></span>
+                            3. Senioridade & Exp. (Peso 15%)
+                          </span>
+                          <span className="font-mono font-bold text-purple-400">{expScore}%</span>
+                        </div>
+                        <div className="w-full bg-[#1e2638] h-1.5 rounded-full overflow-hidden">
+                          <div className="bg-purple-400 h-full rounded-full transition-all duration-500" style={{ width: `${expScore}%` }}></div>
+                        </div>
+                        <p className="text-[11px] text-slate-300 leading-relaxed">
+                          Candidato nível <strong>{candidate.seniority}</strong> para vaga nível <strong>{vacancy.seniority}</strong> com histórico comprovado de projetos.
+                        </p>
+                      </div>
+
+                      {/* Condições & Trabalho */}
+                      <div className="p-3 rounded-xl bg-[#111318] border border-[#262F40] space-y-1.5">
+                        <div className="flex items-center justify-between text-xs">
+                          <span className="font-bold text-white flex items-center gap-1.5">
+                            <span className="w-2 h-2 rounded-full bg-amber-400"></span>
+                            4. Condições & Modelo (Peso 10%)
+                          </span>
+                          <span className="font-mono font-bold text-amber-400">{item.condScore ?? 90}%</span>
+                        </div>
+                        <div className="w-full bg-[#1e2638] h-1.5 rounded-full overflow-hidden">
+                          <div className="bg-amber-400 h-full rounded-full transition-all duration-500" style={{ width: `${item.condScore ?? 90}%` }}></div>
+                        </div>
+                        <p className="text-[11px] text-slate-300 leading-relaxed">
+                          Modalidade {vacancy.modality}, contrato {vacancy.contractTypes.join('/')} e faixa salarial alinhada com as preferências do candidato.
+                        </p>
+                      </div>
+                    </div>
+
+                    {/* Nota de Auditoria LGPD */}
+                    <div className="pt-2 border-t border-[#262F40] text-[11px] text-slate-400 flex items-center gap-2">
+                      <ShieldCheck className="w-4 h-4 text-emerald-400 shrink-0" />
+                      <span>
+                        <strong>Auditoria LGPD Art. 20:</strong> Este cálculo utiliza estritamente dados técnicos declarados e evidências comprovadas. Idade, gênero, raça ou localização pessoal são 100% excluídos da pontuação.
+                      </span>
+                    </div>
                   </div>
                 )}
 
@@ -899,21 +1015,117 @@ export const CandidateOpportunitiesView: React.FC<CandidateOpportunitiesViewProp
                 </div>
               )}
 
-              {/* Seção 6: Transparência Algorítmica e IA Explicável */}
-              <div className="p-4 rounded-xl bg-[#161B26] border border-[#facc15]/30 space-y-2">
-                <div className="flex items-center gap-2 text-[#facc15]">
-                  <Sparkles className="w-4 h-4" />
-                  <strong className="text-xs font-bold font-heading">
-                    Explicabilidade do Algoritmo de Matching • LGPD Art. 20
-                  </strong>
+              {/* Seção 6: Memória de Cálculo & Transparência Algorítmica (LGPD Art. 20) */}
+              <div className="p-4 sm:p-5 rounded-2xl bg-[#161B26] border-2 border-[#facc15]/40 space-y-3.5 shadow-xl">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-[#262F40] pb-3">
+                  <div className="flex items-center gap-2 text-[#facc15]">
+                    <Calculator className="w-5 h-5 text-[#facc15]" />
+                    <strong className="text-sm font-bold font-heading text-white">
+                      Memória de Cálculo de Compatibilidade • Fórmula Matemática Auditável
+                    </strong>
+                  </div>
+                  <span className="px-2.5 py-0.5 rounded-full bg-emerald-500/15 border border-emerald-500/30 text-emerald-300 font-mono text-[10px] font-bold self-start sm:self-auto">
+                    LGPD Art. 20 Conforme
+                  </span>
                 </div>
-                <p className="text-slate-300 text-xs leading-relaxed">
-                  {selectedDetailVacancy.isHighMatch
-                    ? `Sua pontuação de ${selectedDetailVacancy.score}% reflete forte aderência com as evidências de código e respostas da sua entrevista técnica. Os requisitos prioritários (${selectedDetailVacancy.matchedSkills.join(', ')}) foram confirmados pelo modelo de IA.`
-                    : `Sua pontuação de ${selectedDetailVacancy.score}% indica aderência conceitual satisfatória. Embora existam requisitos complementares não identificados no seu perfil atual, sua candidatura é incentivada caso queira expandir sua stack de atuação.`}
-                </p>
-                <div className="text-[11px] text-slate-400 pt-1 font-mono">
-                  Garantia Q.I. Match: Critérios demográficos (idade, gênero, etnia e endereço pessoal) são 100% excluídos do cálculo.
+
+                {/* Fórmula Geral e Substituição Real */}
+                <div className="p-3.5 rounded-xl bg-[#0D111A] border border-[#262F40] space-y-2">
+                  <div className="flex items-center justify-between">
+                    <span className="text-[10px] font-mono text-[#facc15] font-bold uppercase tracking-wider">
+                      Fórmula Linear Ponderada Multidimensional:
+                    </span>
+                    <span className="text-[10px] font-mono text-slate-400">4 Dimensões Heurísticas</span>
+                  </div>
+
+                  <div className="p-2.5 rounded-lg bg-[#111318] border border-[#232D3F] font-mono text-xs text-slate-200 overflow-x-auto">
+                    <code className="text-[#facc15] font-bold">
+                      S_global = (0.50 × S_hard) + (0.25 × S_soft) + (0.15 × S_exp) + (0.10 × S_cond)
+                    </code>
+                  </div>
+
+                  <span className="text-[10px] font-mono text-slate-400 font-bold uppercase tracking-wider block pt-1">
+                    Aplicação dos Coeficientes Desta Vaga:
+                  </span>
+                  <div className="p-2.5 rounded-lg bg-[#111318] border border-[#232D3F] font-mono text-xs text-slate-200 overflow-x-auto">
+                    <code>
+                      S_global = (0.50 × <span className="text-emerald-400 font-bold">{selectedDetailVacancy.hardScore}%</span>) + (0.25 × <span className="text-blue-400 font-bold">{selectedDetailVacancy.softScore}%</span>) + (0.15 × <span className="text-purple-400 font-bold">{selectedDetailVacancy.expScore}%</span>) + (0.10 × <span className="text-amber-400 font-bold">{selectedDetailVacancy.condScore ?? 90}%</span>) = <span className="text-[#facc15] font-black text-sm">{selectedDetailVacancy.score}%</span>
+                    </code>
+                  </div>
+                </div>
+
+                {/* 4 Dimensões em Barras de Progresso */}
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-1">
+                  <div className="p-3 rounded-xl bg-[#111318] border border-[#262F40] space-y-1.5">
+                    <div className="flex items-center justify-between text-xs">
+                      <span className="font-bold text-white flex items-center gap-1.5">
+                        <span className="w-2 h-2 rounded-full bg-emerald-400"></span>
+                        1. Hard Skills (Peso 50%)
+                      </span>
+                      <span className="font-mono font-bold text-emerald-400">{selectedDetailVacancy.hardScore}%</span>
+                    </div>
+                    <div className="w-full bg-[#1e2638] h-1.5 rounded-full overflow-hidden">
+                      <div className="bg-emerald-400 h-full rounded-full transition-all" style={{ width: `${selectedDetailVacancy.hardScore}%` }}></div>
+                    </div>
+                    <p className="text-[11px] text-slate-300">
+                      {selectedDetailVacancy.matchedSkills.length} de {selectedDetailVacancy.vacancy.mandatorySkills.length} requisitos obrigatórios atendidos.
+                    </p>
+                  </div>
+
+                  <div className="p-3 rounded-xl bg-[#111318] border border-[#262F40] space-y-1.5">
+                    <div className="flex items-center justify-between text-xs">
+                      <span className="font-bold text-white flex items-center gap-1.5">
+                        <span className="w-2 h-2 rounded-full bg-blue-400"></span>
+                        2. Soft Skills (Peso 25%)
+                      </span>
+                      <span className="font-mono font-bold text-blue-400">{selectedDetailVacancy.softScore}%</span>
+                    </div>
+                    <div className="w-full bg-[#1e2638] h-1.5 rounded-full overflow-hidden">
+                      <div className="bg-blue-400 h-full rounded-full transition-all" style={{ width: `${selectedDetailVacancy.softScore}%` }}></div>
+                    </div>
+                    <p className="text-[11px] text-slate-300">
+                      Evidências comportamentais apuradas na entrevista estruturada com IA.
+                    </p>
+                  </div>
+
+                  <div className="p-3 rounded-xl bg-[#111318] border border-[#262F40] space-y-1.5">
+                    <div className="flex items-center justify-between text-xs">
+                      <span className="font-bold text-white flex items-center gap-1.5">
+                        <span className="w-2 h-2 rounded-full bg-purple-400"></span>
+                        3. Senioridade (Peso 15%)
+                      </span>
+                      <span className="font-mono font-bold text-purple-400">{selectedDetailVacancy.expScore}%</span>
+                    </div>
+                    <div className="w-full bg-[#1e2638] h-1.5 rounded-full overflow-hidden">
+                      <div className="bg-purple-400 h-full rounded-full transition-all" style={{ width: `${selectedDetailVacancy.expScore}%` }}></div>
+                    </div>
+                    <p className="text-[11px] text-slate-300">
+                      Nível {candidate.seniority} do candidato para nível {selectedDetailVacancy.vacancy.seniority} exigido.
+                    </p>
+                  </div>
+
+                  <div className="p-3 rounded-xl bg-[#111318] border border-[#262F40] space-y-1.5">
+                    <div className="flex items-center justify-between text-xs">
+                      <span className="font-bold text-white flex items-center gap-1.5">
+                        <span className="w-2 h-2 rounded-full bg-amber-400"></span>
+                        4. Condições (Peso 10%)
+                      </span>
+                      <span className="font-mono font-bold text-amber-400">{selectedDetailVacancy.condScore ?? 90}%</span>
+                    </div>
+                    <div className="w-full bg-[#1e2638] h-1.5 rounded-full overflow-hidden">
+                      <div className="bg-amber-400 h-full rounded-full transition-all" style={{ width: `${selectedDetailVacancy.condScore ?? 90}%` }}></div>
+                    </div>
+                    <p className="text-[11px] text-slate-300">
+                      Modalidade {selectedDetailVacancy.vacancy.modality} e contrato {selectedDetailVacancy.vacancy.contractTypes.join('/')}.
+                    </p>
+                  </div>
+                </div>
+
+                <div className="pt-2 border-t border-[#262F40] text-[11px] text-slate-400 flex items-center gap-2">
+                  <ShieldCheck className="w-4 h-4 text-emerald-400 shrink-0" />
+                  <span>
+                    <strong>Auditoria e Conformidade Ética (LGPD Artigo 20):</strong> Critérios demográficos (idade, gênero, raça e endereço pessoal) são 100% excluídos do cálculo. Decisão orientada estritamente a evidências técnicas verificadas.
+                  </span>
                 </div>
               </div>
 
