@@ -172,6 +172,8 @@ const STORAGE_KEY = 'QITECH_PROD_STATE_V3';
 const USERS_STORAGE_KEY = 'QITECH_USERS_V1';
 const SESSION_STORAGE_KEY = 'QITECH_SESSION_V1';
 const THEME_STORAGE_KEY = 'QITECH_THEME';
+const CANDIDATES_STORAGE_KEY = 'QITECH_CANDIDATES_V1';
+const COMPANIES_STORAGE_KEY = 'QITECH_COMPANIES_V1';
 
 const normalizeCnpj = (cnpj: string) => cnpj.replace(/\D/g, '');
 const isValidEmailFormat = (email: string) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim());
@@ -230,7 +232,7 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
 
   const allKnownUsers = [...SEED_DEMO_USERS, ...registeredUsers];
   const currentUser = session
-    ? allKnownUsers.find(u => u.id === session.userId || u.email.toLowerCase() === session.email.toLowerCase()) || null
+    ? allKnownUsers.find(u => u.id === session.userId || (Boolean(session.email) && u.email.toLowerCase() === session.email?.toLowerCase())) || null
     : null;
 
   const isAuthenticated = Boolean(session && currentUser);
@@ -277,12 +279,55 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
     localStorage.setItem(USERS_STORAGE_KEY, JSON.stringify(registeredUsers));
   }, [registeredUsers]);
 
-  // Estados mockados de negócio (QITECH_PROD_STATE_V3)
-  const [candidates, setCandidates] = useState<Record<string, CandidateProfile>>({
-    'cand-lucas': SEED_CANDIDATE_LUCAS,
-    'cand-marina': SEED_CANDIDATE_MARINA
+  // Estados mockados de negócio (QITECH_PROD_STATE_V3) com suporte a novos registros
+  const [candidates, setCandidates] = useState<Record<string, CandidateProfile>>(() => {
+    try {
+      const saved = localStorage.getItem(CANDIDATES_STORAGE_KEY);
+      if (saved) {
+        return {
+          'cand-lucas': SEED_CANDIDATE_LUCAS,
+          'cand-marina': SEED_CANDIDATE_MARINA,
+          ...JSON.parse(saved)
+        };
+      }
+    } catch (e) {
+      console.error('Falha ao ler CANDIDATES_STORAGE_KEY:', e);
+    }
+    return {
+      'cand-lucas': SEED_CANDIDATE_LUCAS,
+      'cand-marina': SEED_CANDIDATE_MARINA
+    };
   });
-  const [companies, setCompanies] = useState<Company[]>(SEED_COMPANIES);
+
+  const [companies, setCompanies] = useState<Company[]>(() => {
+    try {
+      const saved = localStorage.getItem(COMPANIES_STORAGE_KEY);
+      if (saved) {
+        const parsed: Company[] = JSON.parse(saved);
+        const seedIds = new Set(SEED_COMPANIES.map(c => c.id));
+        return [...SEED_COMPANIES, ...parsed.filter(c => !seedIds.has(c.id))];
+      }
+    } catch (e) {
+      console.error('Falha ao ler COMPANIES_STORAGE_KEY:', e);
+    }
+    return SEED_COMPANIES;
+  });
+
+  useEffect(() => {
+    try {
+      localStorage.setItem(CANDIDATES_STORAGE_KEY, JSON.stringify(candidates));
+    } catch (e) {
+      console.error('Falha ao salvar CANDIDATES_STORAGE_KEY:', e);
+    }
+  }, [candidates]);
+
+  useEffect(() => {
+    try {
+      localStorage.setItem(COMPANIES_STORAGE_KEY, JSON.stringify(companies));
+    } catch (e) {
+      console.error('Falha ao salvar COMPANIES_STORAGE_KEY:', e);
+    }
+  }, [companies]);
   const [vacancies, setVacancies] = useState<Vacancy[]>(SEED_VACANCIES);
   const [interviews, setInterviews] = useState<Record<string, AIInterviewSession>>({
     'cand-lucas': SEED_INTERVIEW_LUCAS,
@@ -617,8 +662,35 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
     }));
 
     setCandidates(prev => {
-      const existing = prev[candidateId];
-      if (!existing) return prev;
+      const existing = prev[candidateId] || {
+        id: candidateId,
+        userId: currentUser.id,
+        name: currentUser.name,
+        avatar: `https://ui-avatars.com/api/?name=${encodeURIComponent(currentUser.name)}&background=006A7A&color=fff&bold=true`,
+        headline: data.headline.trim(),
+        city: data.city.trim() || 'São Paulo',
+        state: data.state.trim().toUpperCase() || 'SP',
+        about: `Profissional de tecnologia com atuação em ${currentUser.technicalArea || 'Tecnologia'}.`,
+        seniority: data.seniority,
+        experiences: [],
+        projects: [],
+        education: [],
+        certifications: [],
+        languages: [{ language: 'Português', level: 'Nativo' }],
+        githubUrl: '',
+        linkedinUrl: '',
+        email: currentUser.email,
+        phone: '',
+        salaryMin: data.salaryMin,
+        salaryMax: data.salaryMax,
+        contractTypes: ['CLT', 'PJ'],
+        modalities: [data.modality],
+        locationPreference: `${data.city.trim() || 'São Paulo'}/${data.state.trim().toUpperCase() || 'SP'} (${data.modality})`,
+        availability: data.availability,
+        visibility: 'Ativo',
+        isCommunityMember: false,
+        skills: mappedSkills
+      };
       return {
         ...prev,
         [candidateId]: {
