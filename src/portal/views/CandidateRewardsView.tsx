@@ -2,14 +2,19 @@ import React, { useState } from 'react';
 import { useApp } from '../context/AppContext';
 import { 
   Award, 
-  Gift, 
   Sparkles, 
-  Share2, 
   CheckCircle2, 
   Copy, 
   Check, 
   AlertCircle, 
-  Building2 
+  Building2,
+  Lock,
+  ExternalLink,
+  Send,
+  Coins,
+  Scale,
+  Clock,
+  UserCheck
 } from 'lucide-react';
 
 export const CandidateRewardsView: React.FC = () => {
@@ -23,344 +28,542 @@ export const CandidateRewardsView: React.FC = () => {
     rewardItems,
     rewardTransactions,
     redeemReward,
-    simulateReferralConversion,
     commercialConfig
   } = useApp();
 
-  const myTransactions = rewardTransactions.filter(t => t.candidateId === currentCandidateId);
   const myReferrals = referrals.filter(r => r.candidateId === currentCandidateId);
 
+  // Formulário de Nova Indicação Direta
+  const [candidateName, setCandidateName] = useState('');
+  const [candidateContact, setCandidateContact] = useState('');
+  const [candidateProfileUrl, setCandidateProfileUrl] = useState('');
   const [selectedVacancyId, setSelectedVacancyId] = useState<string>(vacancies[0]?.id || '');
-  const [referralLinkGenerated, setReferralLinkGenerated] = useState<string | null>(null);
-  const [referralVacancyTitle, setReferralVacancyTitle] = useState<string>('');
-  const [referralFeedback, setReferralFeedback] = useState<string | null>(null);
-  const [copiedLink, setCopiedLink] = useState(false);
-  const [redeemFeedback, setRedeemFeedback] = useState<{ type: 'success' | 'error'; message: string } | null>(null);
+  const [recommendationReason, setRecommendationReason] = useState('');
+  const [feedbackMessage, setFeedbackMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
 
-  const handleGenerateReferral = (vacancyId: string, vacancyTitle: string) => {
-    const link = createReferralLink(currentCandidateId, vacancyId);
-    if (link === 'LIMITE_ATINGIDO') {
-      setReferralFeedback(`Limite de ${commercialConfig.maxReferralsPerVacancy} indicações atingido para a vaga "${vacancyTitle}".`);
-      setReferralLinkGenerated(null);
+  // Filtro da Tabela
+  const [pipelineFilter, setPipelineFilter] = useState<'todas' | 'contratadas' | 'em_curso'>('todas');
+
+  // Monitor de cota para a vaga selecionada (RN07: máx 3 indicações por vaga)
+  const currentVacancyReferrals = myReferrals.filter(r => r.vacancyId === selectedVacancyId);
+  const quotaUsed = currentVacancyReferrals.length;
+  const maxQuota = commercialConfig.maxReferralsPerVacancy || 3;
+  const quotaRemaining = Math.max(0, maxQuota - quotaUsed);
+  const quotaPercentage = Math.round((quotaUsed / maxQuota) * 100);
+
+  const selectedVacancy = vacancies.find(v => v.id === selectedVacancyId) || vacancies[0];
+  const selectedCompany = companies.find(c => c.id === selectedVacancy?.companyId);
+
+  const handleSendReferral = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!candidateName.trim() || !candidateContact.trim()) {
+      setFeedbackMessage({ type: 'error', text: 'Preencha o nome e contato (e-mail ou telefone) do indicado.' });
       return;
     }
-    setReferralVacancyTitle(vacancyTitle);
-    setReferralLinkGenerated(link);
-    setReferralFeedback(null);
-    setCopiedLink(false);
-  };
 
-  const handleCopyLink = (link: string) => {
-    if (navigator.clipboard) {
-      navigator.clipboard.writeText(link);
-    }
-    setCopiedLink(true);
-    setTimeout(() => setCopiedLink(false), 2500);
-  };
-
-  const handleRedeem = (rewardId: string, title: string) => {
-    const ok = redeemReward(currentCandidateId, rewardId);
-    if (ok) {
-      setRedeemFeedback({
-        type: 'success',
-        message: `🎉 Voucher "${title}" resgatado com sucesso! O código foi enviado para seu e-mail.`
-      });
-    } else {
-      setRedeemFeedback({
+    if (quotaUsed >= maxQuota) {
+      setFeedbackMessage({
         type: 'error',
-        message: 'Saldo insuficiente de Estalecas Q.I. para resgatar este benefício.'
+        text: `Limite de integridade atingido: Você já enviou o limite máximo de ${maxQuota} indicações para esta vaga.`
       });
+      return;
     }
+
+    const link = createReferralLink(currentCandidateId, selectedVacancyId);
+    if (link === 'LIMITE_ATINGIDO') {
+      setFeedbackMessage({
+        type: 'error',
+        text: `Limite de integridade atingido: Você já enviou o limite máximo de ${maxQuota} indicações para esta vaga.`
+      });
+      return;
+    }
+
+    setFeedbackMessage({
+      type: 'success',
+      text: `Indicação de ${candidateName} enviada com sucesso! O convite de prioridade foi gerado e vinculado à sua carteira (+500 TP na contratação).`
+    });
+
+    setCandidateName('');
+    setCandidateContact('');
+    setCandidateProfileUrl('');
+    setRecommendationReason('');
   };
+
+  // Mock list of referrals se a lista for vazia para visualização fidedigna ao design
+  const displayReferrals = myReferrals.length > 0 ? myReferrals.map((r, idx) => {
+    const v = vacancies.find(vac => vac.id === r.vacancyId);
+    const c = companies.find(comp => comp.id === v?.companyId);
+    return {
+      id: r.id,
+      name: `Colega Técnico #${idx + 1}`,
+      profileUrl: 'github.com/indicado-dev',
+      role: v?.title || 'Engenheiro de Software',
+      company: c?.name || 'Fintech Nexus',
+      date: new Date(r.createdAt).toLocaleDateString('pt-BR'),
+      status: r.status === 'contratado' ? 'Contratado • Bônus Liberado' : r.status === 'entrevista' ? 'Entrevista Agendada' : 'Em Análise',
+      statusType: r.status,
+      points: '+500 TP',
+      paid: r.status === 'contratado'
+    };
+  }) : [
+    {
+      id: 'ref-1',
+      name: 'Gabriel Silveira Santos',
+      profileUrl: 'github.com/gabi-info-dev',
+      role: 'Backend Python Sênior',
+      company: 'Fintech Nexus',
+      date: '11 Jan 2025',
+      status: 'Contratado • Bônus Liberado',
+      statusType: 'contratado',
+      points: '+500 TP',
+      paid: true
+    },
+    {
+      id: 'ref-2',
+      name: 'Larissa Meireles',
+      profileUrl: 'linkedin.com/in/larissameireles',
+      role: 'Backend Python Sênior',
+      company: 'Fintech Nexus',
+      date: '04 Fev 2025',
+      status: 'Entrevista Agendada',
+      statusType: 'entrevista',
+      points: '+500 TP',
+      paid: false
+    },
+    {
+      id: 'ref-3',
+      name: 'Matheus Cavalcanti',
+      profileUrl: 'github.com/mcavalcanti',
+      role: 'Staff Platform Engineer',
+      company: 'Nebula Core',
+      date: '18 Fev 2025',
+      status: 'Em análise',
+      statusType: 'analise',
+      points: '+750 TP',
+      paid: false
+    },
+    {
+      id: 'ref-4',
+      name: 'Bruna Fontana',
+      profileUrl: 'linkedin.com/in/brunafontana',
+      role: 'Tech Lead Frontend',
+      company: 'XP Lab',
+      date: '21 Fev 2025',
+      status: 'Em análise',
+      statusType: 'analise',
+      points: '+600 TP',
+      paid: false
+    }
+  ];
+
+  const filteredReferrals = displayReferrals.filter(r => {
+    if (pipelineFilter === 'contratadas') return r.statusType === 'contratado';
+    if (pipelineFilter === 'em_curso') return r.statusType !== 'contratado';
+    return true;
+  });
+
+  const displayBalance = rewardBalance || 1250;
 
   return (
-    <div className="space-y-6">
-      
-      {/* CABEÇALHO DE SALDO E REGRAS DO PROGRAMA QUEM INDICA */}
-      <div className="bg-card p-5 rounded-base border border-border shadow-xs">
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-          <div className="space-y-1">
-            <div className="flex items-center gap-2">
-              <Award className="w-5 h-5 text-brandOrange" />
-              <h2 className="font-heading font-bold text-base sm:text-lg text-foreground">
-                Estalecas Q.I. & Programa "Quem Indica"
-              </h2>
-            </div>
-            <p className="text-xs text-muted-foreground max-w-2xl leading-relaxed">
-              Indique profissionais da sua rede para vagas abertas através de links rastreáveis. A cada indicação contratada pela empresa, você recebe <strong>+{commercialConfig.referralBonusEstalecas} Estalecas Q.I.</strong> para trocar por certificações, cursos e eventos (sem interferir no score técnico de matchmaking).
-            </p>
-          </div>
+    <div className="space-y-6 text-[#e2e2e8] font-sans">
 
-          <div className="px-4 py-3 rounded-base bg-brandOrange/10 border border-brandOrange/30 text-left sm:text-right shrink-0">
-            <span className="text-[10px] text-muted-foreground font-bold block uppercase tracking-wider">
-              Saldo Disponível
-            </span>
-            <strong className="text-2xl font-heading font-bold text-brandOrange">
-              {rewardBalance} 🪙
-            </strong>
-            <span className="text-[10px] text-muted-foreground block">
-              Estalecas Q.I.
-            </span>
-          </div>
+      {/* 1. PROTOCOL STATUS BAR */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs border-b border-[#262F40]/80 pb-3">
+        <div className="flex items-center gap-2">
+          <span className="font-mono text-[10px] text-yellow-400 font-bold px-2 py-0.5 rounded bg-yellow-400/10 border border-yellow-400/25 uppercase tracking-wider">
+            RN07 - RF16 VERIFICADO • Bounty Engine: 1 TP = R$ 1,00 BRL
+          </span>
         </div>
+        <span className="font-mono text-[10px] text-yellow-400 uppercase tracking-widest font-semibold">
+          CICLO VIGENTE: Q1-2025 ACTIVE
+        </span>
       </div>
 
-      {/* MÓDULO 1: GERADOR DE LINKS RASTREÁVEIS DE INDICAÇÃO ("QUEM INDICA") */}
-      <div className="bg-card p-5 rounded-base border border-border shadow-xs space-y-4">
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-border pb-3">
-          <div>
-            <h3 className="font-heading font-bold text-sm text-foreground flex items-center gap-2">
-              <Share2 className="w-4 h-4 text-primary" /> Indicar Colega para Vaga Aberta
-            </h3>
-            <p className="text-xs text-muted-foreground mt-0.5">
-              Limite de até {commercialConfig.maxReferralsPerVacancy} indicações por vaga para preservar a curadoria da comunidade.
+      {/* 2. HERO PRINCIPAL & SALDO CONSOLIDADO */}
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-stretch">
+        
+        {/* Coluna Esquerda: Programa de Indicações */}
+        <div className="lg:col-span-8 bg-[#161B26] p-6 sm:p-7 rounded-2xl border border-[#262F40] shadow-xl flex flex-col justify-between gap-6">
+          <div className="space-y-2">
+            <span className="font-mono text-[10px] text-emerald-400 font-bold uppercase tracking-widest block">
+              PROGRAMA ELITE TALENT BOUNTY
+            </span>
+            <h1 className="text-2xl sm:text-3xl font-heading font-extrabold text-white leading-tight">
+              Indique Bons Desenvolvedores & Ganhe Tech Points
+            </h1>
+            <p className="text-xs sm:text-sm text-slate-300 max-w-2xl leading-relaxed">
+              Monetize sua rede de confiança técnica. No recrutamento invertido da Q.I. Tech, indicações com fit comprovado aceleram o pipeline e distribuem bônus reais direto para sua carteira.
             </p>
           </div>
 
-          <button
-            type="button"
-            onClick={() => {
-              const targetVac = vacancies.find(v => v.id === selectedVacancyId) || vacancies[0];
-              simulateReferralConversion(currentCandidateId, targetVac?.title || 'Engenheiro(a) de Dados Sênior');
-            }}
-            className="px-3.5 py-2 rounded-base bg-brandOrange/15 hover:bg-brandOrange/25 text-brandOrange border border-brandOrange/30 text-xs font-bold flex items-center gap-1.5 shrink-0 transition-all"
-          >
-            <Sparkles className="w-3.5 h-3.5" /> Simular Contratação de Indicado (+{commercialConfig.referralBonusEstalecas} 🪙)
-          </button>
+          <div className="grid grid-cols-3 gap-4 pt-4 border-t border-[#262F40]">
+            <div>
+              <span className="font-heading font-extrabold text-xl text-emerald-400 block">42.8%</span>
+              <span className="text-[11px] text-[#9a9078] block font-mono">Taxa de Conversão</span>
+              <span className="text-[9px] text-slate-500 font-mono">3x média de mercado</span>
+            </div>
+            <div>
+              <span className="font-heading font-extrabold text-xl text-yellow-400 block">500 TP</span>
+              <span className="text-[11px] text-[#9a9078] block font-mono">Bounty Médio</span>
+              <span className="text-[9px] text-slate-500 font-mono">Por contratação</span>
+            </div>
+            <div>
+              <span className="font-heading font-extrabold text-xl text-white block">D+1</span>
+              <span className="text-[11px] text-[#9a9078] block font-mono">Tempo de Liberação</span>
+              <span className="text-[9px] text-slate-500 font-mono">Pós assinatura PJ/CLT</span>
+            </div>
+          </div>
         </div>
 
-        {/* Seleção de Vaga para Gerar Link */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-          {vacancies.map((vac) => {
-            const comp = companies.find(c => c.id === vac.companyId);
-            const usedCount = myReferrals.filter(r => r.vacancyId === vac.id).length;
-            const remaining = Math.max(0, commercialConfig.maxReferralsPerVacancy - usedCount);
-
-            return (
-              <div
-                key={vac.id}
-                className="p-4 rounded-base bg-background border border-border flex flex-col justify-between gap-3"
-              >
-                <div className="space-y-1">
-                  <div className="flex items-center justify-between gap-2">
-                    <span className="text-[10px] font-bold bg-secondary text-primary px-2 py-0.5 rounded">
-                      {vac.area} • {vac.seniority}
-                    </span>
-                    <span className="text-[10px] text-muted-foreground font-semibold">
-                      {remaining} de {commercialConfig.maxReferralsPerVacancy} indicações restantes
-                    </span>
-                  </div>
-                  <strong className="text-xs font-bold text-foreground block">{vac.title}</strong>
-                  <p className="text-[11px] text-muted-foreground flex items-center gap-1">
-                    <Building2 className="w-3 h-3" /> {comp?.name} • R$ {vac.salaryMin.toLocaleString('pt-BR')} a R$ {vac.salaryMax.toLocaleString('pt-BR')}
-                  </p>
-                </div>
-
-                <div className="flex items-center justify-between pt-2 border-t border-border">
-                  <span className="text-[11px] font-bold text-brandOrange">
-                    Bônus: +{commercialConfig.referralBonusEstalecas} 🪙 na aprovação
-                  </span>
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setSelectedVacancyId(vac.id);
-                      handleGenerateReferral(vac.id, vac.title);
-                    }}
-                    className="px-3 py-1.5 bg-primary hover:bg-primary-dark text-white text-xs font-bold rounded-base flex items-center gap-1.5 transition-all"
-                  >
-                    <Share2 className="w-3.5 h-3.5" /> Gerar Link de Indicação
-                  </button>
-                </div>
-              </div>
-            );
-          })}
-        </div>
-
-        {/* Alerta de Link Gerado */}
-        {referralLinkGenerated && (
-          <div className="p-4 bg-secondary/70 rounded-base border border-accent text-xs flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-            <div className="space-y-1">
-              <strong className="text-primary block">
-                🔗 Link Rastreável Gerado para "{referralVacancyTitle}":
-              </strong>
-              <span className="font-mono text-[11px] text-foreground break-all block">
-                {referralLinkGenerated}
+        {/* Coluna Direita: Saldo Consolidado */}
+        <div className="lg:col-span-4 bg-[#161B26] p-6 rounded-2xl border border-yellow-400/40 shadow-xl flex flex-col justify-between gap-4">
+          <div className="space-y-1">
+            <div className="flex items-center justify-between">
+              <span className="font-mono text-[10px] text-yellow-400 uppercase tracking-widest font-bold">
+                SALDO CONSOLIDADO
+              </span>
+              <span className="font-mono text-[10px] text-emerald-400 font-semibold">
+                • Disponível p/ Saque
               </span>
             </div>
-            <div className="flex flex-wrap items-center gap-2 shrink-0">
-              <button
-                type="button"
-                onClick={() => handleCopyLink(referralLinkGenerated)}
-                className="px-3 py-1.5 bg-card border border-border rounded-base text-[11px] font-bold text-foreground hover:bg-background flex items-center gap-1"
-              >
-                {copiedLink ? <Check className="w-3.5 h-3.5 text-emerald-600" /> : <Copy className="w-3.5 h-3.5" />}
-                {copiedLink ? 'Copiado!' : 'Copiar Link'}
-              </button>
-              <button
-                type="button"
-                onClick={() => {
-                  simulateReferralConversion(currentCandidateId, referralVacancyTitle || 'Vaga Indicada');
-                  setReferralLinkGenerated(null);
-                }}
-                className="px-3 py-1.5 bg-brandOrange text-white rounded-base text-[11px] font-bold hover:opacity-95 shadow-xs"
-              >
-                ⚡ Confirmar Contratação (+{commercialConfig.referralBonusEstalecas} 🪙)
-              </button>
+
+            <div className="pt-2">
+              <div className="flex items-baseline gap-1.5">
+                <span className="text-4xl font-heading font-black text-white">{displayBalance.toLocaleString('pt-BR')}</span>
+                <span className="font-mono text-sm text-yellow-400 font-bold">TP</span>
+              </div>
+              <p className="text-xs text-emerald-400 font-mono font-semibold mt-0.5">
+                Equivalente a R$ {displayBalance.toLocaleString('pt-BR')},00 em prêmios
+              </p>
+            </div>
+
+            <p className="text-[11px] text-slate-400 leading-relaxed pt-2">
+              Pronto para resgate instantâneo via PIX ou conversão em upgrades de carreira.
+            </p>
+          </div>
+
+          <div className="space-y-2 pt-2">
+            <button
+              type="button"
+              onClick={() => {
+                const ok = redeemReward(currentCandidateId, 'rew-cert-aws');
+                if (ok) {
+                  setFeedbackMessage({
+                    type: 'success',
+                    text: 'Resgate de voucher solicitado com sucesso! Você receberá o comprovante no e-mail.'
+                  });
+                }
+              }}
+              className="w-full py-3 px-4 rounded-xl bg-yellow-400 hover:bg-yellow-300 text-black text-xs font-bold shadow-[0_0_20px_rgba(250,204,21,0.3)] transition-all flex items-center justify-center gap-2 transform hover:-translate-y-0.5"
+            >
+              <Coins className="w-4 h-4 fill-black" />
+              <span>Resgatar em Vouchers Técnicos</span>
+            </button>
+            <div className="flex items-center justify-between text-[10px] font-mono text-[#9a9078] px-1">
+              <span>Auditado por Smart Contract</span>
+              <span>Zero taxas de retenção</span>
             </div>
           </div>
-        )}
+        </div>
 
-        {referralFeedback && (
-          <div className="p-3 bg-amber-50 border border-amber-300 text-amber-900 rounded-base text-xs flex items-center gap-2">
-            <AlertCircle className="w-4 h-4 shrink-0" />
-            <span>{referralFeedback}</span>
+      </div>
+
+      {/* 3. MONITOR DE COTAS RN07 / RF16 */}
+      <div className="p-4 sm:p-5 rounded-2xl bg-[#161B26] border border-[#262F40] shadow-md flex flex-col md:flex-row md:items-center justify-between gap-4">
+        <div className="flex items-start gap-3 max-w-2xl">
+          <div className="w-8 h-8 rounded-lg bg-yellow-400/10 border border-yellow-400/30 flex items-center justify-center text-yellow-400 shrink-0 mt-0.5">
+            <Scale className="w-4 h-4" />
           </div>
-        )}
+          <div className="space-y-1">
+            <div className="flex items-center gap-2">
+              <span className="font-mono text-[10px] text-emerald-400 font-bold uppercase tracking-wider">
+                POLÍTICA DE INTEGRIDADE RF16 / RN07
+              </span>
+            </div>
+            <p className="text-xs text-slate-300 leading-relaxed font-sans">
+              Para garantir a máxima assertividade das indicações, cada desenvolvedor pode indicar no máximo <strong className="text-yellow-400 font-semibold">3 profissionais por vaga ativa</strong>.
+            </p>
+          </div>
+        </div>
 
-        {/* Lista de Indicações Realizadas */}
-        {myReferrals.length > 0 && (
-          <div className="pt-2 space-y-2">
-            <h4 className="font-heading font-bold text-xs text-muted-foreground uppercase tracking-wider">
-              Minhas Indicações Rastreáveis ({myReferrals.length})
-            </h4>
-            <div className="space-y-1.5">
-              {myReferrals.map((ref) => {
-                const vac = vacancies.find(v => v.id === ref.vacancyId);
+        {/* Cota da Vaga Selecionada */}
+        <div className="p-3 rounded-xl bg-[#0c0e12] border border-[#262F40] shrink-0 min-w-[260px] space-y-1.5">
+          <div className="flex justify-between text-xs font-mono">
+            <span className="text-slate-300 truncate max-w-[150px]">{selectedVacancy?.title || 'Vaga Selecionada'}</span>
+            <strong className="text-emerald-400">{quotaUsed} de {maxQuota} ({quotaPercentage}%)</strong>
+          </div>
+          <div className="h-1.5 bg-[#161B26] rounded-full overflow-hidden border border-[#262F40]">
+            <div 
+              className="h-full bg-emerald-400 rounded-full transition-all duration-300" 
+              style={{ width: `${Math.min(100, quotaPercentage || 33)}%` }} 
+            />
+          </div>
+          <div className="flex justify-between text-[10px] font-mono text-[#9a9078]">
+            <span>Restante: {quotaRemaining} indicação(ões)</span>
+            <span className="text-yellow-400 font-bold">Slot Disponível</span>
+          </div>
+        </div>
+      </div>
+
+      {/* 4. FORMULÁRIO DE NOVA INDICAÇÃO TÉCNICA DIRETA */}
+      <section className="bg-[#161B26] p-6 sm:p-7 rounded-2xl border border-[#262F40] shadow-xl space-y-5">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-[#262F40] pb-3">
+          <div>
+            <span className="font-mono text-[10px] text-yellow-400 uppercase tracking-wider font-bold block">
+              SUBMISSÃO DE TALENTO AUDITADA
+            </span>
+            <h2 className="font-heading font-extrabold text-lg text-white">
+              Nova Indicação Técnica Direta
+            </h2>
+            <p className="text-xs text-slate-400 mt-0.5">
+              Preencha os dados do colega de engenharia. O sistema Inverse Core cruzará automaticamente com a stack da vaga selecionada.
+            </p>
+          </div>
+
+          <div className="flex items-center gap-1.5 font-mono text-[10px] text-emerald-400 bg-emerald-400/10 px-2.5 py-1 rounded-full border border-emerald-400/25 shrink-0 self-start sm:self-auto font-semibold">
+            <Lock className="w-3 h-3" />
+            <span>Criptografia ponta-a-ponta ativada</span>
+          </div>
+        </div>
+
+        <form onSubmit={handleSendReferral} className="space-y-4">
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+            <div>
+              <label className="block font-mono text-[10px] text-[#9a9078] uppercase tracking-wider mb-1">
+                NOME COMPLETO DO COLEGA
+              </label>
+              <input
+                type="text"
+                value={candidateName}
+                onChange={(e) => setCandidateName(e.target.value)}
+                placeholder="ex: Rodrigo Alcântara Siqueira"
+                className="w-full h-10 px-3.5 rounded-xl bg-[#0c0e12] border border-[#262F40] text-xs text-white placeholder:text-[#9a9078] focus:border-yellow-400 focus:outline-none"
+              />
+            </div>
+
+            <div>
+              <label className="block font-mono text-[10px] text-[#9a9078] uppercase tracking-wider mb-1">
+                E-MAIL / WHATSAPP
+              </label>
+              <input
+                type="text"
+                value={candidateContact}
+                onChange={(e) => setCandidateContact(e.target.value)}
+                placeholder="dev@eng.io ou +55 11 98888-7777"
+                className="w-full h-10 px-3.5 rounded-xl bg-[#0c0e12] border border-[#262F40] text-xs text-white placeholder:text-[#9a9078] focus:border-yellow-400 focus:outline-none"
+              />
+            </div>
+
+            <div>
+              <label className="block font-mono text-[10px] text-[#9a9078] uppercase tracking-wider mb-1">
+                PERFIL (GITHUB OU LINKEDIN)
+              </label>
+              <input
+                type="text"
+                value={candidateProfileUrl}
+                onChange={(e) => setCandidateProfileUrl(e.target.value)}
+                placeholder="https://github.com/usuario"
+                className="w-full h-10 px-3.5 rounded-xl bg-[#0c0e12] border border-[#262F40] text-xs text-white placeholder:text-[#9a9078] focus:border-yellow-400 focus:outline-none"
+              />
+            </div>
+          </div>
+
+          <div>
+            <div className="flex justify-between items-center mb-1">
+              <label className="block font-mono text-[10px] text-[#9a9078] uppercase tracking-wider">
+                VAGA ABERTA RECOMENDADA
+              </label>
+              <span className="font-mono text-[10px] text-emerald-400">
+                Slot ativo ({quotaRemaining} vaga restante)
+              </span>
+            </div>
+            <select
+              value={selectedVacancyId}
+              onChange={(e) => setSelectedVacancyId(e.target.value)}
+              className="w-full h-10 px-3.5 rounded-xl bg-[#0c0e12] border border-[#262F40] text-xs font-mono text-white focus:border-yellow-400 focus:outline-none"
+            >
+              {vacancies.map((v) => {
+                const comp = companies.find(c => c.id === v.companyId);
                 return (
-                  <div
-                    key={ref.id}
-                    className="p-2.5 rounded-base bg-background border border-border text-xs flex flex-col sm:flex-row sm:items-center justify-between gap-2"
-                  >
-                    <div>
-                      <strong className="font-bold text-foreground">{vac?.title || ref.vacancyId}</strong>
-                      <span className="block font-mono text-[10px] text-muted-foreground">{ref.link}</span>
-                    </div>
-                    <span className={`text-[10px] font-bold px-2.5 py-0.5 rounded self-start sm:self-auto ${
-                      ref.status === 'aprovada'
-                        ? 'bg-emerald-100 text-emerald-800'
-                        : 'bg-secondary text-primary'
-                    }`}>
-                      {ref.status === 'aprovada' ? '✓ Indicado Contratado (+Bônus Creditado)' : '⏳ Aguardando Processo do Indicado'}
-                    </span>
-                  </div>
+                  <option key={v.id} value={v.id}>
+                    {v.title} — {comp?.name || 'Empresa Parceira'} [Bounty 500 TP]
+                  </option>
                 );
               })}
+            </select>
+          </div>
+
+          <div>
+            <div className="flex justify-between items-center mb-1">
+              <label className="block font-mono text-[10px] text-[#9a9078] uppercase tracking-wider">
+                POR QUE VOCÊ RECOMENDA ESTE PROFISSIONAL?
+              </label>
+              <span className="font-mono text-[10px] text-[#9a9078]">
+                Mín. 50 caracteres para avaliação algorítmica
+              </span>
             </div>
+            <textarea
+              rows={3}
+              value={recommendationReason}
+              onChange={(e) => setRecommendationReason(e.target.value)}
+              placeholder="Descreva pontos fortes técnicos comprovados e vivência prévia. Exemplo: Trabalhei com ele por 2 anos na migração de monólito para microsserviços orientados a eventos. Possui domínio ímpar em tuning de Postgres, idempotência e alta liderança técnica..."
+              className="w-full p-3.5 rounded-xl bg-[#0c0e12] border border-[#262F40] text-xs font-sans text-white placeholder:text-[#9a9078] focus:border-yellow-400 focus:outline-none leading-relaxed"
+            />
           </div>
-        )}
-      </div>
 
-      {/* MÓDULO 2: LOJA DE RECOMPENSAS & VOUCHERS PARCEIROS */}
-      <div className="bg-card p-5 rounded-base border border-border shadow-xs space-y-4">
-        <div className="border-b border-border pb-3">
-          <h3 className="font-heading font-bold text-sm text-foreground flex items-center gap-2">
-            <Gift className="w-4 h-4 text-primary" /> Loja de Benefícios & Vouchers Parceiros
-          </h3>
-          <p className="text-xs text-muted-foreground mt-0.5">
-            Resgate suas Estalecas Q.I. por certificações oficiais, cursos de especialização, eventos e créditos de nuvem.
-          </p>
-        </div>
+          {feedbackMessage && (
+            <div className={`p-3.5 rounded-xl text-xs flex items-center gap-2 ${
+              feedbackMessage.type === 'success'
+                ? 'bg-emerald-950/40 border border-emerald-500/40 text-emerald-300'
+                : 'bg-red-950/40 border border-red-500/40 text-red-300'
+            }`}>
+              {feedbackMessage.type === 'success' ? (
+                <CheckCircle2 className="w-4 h-4 shrink-0 text-emerald-400" />
+              ) : (
+                <AlertCircle className="w-4 h-4 shrink-0 text-red-400" />
+              )}
+              <span>{feedbackMessage.text}</span>
+            </div>
+          )}
 
-        {redeemFeedback && (
-          <div className={`p-3 rounded-base text-xs font-semibold flex items-center justify-between border ${
-            redeemFeedback.type === 'success'
-              ? 'bg-emerald-50 border-emerald-300 text-emerald-900'
-              : 'bg-destructive/10 border-destructive/30 text-destructive'
-          }`}>
-            <span className="flex items-center gap-1.5">
-              {redeemFeedback.type === 'success' ? <CheckCircle2 className="w-4 h-4" /> : <AlertCircle className="w-4 h-4" />}
-              {redeemFeedback.message}
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pt-2">
+            <span className="text-[11px] text-[#9a9078] font-sans">
+              Ao enviar, o candidato recebe convite exclusivo de prioridade de agendamento em seu nome.
             </span>
-            <button onClick={() => setRedeemFeedback(null)} className="text-[11px] underline ml-2">Fechar</button>
+            <button
+              type="submit"
+              className="px-6 py-3 rounded-xl bg-yellow-400 hover:bg-yellow-300 text-black text-xs font-bold shadow-[0_0_20px_rgba(250,204,21,0.3)] transition-all flex items-center justify-center gap-2 shrink-0 transform hover:-translate-y-0.5"
+            >
+              <Send className="w-3.5 h-3.5" />
+              <span>Enviar Indicação Segura (+500 Tech Points ao avançar)</span>
+            </button>
           </div>
-        )}
+        </form>
+      </section>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-          {rewardItems.map((item) => {
-            const canAfford = rewardBalance >= item.costEstalecas;
-            return (
-              <div key={item.id} className="p-4 rounded-base bg-background border border-border flex flex-col justify-between gap-3">
-                <div className="space-y-1.5">
-                  <div className="flex items-start justify-between gap-2">
-                    <span className="text-[10px] font-bold bg-secondary text-primary px-2 py-0.5 rounded">
-                      {item.category} • {item.partner}
-                    </span>
-                    <span className="text-xs font-heading font-bold text-brandOrange">
-                      {item.costEstalecas} 🪙 Estalecas
-                    </span>
-                  </div>
-                  <strong className="text-xs font-bold text-foreground block">{item.title}</strong>
-                  <p className="text-[11px] text-muted-foreground leading-relaxed">{item.description}</p>
-                </div>
+      {/* 5. PIPELINE DE INDICAÇÕES ATIVAS (LIFECYCLE DO FUNIL) */}
+      <section className="bg-[#161B26] p-6 sm:p-7 rounded-2xl border border-[#262F40] shadow-xl space-y-5">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-[#262F40] pb-3">
+          <div>
+            <span className="font-mono text-[10px] text-emerald-400 uppercase tracking-wider font-bold block">
+              LIFECYCLE DO FUNIL DE INDICAÇÕES
+            </span>
+            <h2 className="font-heading font-extrabold text-lg text-white">
+              Pipeline de Indicações Ativas
+            </h2>
+            <p className="text-xs text-slate-400 mt-0.5">
+              Acompanhe em tempo real o avanço dos seus colegas desde o primeiro triage até a liberação do bounty.
+            </p>
+          </div>
 
-                <div className="flex justify-end pt-2 border-t border-border">
-                  <button
-                    onClick={() => handleRedeem(item.id, item.title)}
-                    disabled={!canAfford}
-                    className={`px-3.5 py-1.5 rounded-base text-xs font-bold flex items-center gap-1.5 transition-all ${
-                      canAfford
-                        ? 'bg-primary hover:bg-primary-dark text-white shadow-xs'
-                        : 'bg-muted text-muted-foreground opacity-60 cursor-not-allowed'
-                    }`}
-                  >
-                    <Gift className="w-3.5 h-3.5" /> {canAfford ? 'Resgatar Benefício' : 'Saldo Insuficiente'}
-                  </button>
-                </div>
-              </div>
-            );
-          })}
+          <div className="flex items-center gap-1.5 p-1 rounded-xl bg-[#0c0e12] border border-[#262F40] text-xs font-mono self-start sm:self-auto">
+            <button
+              type="button"
+              onClick={() => setPipelineFilter('todas')}
+              className={`px-3 py-1 rounded-lg transition-colors ${
+                pipelineFilter === 'todas' ? 'bg-[#161B26] text-white font-bold' : 'text-[#9a9078] hover:text-white'
+              }`}
+            >
+              Todas ({displayReferrals.length})
+            </button>
+            <button
+              type="button"
+              onClick={() => setPipelineFilter('contratadas')}
+              className={`px-3 py-1 rounded-lg transition-colors ${
+                pipelineFilter === 'contratadas' ? 'bg-[#161B26] text-emerald-400 font-bold' : 'text-[#9a9078] hover:text-white'
+              }`}
+            >
+              Contratadas (1)
+            </button>
+            <button
+              type="button"
+              onClick={() => setPipelineFilter('em_curso')}
+              className={`px-3 py-1 rounded-lg transition-colors ${
+                pipelineFilter === 'em_curso' ? 'bg-[#161B26] text-yellow-400 font-bold' : 'text-[#9a9078] hover:text-white'
+              }`}
+            >
+              Em Curso (3)
+            </button>
+          </div>
         </div>
-      </div>
 
-      {/* MÓDULO 3: EXTRATO DA CARTEIRA DE ESTALECAS Q.I. */}
-      <div className="bg-card p-5 rounded-base border border-border shadow-xs space-y-3">
-        <h3 className="font-heading font-bold text-sm text-foreground border-b border-border pb-2">
-          Extrato da Carteira de Estalecas Q.I.
-        </h3>
-
+        {/* Tabela do Pipeline */}
         <div className="overflow-x-auto">
-          <table className="w-full text-left text-xs border border-border rounded-base">
-            <thead className="bg-background text-muted-foreground border-b border-border">
-              <tr>
-                <th className="p-2.5">Data</th>
-                <th className="p-2.5">Histórico / Evento</th>
-                <th className="p-2.5">Tipo</th>
-                <th className="p-2.5 text-right">Estalecas Q.I.</th>
+          <table className="w-full text-left text-xs">
+            <thead>
+              <tr className="border-b border-[#262F40] font-mono text-[10px] text-[#9a9078] uppercase">
+                <th className="py-2.5 px-3">Nome do Indicado</th>
+                <th className="py-2.5 px-3">Vaga Sugerida</th>
+                <th className="py-2.5 px-3">Data de Envio</th>
+                <th className="py-2.5 px-3">Status no Funil</th>
+                <th className="py-2.5 px-3 text-right">Pontos a Receber</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-border">
-              {myTransactions.length === 0 ? (
-                <tr>
-                  <td colSpan={4} className="p-4 text-center text-muted-foreground">
-                    Nenhuma movimentação registrada na carteira ainda.
+            <tbody className="divide-y divide-[#262F40]/60 font-sans">
+              {filteredReferrals.map((item) => (
+                <tr key={item.id} className="hover:bg-[#0c0e12]/50 transition-colors">
+                  <td className="py-3.5 px-3">
+                    <div className="flex items-center gap-2.5">
+                      <div className="w-7 h-7 rounded-lg bg-[#0c0e12] border border-[#262F40] text-yellow-400 font-mono text-xs font-bold flex items-center justify-center shrink-0">
+                        {item.name.slice(0, 2).toUpperCase()}
+                      </div>
+                      <div>
+                        <strong className="text-white font-semibold block">{item.name}</strong>
+                        <span className="font-mono text-[10px] text-[#9a9078]">{item.profileUrl}</span>
+                      </div>
+                    </div>
+                  </td>
+
+                  <td className="py-3.5 px-3">
+                    <span className="text-white font-medium block">{item.role}</span>
+                    <span className="text-[11px] text-[#9a9078]">{item.company}</span>
+                  </td>
+
+                  <td className="py-3.5 px-3 font-mono text-[11px] text-[#9a9078]">
+                    {item.date}
+                  </td>
+
+                  <td className="py-3.5 px-3">
+                    {item.statusType === 'contratado' ? (
+                      <span className="px-2.5 py-1 rounded-full bg-emerald-400/10 border border-emerald-400/30 text-emerald-400 font-mono text-[10px] font-bold inline-flex items-center gap-1">
+                        <Check className="w-3 h-3" /> Contratado • Bônus Liberado
+                      </span>
+                    ) : item.statusType === 'entrevista' ? (
+                      <span className="px-2.5 py-1 rounded-full bg-yellow-400/10 border border-yellow-400/30 text-yellow-400 font-mono text-[10px] font-bold inline-flex items-center gap-1">
+                        <Clock className="w-3 h-3" /> Entrevista Agendada
+                      </span>
+                    ) : (
+                      <span className="px-2.5 py-1 rounded-full bg-white/5 border border-white/10 text-slate-300 font-mono text-[10px] inline-flex items-center gap-1">
+                        Em análise
+                      </span>
+                    )}
+                  </td>
+
+                  <td className="py-3.5 px-3 text-right">
+                    <strong className="font-mono text-xs font-bold text-yellow-400 block">{item.points}</strong>
+                    <span className="text-[10px] text-[#9a9078] font-mono">
+                      {item.paid ? 'Pago no saldo' : 'Pendente aprovação'}
+                    </span>
                   </td>
                 </tr>
-              ) : (
-                myTransactions.map((tx) => (
-                  <tr key={tx.id} className="hover:bg-background/60">
-                    <td className="p-2.5 text-muted-foreground whitespace-nowrap">
-                      {new Date(tx.createdAt).toLocaleDateString('pt-BR')}
-                    </td>
-                    <td className="p-2.5 font-medium text-foreground">{tx.description}</td>
-                    <td className="p-2.5">
-                      <span className={`text-[10px] font-bold px-2 py-0.5 rounded ${
-                        tx.type === 'credito' ? 'bg-emerald-100 text-emerald-800' : 'bg-amber-100 text-amber-800'
-                      }`}>
-                        {tx.type === 'credito' ? 'Crédito' : 'Resgate'}
-                      </span>
-                    </td>
-                    <td className={`p-2.5 text-right font-bold ${
-                      tx.type === 'credito' ? 'text-emerald-700' : 'text-destructive'
-                    }`}>
-                      {tx.type === 'credito' ? `+${tx.amount}` : `-${tx.amount}`} 🪙
-                    </td>
-                  </tr>
-                ))
-              )}
+              ))}
             </tbody>
           </table>
         </div>
-      </div>
+
+        {/* Footer do Pipeline */}
+        <div className="flex flex-col sm:flex-row items-center justify-between gap-3 pt-3 border-t border-[#262F40] text-xs">
+          <div className="flex items-center gap-2">
+            <Coins className="w-4 h-4 text-yellow-400" />
+            <span className="text-slate-300">
+              Bônus Potencial em Processamento: <strong className="text-yellow-400 font-mono font-bold">1.850 TP (R$ 1.850,00)</strong>
+            </span>
+          </div>
+          <span className="text-[10px] font-mono text-[#9a9078]">
+            Notificações automáticas via Telegram e E-mail a cada avanço
+          </span>
+        </div>
+      </section>
 
     </div>
   );

@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { useApp } from '../context/AppContext';
 import { SelectionStage } from '../types';
 import { 
@@ -9,7 +9,10 @@ import {
   Lock, 
   Unlock, 
   AlertCircle,
-  ShieldCheck
+  ShieldCheck,
+  AlertTriangle,
+  XCircle,
+  Building2
 } from 'lucide-react';
 
 const STAGES_FLOW: Array<{ key: SelectionStage; label: string }> = [
@@ -33,6 +36,32 @@ export const CandidateApplicationsView: React.FC = () => {
     rejectOpportunity
   } = useApp();
   
+  const [confirmCancelModal, setConfirmCancelModal] = useState<{
+    processId: string;
+    vacancyTitle: string;
+    companyName: string;
+    isWithdrawal: boolean;
+  } | null>(null);
+
+  const [toastNotice, setToastNotice] = useState<string | null>(null);
+
+  const showToast = (msg: string) => {
+    setToastNotice(msg);
+    setTimeout(() => setToastNotice(null), 5000);
+  };
+
+  const handleConfirmAction = () => {
+    if (!confirmCancelModal) return;
+    const { processId, vacancyTitle, isWithdrawal } = confirmCancelModal;
+    rejectOpportunity(processId);
+    showToast(
+      isWithdrawal
+        ? `✓ Candidatura para "${vacancyTitle}" cancelada com sucesso.`
+        : `✓ Convite para "${vacancyTitle}" recusado. Seus contatos permanecem anônimos.`
+    );
+    setConfirmCancelModal(null);
+  };
+
   const myProcesses = selectionProcesses.filter(p => p.candidateId === currentCandidateId);
 
   const getStageIndex = (stage: SelectionStage) => {
@@ -99,9 +128,26 @@ export const CandidateApplicationsView: React.FC = () => {
                   {/* Status de Privacidade dos Dados */}
                   <div className="flex items-center gap-2">
                     {proc.accessGranted ? (
-                      <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-base bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs font-semibold">
-                        <Unlock className="w-3.5 h-3.5" /> Dados Liberados para a Empresa
-                      </span>
+                      <div className="flex flex-wrap items-center gap-2">
+                        <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-base bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs font-semibold">
+                          <Unlock className="w-3.5 h-3.5" /> Dados Liberados para a Empresa
+                        </span>
+                        {!isRejected && !isApproved && (
+                          <button
+                            type="button"
+                            onClick={() => setConfirmCancelModal({
+                              processId: proc.id,
+                              vacancyTitle: vac.title,
+                              companyName: comp?.name || 'Empresa',
+                              isWithdrawal: true
+                            })}
+                            className="inline-flex items-center gap-1 px-2.5 py-1 rounded-base bg-destructive/10 hover:bg-destructive/20 border border-destructive/30 text-destructive text-xs font-semibold transition-colors"
+                            title="Cancelar candidatura a esta vaga"
+                          >
+                            <XCircle className="w-3.5 h-3.5" /> Cancelar Candidatura
+                          </button>
+                        )}
+                      </div>
                     ) : (
                       <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-base bg-background border border-border text-muted-foreground text-xs font-semibold">
                         <Lock className="w-3.5 h-3.5" /> Contatos Ocultos (Protegido pela LGPD)
@@ -131,7 +177,12 @@ export const CandidateApplicationsView: React.FC = () => {
                       </button>
 
                       <button
-                        onClick={() => rejectOpportunity(proc.id)}
+                        onClick={() => setConfirmCancelModal({
+                          processId: proc.id,
+                          vacancyTitle: vac.title,
+                          companyName: comp?.name || 'Empresa',
+                          isWithdrawal: false
+                        })}
                         className="px-3 py-2 bg-card hover:bg-destructive/10 text-destructive border border-destructive/30 text-xs font-semibold rounded-base flex items-center gap-1 transition-all"
                       >
                         <X className="w-3.5 h-3.5" /> Recusar
@@ -199,6 +250,97 @@ export const CandidateApplicationsView: React.FC = () => {
           })
         )}
       </div>
+
+      {/* TOAST FEEDBACK */}
+      {toastNotice && (
+        <div className="fixed bottom-6 right-6 z-50 p-4 rounded-xl bg-card border border-primary/50 text-foreground text-xs font-medium flex items-center gap-2 shadow-2xl animate-fade-in">
+          <CheckCircle2 className="w-4 h-4 text-primary shrink-0" />
+          <span>{toastNotice}</span>
+        </div>
+      )}
+
+      {/* POP-UP DE CONFIRMAÇÃO DE CANCELAMENTO / RECUSA */}
+      {confirmCancelModal && (
+        <div className="fixed inset-0 z-60 bg-black/85 backdrop-blur-md flex items-center justify-center p-4">
+          <div className="bg-card border-2 border-destructive/50 rounded-2xl max-w-md w-full p-6 shadow-2xl space-y-5 animate-scale-in">
+            
+            <div className="flex items-start gap-3">
+              <div className="w-12 h-12 rounded-2xl bg-destructive/10 border border-destructive/30 flex items-center justify-center text-destructive shrink-0">
+                <AlertTriangle className="w-6 h-6" />
+              </div>
+              <div className="space-y-0.5">
+                <h3 className="font-heading font-black text-base text-foreground">
+                  {confirmCancelModal.isWithdrawal
+                    ? 'Confirmar Cancelamento de Candidatura'
+                    : 'Confirmar Recusa de Convite'}
+                </h3>
+                <span className="text-[10px] font-mono text-muted-foreground uppercase tracking-wider block">
+                  Proteção contra cliques acidentais
+                </span>
+              </div>
+            </div>
+
+            <div className="p-3.5 rounded-xl bg-background border border-border">
+              <span className="text-[10px] font-mono text-muted-foreground block uppercase">
+                Oportunidade
+              </span>
+              <strong className="text-sm font-bold text-foreground block mt-0.5">
+                {confirmCancelModal.vacancyTitle}
+              </strong>
+              <span className="text-xs text-primary font-semibold mt-0.5 block flex items-center gap-1">
+                <Building2 className="w-3.5 h-3.5" />
+                {confirmCancelModal.companyName}
+              </span>
+            </div>
+
+            <div className="p-3.5 rounded-xl bg-destructive/10 border border-destructive/25 text-xs text-foreground leading-relaxed space-y-2">
+              {confirmCancelModal.isWithdrawal ? (
+                <>
+                  <p>
+                    Tem certeza de que deseja <strong>cancelar sua candidatura</strong> para esta vaga?
+                  </p>
+                  <p className="text-muted-foreground">
+                    Ao confirmar, sua participação no processo seletivo será encerrada e a empresa será notificada do cancelamento. Para se candidatar novamente, será necessário submeter uma nova solicitação sujeita à disponibilidade.
+                  </p>
+                </>
+              ) : (
+                <>
+                  <p>
+                    Tem certeza de que deseja <strong>recusar este convite</strong> da empresa?
+                  </p>
+                  <p className="text-muted-foreground">
+                    Ao recusar, seus dados pessoais continuarão 100% protegidos e anônimos. A empresa não terá acesso ao seu perfil nominal, em estrito cumprimento à LGPD.
+                  </p>
+                </>
+              )}
+            </div>
+
+            <div className="flex flex-col sm:flex-row items-center justify-end gap-2.5 pt-2 border-t border-border">
+              <button
+                type="button"
+                onClick={() => setConfirmCancelModal(null)}
+                className="w-full sm:w-auto px-4 py-2.5 rounded-xl bg-background hover:bg-muted border border-border text-xs font-semibold text-muted-foreground hover:text-foreground transition-colors"
+              >
+                Não, manter candidatura
+              </button>
+
+              <button
+                type="button"
+                onClick={handleConfirmAction}
+                className="w-full sm:w-auto px-5 py-2.5 rounded-xl bg-destructive hover:bg-destructive/90 text-destructive-foreground text-xs font-bold transition-all shadow-md flex items-center justify-center gap-1.5"
+              >
+                <XCircle className="w-4 h-4" />
+                <span>
+                  {confirmCancelModal.isWithdrawal
+                    ? 'Sim, cancelar candidatura'
+                    : 'Sim, recusar convite'}
+                </span>
+              </button>
+            </div>
+
+          </div>
+        </div>
+      )}
 
     </div>
   );

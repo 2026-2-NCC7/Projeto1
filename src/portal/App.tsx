@@ -17,6 +17,8 @@ import { CommunityFeedView } from './views/CommunityFeedView';
 import { CommunityNetworkView } from './views/CommunityNetworkView';
 import { CommunityHelperView } from './views/CommunityHelperView';
 import { AdminDashboardView } from './views/AdminDashboardView';
+import { VitrinePlanosView } from './views/VitrinePlanosView';
+import { CookieConsentModal } from './components/common/CookieConsentModal';
 
 // Páginas Integradas do Motor de IA & Auditoria TCC
 import { DashboardPage } from '../pages/DashboardPage';
@@ -48,7 +50,8 @@ const COMPANY_ALLOWED_TABS = [
   'empresa-vaga-detalhe',
   'empresa-matching-ia',
   'empresa-comparacao',
-  'empresa-relatorios-ia'
+  'empresa-relatorios-ia',
+  'vitrine-planos'
 ];
 
 const ADMIN_ALLOWED_TABS = [
@@ -56,7 +59,8 @@ const ADMIN_ALLOWED_TABS = [
   'admin-motor-ia',
   'admin-monitor',
   'admin-revisoes',
-  'admin-laboratorio'
+  'admin-laboratorio',
+  'vitrine-planos'
 ];
 
 export const MainLayout: React.FC = () => {
@@ -91,6 +95,7 @@ export const MainLayout: React.FC = () => {
   };
 
   const isTabAllowedForRole = (tab: string): boolean => {
+
     const role = session?.role || currentUser?.role;
     if (role === 'empresa' || activePersona === 'empresa-orion') {
       return COMPANY_ALLOWED_TABS.includes(tab);
@@ -238,6 +243,7 @@ export const MainLayout: React.FC = () => {
       case 'admin-monitor': return 'Trilha de Auditoria e Pipeline';
       case 'admin-revisoes': return 'Fila de Revisão de Avaliações';
       case 'admin-laboratorio': return 'Catálogo de Dados e APIs';
+      case 'vitrine-planos': return 'Gestão de Planos & Slots B2B';
       default: return 'Q.I. Tech';
     }
   };
@@ -427,6 +433,12 @@ export const MainLayout: React.FC = () => {
                 )}
               </div>
             )}
+            {safeTab === 'vitrine-planos' && (
+              <VitrinePlanosView
+                onNavigateToDev={() => setCurrentTab('candidato-perfil')}
+                onNavigateToCompany={() => setCurrentTab('empresa-vagas')}
+              />
+            )}
             {safeTab === 'admin-laboratorio' && (
               <div className="space-y-4">
                 <div className="bg-card p-3.5 rounded-base border border-border shadow-xs flex flex-wrap items-center justify-between gap-2">
@@ -479,6 +491,7 @@ export const MainLayout: React.FC = () => {
           <span className="text-[11px]">Faster-Whisper (int8) • Qwen3 + EvidenceVerifier • Multilingual-E5 • LGPD Double Opt-In & Art. 20</span>
         </div>
       </footer>
+      <CookieConsentModal />
     </div>
   );
 };

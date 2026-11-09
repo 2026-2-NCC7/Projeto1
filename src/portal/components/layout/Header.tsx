@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useApp, ActivePersona } from '../../context/AppContext';
-import { Bell, Search, User, LogOut, ChevronDown, Check, Sun, Moon, PlayCircle, Brain } from 'lucide-react';
+import { Bell, Search, User, LogOut, ChevronDown, Check, Sun, Moon, PlayCircle, Brain, ShieldCheck, Lock } from 'lucide-react';
+import { AnimatedIcon } from '../common/AnimatedIcon';
 
 interface HeaderProps {
   currentViewTitle: string;
@@ -194,8 +195,9 @@ export const Header: React.FC<HeaderProps> = ({ currentViewTitle }) => {
                 <span className="text-xs font-bold text-foreground block leading-tight truncate max-w-[145px]">
                   {userDisplayName}
                 </span>
-                <span className="text-[10px] text-primary font-semibold block">
-                  {userBadge}
+                <span className="text-[10px] text-primary font-semibold flex items-center gap-1">
+                  <AnimatedIcon type="shield" size={11} animation="pulse" className="text-emerald-400" />
+                  <span>{userBadge}</span>
                 </span>
               </div>
               <ChevronDown className="w-3.5 h-3.5 text-muted-foreground" />
@@ -204,14 +206,15 @@ export const Header: React.FC<HeaderProps> = ({ currentViewTitle }) => {
             {showUserMenu && (
               <div className="absolute right-0 mt-2 w-64 bg-card border border-border rounded-base shadow-xl py-2 z-50">
                 <div className="px-3.5 py-2 border-b border-border bg-background/50">
-                  <span className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground block">
-                    Sessão Autenticada
+                  <span className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground flex items-center justify-between">
+                    <span>Ticket Magro Ativo</span>
+                    <span className="text-emerald-400 font-mono text-[9px]">HttpOnly</span>
                   </span>
                   <strong className="text-xs font-bold text-foreground block truncate mt-0.5">
                     {userDisplayName}
                   </strong>
-                  <span className="text-[10px] text-muted-foreground block truncate">
-                    {session?.email || currentUser?.email}
+                  <span className="text-[10px] text-muted-foreground block truncate font-mono">
+                    ID: {session?.userId || currentUserId}
                   </span>
                 </div>
 

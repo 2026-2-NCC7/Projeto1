@@ -1,3 +1,4 @@
+import { evaluatePasswordStrength } from '../utils/security';
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import { 
   CandidateProfile, 
@@ -130,6 +131,7 @@ interface AppContextType {
   retakeInterview: (candidateId: string) => void;
   acceptOpportunity: (processId: string) => void;
   rejectOpportunity: (processId: string) => void;
+  applyToVacancy: (candidateId: string, vacancyId: string) => void;
   createReferralLink: (candidateId: string, vacancyId: string) => string;
   redeemReward: (candidateId: string, rewardId: string) => boolean;
   simulateReferralConversion: (candidateId: string, vacancyTitle: string) => void;
@@ -199,18 +201,23 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
     return [];
   });
 
-  // Sessão separada: QITECH_SESSION_V1
+  // Sessão separada: QITECH_SESSION_V1 (Ticket Magro / Lean Token - Sem PII)
   const [session, setSession] = useState<UserSession | null>(() => {
     try {
       const raw = localStorage.getItem(SESSION_STORAGE_KEY);
       if (raw) {
         const parsed = JSON.parse(raw);
-        if (parsed && parsed.userId && parsed.role && parsed.email) {
+        if (parsed && parsed.userId && parsed.role) {
           return {
+            ticketId: parsed.ticketId || `tk_${Date.now()}`,
             userId: parsed.userId,
             role: parsed.role,
-            email: parsed.email,
-            loginAt: parsed.loginAt || new Date().toISOString()
+            loginAt: parsed.loginAt || new Date().toISOString(),
+            flags: parsed.flags || {
+              httpOnly: true,
+              secure: true,
+              sameSite: 'Strict'
+            }
           };
         }
       }
@@ -261,6 +268,8 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
   const toggleTheme = () => {
     setTheme(prev => (prev === 'dark' ? 'light' : 'dark'));
   };
+
+
 
   // Persistir QITECH_USERS_V1 separadamente
   useEffect(() => {
@@ -334,12 +343,28 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
     .reduce((acc, tx) => (tx.type === 'credito' ? acc + tx.amount : acc - tx.amount), 0);
 
   const saveSession = (user: RegisteredUser) => {
+    // Ticket Magro (Lean Session Token): Apenas ID anônimo e controle de acesso, sem PII
+    const randomTicketId = typeof crypto !== 'undefined' && crypto.randomUUID
+      ? crypto.randomUUID()
+      : `tk_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`;
+
     const newSession: UserSession = {
+      ticketId: randomTicketId,
       userId: user.id,
       role: user.role,
-      email: user.email,
-      loginAt: new Date().toISOString()
+      loginAt: new Date().toISOString(),
+      flags: {
+        httpOnly: true,
+        secure: true,
+        sameSite: 'Strict'
+      }
     };
+
+    // Cookie seguro HttpOnly simulado no browser com SameSite=Strict
+    if (typeof document !== 'undefined') {
+      document.cookie = `qitech_ticket=${randomTicketId}; max-age=${8 * 3600}; path=/; SameSite=Strict`;
+    }
+
     localStorage.setItem(SESSION_STORAGE_KEY, JSON.stringify(newSession));
     setSession(newSession);
     if (user.personaId) {
@@ -353,6 +378,8 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
     }
   };
 
+
+
   const setActivePersona = (persona: ActivePersona) => {
     const demoTarget = SEED_DEMO_USERS.find(u => u.personaId === persona);
     if (demoTarget) {
@@ -362,12 +389,16 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
     }
   };
 
+
+
   const login = (persona: ActivePersona) => {
     const demoTarget = SEED_DEMO_USERS.find(u => u.personaId === persona);
     if (demoTarget) {
       saveSession(demoTarget);
     }
   };
+
+
 
   const loginWithCredentials = (email: string, password: string, _expectedRole?: UserRole): AuthResult => {
     const cleanEmail = email.trim().toLowerCase();
@@ -397,6 +428,8 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
     return { success: true, user: matchedUser };
   };
 
+
+
   const registerProfessional = (input: RegisterProfessionalInput): AuthResult => {
     const name = input.name.trim();
     const email = input.email.trim().toLowerCase();
@@ -408,8 +441,12 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
     if (!isValidEmailFormat(email)) {
       return { success: false, error: 'Formato de e-mail inválido. Digite um e-mail válido (ex: nome@dominio.com).' };
     }
-    if (password.length < 6) {
-      return { success: false, error: 'A senha deve possuir no mínimo 6 caracteres.' };
+    const pwdEval = evaluatePasswordStrength(password);
+    if (!pwdEval.isStrongEnough) {
+      return { 
+        success: false, 
+        error: 'Senha fraca ou vulnerável. Exigido: mínimo 8 caracteres, letras maiúsculas e minúsculas, número e caractere especial (!@#$...).' 
+      };
     }
     if (password !== confirmPassword) {
       return { success: false, error: 'A confirmação de senha não coincide com a senha informada.' };
@@ -438,6 +475,8 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
       candidateId,
       onboardingCompleted: false
     };
+
+
 
     const initialProfile: CandidateProfile = {
       id: candidateId,
@@ -469,12 +508,16 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
       skills: []
     };
 
+
+
     setRegisteredUsers(prev => [...prev, newUser]);
     setCandidates(prev => ({ ...prev, [candidateId]: initialProfile }));
     saveSession(newUser);
 
     return { success: true, user: newUser };
   };
+
+
 
   const registerCompany = (input: RegisterCompanyInput): AuthResult => {
     const companyName = input.companyName.trim();
@@ -492,8 +535,12 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
     if (cleanCnpj.length < 14) {
       return { success: false, error: 'Informe um CNPJ válido com 14 dígitos.' };
     }
-    if (password.length < 6) {
-      return { success: false, error: 'A senha deve possuir no mínimo 6 caracteres.' };
+    const pwdEval = evaluatePasswordStrength(password);
+    if (!pwdEval.isStrongEnough) {
+      return { 
+        success: false, 
+        error: 'Senha fraca ou vulnerável. Exigido: mínimo 8 caracteres, letras maiúsculas e minúsculas, número e caractere especial (!@#$...).' 
+      };
     }
     if (password !== confirmPassword) {
       return { success: false, error: 'A confirmação de senha não coincide com a senha informada.' };
@@ -532,6 +579,8 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
       companyId
     };
 
+
+
     const newCompany: Company = {
       id: companyId,
       name: companyName,
@@ -542,12 +591,16 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
       website: ''
     };
 
+
+
     setRegisteredUsers(prev => [...prev, newUser]);
     setCompanies(prev => [...prev, newCompany]);
     saveSession(newUser);
 
     return { success: true, user: newUser };
   };
+
+
 
   const completeProfessionalOnboarding = (data: ProfessionalOnboardingData) => {
     if (!currentUser || !currentUser.candidateId) return;
@@ -581,6 +634,8 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
           availability: data.availability
         }
       };
+
+
     });
 
     setRegisteredUsers(prev =>
@@ -613,6 +668,8 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
           updatedAt: new Date().toISOString(),
           unlockedFreeGrant: false
         };
+
+
       });
       setSelectionProcesses(prev => [...generatedProcs, ...prev]);
     }
@@ -626,6 +683,8 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
       type: 'credito',
       createdAt: new Date().toISOString()
     };
+
+
     setRewardTransactions(prev => [bonusTx, ...prev]);
 
     addNotification(
@@ -636,10 +695,14 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
     );
   };
 
+
+
   const logout = () => {
     localStorage.removeItem(SESSION_STORAGE_KEY);
     setSession(null);
   };
+
+
 
   // Carregar do localStorage e sincronizar entre abas
   useEffect(() => {
@@ -670,6 +733,8 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
       }
     };
 
+
+
     loadFromStorage(localStorage.getItem(STORAGE_KEY));
 
     const handleStorageChange = (e: StorageEvent) => {
@@ -695,6 +760,8 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
         }
       }
     };
+
+
     window.addEventListener('storage', handleStorageChange);
     return () => window.removeEventListener('storage', handleStorageChange);
   }, []);
@@ -721,6 +788,8 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
       commercialConfig,
       moderationReports
     };
+
+
     localStorage.setItem(STORAGE_KEY, JSON.stringify(dataToSave));
   }, [candidates, companies, vacancies, interviews, selectionProcesses, communityProfiles, posts, comments, connections, notifications, auditLogs, customSkillsPending, referrals, rewardTransactions, companyCredits, companyInvoices, commercialConfig, moderationReports]);
 
@@ -732,8 +801,12 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
       details,
       actor
     };
+
+
     setAuditLogs(prev => [newLog, ...prev]);
   };
+
+
 
   const addNotification = (recipientUserId: string, title: string, message: string, type: 'vaga' | 'processo' | 'comunidade' | 'sistema') => {
     const notif: AppNotification = {
@@ -745,8 +818,12 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
       read: false,
       createdAt: new Date().toISOString()
     };
+
+
     setNotifications(prev => [notif, ...prev]);
   };
+
+
 
   // Funções Candidato
   const updateCandidateProfile = (candidateId: string, updated: Partial<CandidateProfile>) => {
@@ -757,9 +834,13 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
         ...prev,
         [candidateId]: { ...current, ...updated }
       };
+
+
     });
     addAudit('CANDIDATE_PROFILE_UPDATED', `Perfil do candidato ${candidateId} atualizado`, candidates[candidateId]?.name || candidateId);
   };
+
+
 
   const addCandidateSkill = (candidateId: string, skill: CandidateSkill) => {
     setCandidates(prev => {
@@ -772,8 +853,12 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
           skills: [...current.skills, skill]
         }
       };
+
+
     });
   };
+
+
 
   const removeCandidateSkill = (candidateId: string, skillId: string) => {
     setCandidates(prev => {
@@ -786,8 +871,12 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
           skills: current.skills.filter(s => s.id !== skillId)
         }
       };
+
+
     });
   };
+
+
 
   const suggestNewSkill = (skillName: string) => {
     if (!skillName.trim()) return;
@@ -797,6 +886,8 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
     addAudit('NEW_SKILL_SUGGESTED', `Nova habilidade sugerida para revisão: "${skillName.trim()}"`, candName);
     addNotification('user-admin', 'Nova Habilidade Sugerida', `${candName} sugeriu a tecnologia "${skillName.trim()}" para curadoria do catálogo.`, 'sistema');
   };
+
+
 
   const submitInterviewAnswers = (candidateId: string, answers: any[], summary: any[]) => {
     setInterviews(prev => ({
@@ -815,6 +906,8 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
     addNotification(candidates[candidateId]?.userId || '', 'Entrevista de Competências Concluída', 'Seu perfil agora conta com resumo comportamental gerado por IA.', 'sistema');
   };
 
+
+
   const contestInterview = (candidateId: string) => {
     setInterviews(prev => {
       const cur = prev[candidateId];
@@ -826,11 +919,15 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
           status: 'contestada'
         }
       };
+
+
     });
     addAudit('AI_INTERVIEW_CONTESTED', `Candidato ${candidateId} contestou a síntese comportamental automatizada`, candidates[candidateId]?.name || candidateId);
     addNotification(candidates[candidateId]?.userId || '', 'Contestação Registrada', 'Sua solicitação de revisão foi protocolada e aguarda análise da equipe.', 'sistema');
     addNotification('user-admin', 'Revisão de IA Solicitada (Art. 20 LGPD)', `O candidato ${candidates[candidateId]?.name} solicitou revisão da síntese comportamental de IA.`, 'sistema');
   };
+
+
 
   const retakeInterview = (candidateId: string) => {
     setInterviews(prev => {
@@ -843,8 +940,12 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
           status: 'nao_iniciada'
         }
       };
+
+
     });
   };
+
+
 
   const acceptOpportunity = (processId: string) => {
     const proc = selectionProcesses.find(p => p.id === processId);
@@ -866,6 +967,8 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
           currentStage: isFreeCourtesy ? 'dados_liberados' : 'candidato_aceitou',
           updatedAt: new Date().toISOString()
         };
+
+
       }
       return p;
     }));
@@ -881,6 +984,8 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
         nfseNumber: 'Isento (Cortesia Comercial RN03)',
         createdAt: new Date().toISOString()
       };
+
+
       setCompanyInvoices(prev => [courtesyInvoice, ...prev]);
     }
 
@@ -888,6 +993,8 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
     addNotification(cand?.userId || '', 'Double Opt-In Confirmado', `Você autorizou o envio dos seus contatos para a empresa referente à vaga ${vac?.title}.`, 'processo');
     addNotification('user-orion', `Double Opt-In Confirmado — ${cand?.name?.replace(' (fictício)', '').replace(' (fictícia)', '')}`, `O candidato aceitou o convite para a vaga "${vac?.title}". ${isFreeCourtesy ? 'Como 1º perfil do Match Express, os contatos foram liberados gratuitamente!' : 'Perfil disponível para desbloqueio comercial.'}`, 'processo');
   };
+
+
 
   const rejectOpportunity = (processId: string) => {
     const proc = selectionProcesses.find(p => p.id === processId);
@@ -905,6 +1012,8 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
           currentStage: 'recusado',
           updatedAt: new Date().toISOString()
         };
+
+
       }
       return p;
     }));
@@ -913,6 +1022,59 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
     addNotification(cand?.userId || '', 'Oportunidade Recusada', `Você recusou o convite para a vaga ${vac?.title}. Seus dados permaneceram privados.`, 'processo');
     addNotification('user-orion', 'Convite Recusado (Double Opt-In)', `Um candidato da shortlist recusou o convite para a vaga "${vac?.title}". Os dados pessoais permaneceram protegidos.`, 'processo');
   };
+
+  const applyToVacancy = (candidateId: string, vacancyId: string) => {
+    const vac = vacancies.find(v => v.id === vacancyId);
+    const cand = candidates[candidateId];
+    if (!vac || !cand) return;
+
+    const existing = selectionProcesses.find(p => p.candidateId === candidateId && p.vacancyId === vacancyId);
+    if (existing) {
+      if (existing.doubleOptInStatus === 'recusado') {
+        setSelectionProcesses(prev => prev.map(p => p.id === existing.id ? {
+          ...p,
+          doubleOptInStatus: 'aceito',
+          currentStage: 'apresentado',
+          updatedAt: new Date().toISOString()
+        } : p));
+      }
+      return;
+    }
+
+    const candSkills = cand.skills || [];
+    const matchedSkills = vac.mandatorySkills.filter(req =>
+      candSkills.some(cs => cs.name.toLowerCase().includes(req.toLowerCase()))
+    );
+    const hardScore = Math.min(100, Math.max(35, Math.round((matchedSkills.length / Math.max(1, vac.mandatorySkills.length)) * 100)));
+    const softScore = cand.interviewSummary?.length ? 88 : 80;
+    const expScore = 78;
+    const finalScore = Math.round(hardScore * 0.4 + softScore * 0.3 + expScore * 0.3);
+
+    const newProc: SelectionProcess = {
+      id: `proc-${candidateId}-${vacancyId}-${Date.now()}`,
+      vacancyId,
+      candidateId,
+      currentStage: 'apresentado',
+      doubleOptInStatus: 'aceito',
+      doubleOptInDate: new Date().toISOString(),
+      accessGranted: false,
+      demonstrativeScore: finalScore,
+      matchExplanation: finalScore >= 75
+        ? `Candidatura espontânea de alta afinidade técnica (${finalScore}%). Sinergia confirmada nos requisitos obrigatórios.`
+        : `Candidatura direta espontânea (${finalScore}% de alinhamento prévio). Candidato ciente dos gaps técnicos mas motivado pelo desafio.`,
+      internalNotes: `Candidatura submetida diretamente pelo profissional. Afinidade inicial calculada: ${finalScore}%.`,
+      feedback: 'Candidatura em análise inicial pelo time de engenharia da empresa.',
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString()
+    };
+
+    setSelectionProcesses(prev => [newProc, ...prev]);
+    addAudit('CANDIDATE_DIRECT_APPLICATION', `Candidato ${cand.name} aplicou diretamente para a vaga "${vac.title}" (Score: ${finalScore}%)`, cand.name);
+    addNotification(cand.userId || '', 'Candidatura Enviada!', `Sua candidatura para "${vac.title}" foi enviada com sucesso para a empresa.`, 'processo');
+    addNotification('user-orion', 'Nova Candidatura Recebida', `${cand.name} aplicou para a vaga "${vac.title}" (${finalScore}% de afinidade).`, 'processo');
+  };
+
+
 
   const createReferralLink = (candidateId: string, vacancyId: string) => {
     const existingForVacancy = referrals.filter(r => r.candidateId === candidateId && r.vacancyId === vacancyId);
@@ -926,6 +1088,8 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
     return link;
   };
 
+
+
   const simulateReferralConversion = (candidateId: string, vacancyTitle: string) => {
     const bonus = commercialConfig.referralBonusEstalecas;
     const newTx: RewardTransaction = {
@@ -936,11 +1100,15 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
       type: 'credito',
       createdAt: new Date().toISOString()
     };
+
+
     setRewardTransactions(prev => [newTx, ...prev]);
     setReferrals(prev => prev.map((r, idx) => idx === prev.length - 1 ? { ...r, status: 'aprovada' } : r));
     addAudit('ESTALECAS_REWARD_GRANTED', `Crédito de +${bonus} Estalecas Q.I. concedido após aprovação validada de indicado (RN14)`, 'Motor de Recompensas Q.I.');
     addNotification(candidates[candidateId]?.userId || '', `🪙 +${bonus} Estalecas Q.I. Recebidas!`, `Sua indicação para "${vacancyTitle}" foi aprovada pela empresa! Seus créditos já estão disponíveis para resgate.`, 'sistema');
   };
+
+
 
   const redeemReward = (candidateId: string, rewardId: string): boolean => {
     const item = rewardItems.find(r => r.id === rewardId);
@@ -960,11 +1128,15 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
       type: 'resgate',
       createdAt: new Date().toISOString()
     };
+
+
     setRewardTransactions(prev => [newTx, ...prev]);
     addAudit('REWARD_REDEEMED', `Resgate de benefício "${item.title}" por ${item.costEstalecas} Estalecas Q.I.`, candidates[candidateId]?.name || candidateId);
     addNotification(candidates[candidateId]?.userId || '', '🎁 Benefício Resgatado com Sucesso!', `Seu voucher para "${item.title}" foi emitido e enviado ao seu e-mail cadastrado.`, 'sistema');
     return true;
   };
+
+
 
   const joinCommunity = (candidateId: string, publicFields: any) => {
     const cand = candidates[candidateId];
@@ -992,6 +1164,8 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
       }
     };
 
+
+
     setCommunityProfiles(prev => ({ ...prev, [cand.userId]: newProfile }));
     setCandidates(prev => ({
       ...prev,
@@ -1001,6 +1175,8 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
     addAudit('COMMUNITY_JOINED', `Candidato ${cand.name} aderiu à comunidade técnica como pessoa física`, cand.name);
     addNotification(cand.userId, 'Bem-vindo à Comunidade Q.I. Tech!', 'Seu perfil comunitário público foi criado respeitando suas preferências de privacidade.', 'comunidade');
   };
+
+
 
   // Funções Empresa
   const createVacancy = (newVacancy: Omit<Vacancy, 'id' | 'companyId' | 'createdAt'>) => {
@@ -1013,6 +1189,8 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
       companyId: activeCompId,
       createdAt: new Date().toISOString()
     };
+
+
     setVacancies(prev => [created, ...prev]);
 
     // Executa o Match Engine automaticamente sobre os candidatos ativos da base
@@ -1037,6 +1215,8 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
         updatedAt: new Date().toISOString(),
         unlockedFreeGrant: created.isUrgentMatchExpress && index === 0
       };
+
+
     });
 
     setSelectionProcesses(prev => [...newProcesses, ...prev]);
@@ -1046,6 +1226,8 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
       addNotification(c.userId, `Novo Convite de Vaga (${created.isUrgentMatchExpress ? 'Match Express' : 'Match Compatível'})`, `A ${activeCompName} publicou a vaga "${created.title}" compatível com seu perfil. Confirme o Double Opt-In se desejar liberar seu contato.`, 'vaga');
     });
   };
+
+
 
   const unlockCandidateProfile = (processId: string, method: 'credit' | 'single_purchase'): boolean => {
     const proc = selectionProcesses.find(p => p.id === processId);
@@ -1068,6 +1250,8 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
         nfseNumber: 'Consumo de Crédito Corporativo',
         createdAt: new Date().toISOString()
       };
+
+
       setCompanyInvoices(prev => [newInv, ...prev]);
     } else {
       const nfseNum = `NFS-e 2026/00${Math.floor(1000 + Math.random() * 8999)}-SP`;
@@ -1081,6 +1265,8 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
         nfseNumber: nfseNum,
         createdAt: new Date().toISOString()
       };
+
+
       setCompanyInvoices(prev => [newInv, ...prev]);
     }
 
@@ -1092,6 +1278,8 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
           currentStage: 'dados_liberados',
           updatedAt: new Date().toISOString()
         };
+
+
       }
       return p;
     }));
@@ -1100,6 +1288,8 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
     addNotification(cand?.userId || '', 'Empresa Acessou Seus Contatos', `A ${activeCompName} desbloqueou seus canais de contato para a vaga "${vac?.title}".`, 'processo');
     return true;
   };
+
+
 
   const buyCompanyCreditPackage = (creditsCount: number, priceBrl: number, packageLabel: string) => {
     setCompanyCredits(prev => prev + creditsCount);
@@ -1115,10 +1305,14 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
       nfseNumber: nfseNum,
       createdAt: new Date().toISOString()
     };
+
+
     setCompanyInvoices(prev => [newInv, ...prev]);
     addAudit('COMPANY_PACKAGE_PURCHASED', `Aquisição de ${packageLabel} (R$ ${priceBrl}) com emissão assíncrona da ${nfseNum}`, activeCompName);
     addNotification(currentUser?.id || 'user-orion', 'Pacote de Créditos Ativado + NFS-e Emitida', `Foram adicionados +${creditsCount} créditos corporativos. Nota fiscal ${nfseNum} disponível no painel.`, 'sistema');
   };
+
+
 
   const updateProcessStage = (processId: string, nextStage: SelectionStage) => {
     const proc = selectionProcesses.find(p => p.id === processId);
@@ -1134,6 +1328,8 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
           currentStage: nextStage,
           updatedAt: new Date().toISOString()
         };
+
+
       }
       return p;
     }));
@@ -1152,10 +1348,14 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
       recusado: 'Processo seletivo encerrado'
     };
 
+
+
     if (cand?.userId) {
       addNotification(cand.userId, `Atualização de Etapa — ${vac?.title}`, `Sua candidatura agora está na etapa: "${stageTitles[nextStage]}".`, 'processo');
     }
   };
+
+
 
   const approveCandidate = (processId: string) => {
     updateProcessStage(processId, 'aprovado');
@@ -1169,6 +1369,8 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
     }
   };
 
+
+
   const rejectCandidate = (processId: string) => {
     updateProcessStage(processId, 'recusado');
     const proc = selectionProcesses.find(p => p.id === processId);
@@ -1180,6 +1382,8 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
     }
   };
 
+
+
   const updateInternalNotes = (processId: string, notes: string) => {
     setSelectionProcesses(prev => prev.map(p => {
       if (p.id === processId) {
@@ -1188,6 +1392,8 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
       return p;
     }));
   };
+
+
 
   const giveFeedback = (processId: string) => {
     setSelectionProcesses(prev => prev.map(p => {
@@ -1199,6 +1405,8 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
     addAudit('MATCH_FEEDBACK_LOGGED', `Feedback positivo de aderência registrado para auditoria interna`, currentCompany?.name || 'Orion Tech Solutions');
   };
 
+
+
   // Funções Comunidade
   const getActiveCommunityAuthor = () => {
     if (activePersona === 'comunidade-rafael') {
@@ -1208,6 +1416,8 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
         headline: 'DevOps & Cloud Practitioner',
         avatar: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150&auto=format&fit=crop&q=80'
       };
+
+
     }
     if (activePersona === 'candidato-marina') {
       return {
@@ -1216,6 +1426,8 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
         headline: 'Senior Data Engineer',
         avatar: 'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=150&auto=format&fit=crop&q=80'
       };
+
+
     }
     if (currentUser && !currentUser.isDemo) {
       const cand = candidates[currentCandidateId];
@@ -1225,6 +1437,8 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
         headline: cand?.headline || `${currentUser.technicalArea || 'Tecnologia'} (${currentUser.seniority || 'Pleno'})`,
         avatar: cand?.avatar || `https://ui-avatars.com/api/?name=${encodeURIComponent(currentUser.name)}&background=006A7A&color=fff&bold=true`
       };
+
+
     }
     return {
       id: 'user-lucas',
@@ -1232,7 +1446,11 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
       headline: 'Front-end Engineer',
       avatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150&auto=format&fit=crop&q=80'
     };
+
+
   };
+
+
 
   const createPost = (content: string, type: 'post' | 'pergunta', tags: string[]) => {
     const author = getActiveCommunityAuthor();
@@ -1253,9 +1471,13 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
       createdAt: new Date().toISOString()
     };
 
+
+
     setPosts(prev => [newPost, ...prev]);
     addAudit('COMMUNITY_POST_CREATED', `Publicação técnica criada por ${author.name}`, author.name);
   };
+
+
 
   const createComment = (postId: string, content: string) => {
     const author = getActiveCommunityAuthor();
@@ -1270,6 +1492,8 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
       createdAt: new Date().toISOString()
     };
 
+
+
     setComments(prev => [...prev, newComment]);
     setPosts(prev => prev.map(p => {
       if (p.id === postId) {
@@ -1278,6 +1502,8 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
       return p;
     }));
   };
+
+
 
   const toggleLikePost = (postId: string) => {
     const currentUserId = getActiveCommunityAuthor().id;
@@ -1289,10 +1515,14 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
           likes: hasLiked ? p.likes - 1 : p.likes + 1,
           likedBy: hasLiked ? p.likedBy.filter(id => id !== currentUserId) : [...p.likedBy, currentUserId]
         };
+
+
       }
       return p;
     }));
   };
+
+
 
   const toggleSavePost = (postId: string) => {
     const currentUserId = getActiveCommunityAuthor().id;
@@ -1303,10 +1533,14 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
           ...p,
           savedBy: hasSaved ? p.savedBy.filter(id => id !== currentUserId) : [...p.savedBy, currentUserId]
         };
+
+
       }
       return p;
     }));
   };
+
+
 
   const connectToUser = (targetUserId: string) => {
     const currentUserId = getActiveCommunityAuthor().id;
@@ -1322,11 +1556,15 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
         degree: '1º grau',
         status: 'conectado'
       };
+
+
       setConnections(prev => [...prev, newConn]);
       addAudit('CONNECTION_ESTABLISHED', `Conexão profissional estabelecida entre ${currentUserId} e ${targetUserId}`, 'Comunidade');
       addNotification(targetUserId, 'Nova conexão profissional', 'Um membro da comunidade conectou-se com você.', 'comunidade');
     }
   };
+
+
 
   const reportPost = (postId: string, reason: string) => {
     const post = posts.find(p => p.id === postId);
@@ -1342,10 +1580,14 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
       status: 'pendente',
       createdAt: new Date().toISOString()
     };
+
+
     setModerationReports(prev => [newReport, ...prev]);
     addAudit('COMMUNITY_POST_REPORTED', `Publicação ${post.id} sinalizada para moderação por ${reporter}: "${reason}"`, reporter);
     addNotification('user-admin', 'Nova Denúncia na Comunidade', `${reporter} reportou uma publicação de ${post.authorName} para revisão.`, 'sistema');
   };
+
+
 
   const migrateExternalToCandidate = (salaryMin: number, salaryMax: number, seniority: Seniority, modality: WorkModality, contracts: WorkContractType[]) => {
     const rafaelComm = communityProfiles['user-rafael-externo'];
@@ -1396,6 +1638,8 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
       }))
     };
 
+
+
     setCandidates(prev => ({ ...prev, 'cand-rafael': newCand }));
 
     // Vincula Rafael como candidato compatível na vaga de Dados/Cloud para demonstrar na empresa!
@@ -1412,11 +1656,15 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
       updatedAt: new Date().toISOString(),
       unlockedFreeGrant: false
     };
+
+
     setSelectionProcesses(prev => [...prev, newProc]);
 
     addAudit('COMMUNITY_MEMBER_MIGRATED_TO_CANDIDATE', 'Rafael Mendes converteu voluntariamente seu perfil comunitário para candidato elegível ao matchmaking (CM05/RM06)', 'Rafael Mendes');
     addNotification('user-orion', 'Novo Talento da Comunidade no Matchmaking!', 'Rafael Mendes (DevOps & AWS) habilitou o perfil para recrutamento e confirmou interesse na vaga.', 'vaga');
   };
+
+
 
   // Funções Admin
   const approveCustomSkill = (skillEntry: string) => {
@@ -1437,6 +1685,8 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
                 : sk
             )
           };
+
+
         }
       });
       return updated;
@@ -1446,6 +1696,8 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
     const targetUser = skillEntry.toLowerCase().includes('marina') ? 'user-marina' : 'user-lucas';
     addNotification(targetUser, 'Habilidade Aprovada pela Curadoria!', `A tecnologia "${cleanName}" que você sugeriu foi revisada e aprovada no catálogo oficial da Q.I. Tech.`, 'sistema');
   };
+
+
 
   const rejectCustomSkill = (skillEntry: string) => {
     const cleanName = skillEntry.replace(/\s*\(sugerida por .*\)$/i, '').trim();
@@ -1459,6 +1711,8 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
           ...cand,
           skills: cand.skills.filter(sk => !(sk.isCustom && sk.name.toLowerCase() === cleanName.toLowerCase()))
         };
+
+
       });
       return updated;
     });
@@ -1468,10 +1722,14 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
     addNotification(targetUser, 'Sugestão de Habilidade Revisada', `A sugestão "${cleanName}" não foi incorporada ao catálogo padronizado.`, 'sistema');
   };
 
+
+
   const updateCommercialConfig = (newConfig: CommercialConfig) => {
     setCommercialConfig(newConfig);
     addAudit('COMMERCIAL_PARAMS_UPDATED', `Parâmetros comerciais atualizados pelo Admin: Desbloqueio avulso R$ ${newConfig.singleUnlockPriceBrl}, Pacote R$ ${newConfig.package5PriceBrl}, Top N=${newConfig.matchExpressTopN}, Bônus Indicação=${newConfig.referralBonusEstalecas} Estalecas (RN05)`, 'Admin Q.I. Tech');
   };
+
+
 
   const resolveModerationReport = (reportId: string, deletePost?: boolean) => {
     const rep = moderationReports.find(r => r.id === reportId);
@@ -1482,9 +1740,13 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
     addAudit('MODERATION_ACTION_TAKEN', `Denúncia ${reportId} tratada pela governança (${deletePost ? 'Conteúdo removido' : 'Arquivada após análise'})`, 'Admin Q.I. Tech');
   };
 
+
+
   const markNotificationAsRead = (notificationId: string) => {
     setNotifications(prev => prev.map(n => n.id === notificationId ? { ...n, read: true } : n));
   };
+
+
 
   const resetAllData = () => {
     localStorage.removeItem(STORAGE_KEY);
@@ -1518,6 +1780,8 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
     setModerationReports(SEED_MODERATION_REPORTS);
     addNotification('user-lucas', 'Sistema Reiniciado', 'Dados mock reinicializados com sucesso para o estado original.', 'sistema');
   };
+
+
 
   return (
     <AppContext.Provider value={{
@@ -1568,6 +1832,7 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
       retakeInterview,
       acceptOpportunity,
       rejectOpportunity,
+      applyToVacancy,
       createReferralLink,
       redeemReward,
       simulateReferralConversion,

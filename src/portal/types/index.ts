@@ -29,10 +29,15 @@ export interface RegisteredUser {
 }
 
 export interface UserSession {
+  ticketId: string;
   userId: string;
   role: UserRole;
-  email: string;
   loginAt: string;
+  flags?: {
+    httpOnly: boolean;
+    secure: boolean;
+    sameSite: 'Strict' | 'Lax' | 'None';
+  };
 }
 
 export interface ProfessionalOnboardingData {

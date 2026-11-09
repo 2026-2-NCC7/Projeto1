@@ -6,24 +6,39 @@ import {
   ShieldCheck, 
   ArrowRight, 
   CheckCircle2, 
-  Lock,
-  Mail,
-  KeyRound,
-  LogIn,
-  UserPlus,
-  Building2,
-  User,
-  Zap,
-  Award,
-  Users,
-  X,
-  Briefcase,
-  Sparkles,
-  Sun,
-  Moon,
-  AlertCircle,
-  PlayCircle
+  Lock, 
+  Mail, 
+  KeyRound, 
+  LogIn, 
+  UserPlus, 
+  Building2, 
+  User, 
+  Zap, 
+  Award, 
+  Users, 
+  X, 
+  Briefcase, 
+  Sparkles, 
+  Sun, 
+  Moon, 
+  AlertCircle, 
+  PlayCircle,
+  AlertTriangle,
+  Check,
+  Eye,
+  EyeOff,
+  Cookie
 } from 'lucide-react';
+import { 
+  evaluatePasswordStrength, 
+  getRemainingLockoutSeconds, 
+  recordFailedLoginAttempt, 
+  clearLoginAttempts,
+  preventClickjacking,
+  isEmbeddedInIframe
+} from '../utils/security';
+import { AnimatedIcon } from '../components/common/AnimatedIcon';
+import { CookieConsentModal } from '../components/common/CookieConsentModal';
 
 type SignupTab = 'profissional' | 'empresa' | 'admin';
 
@@ -46,6 +61,49 @@ const TECHNICAL_AREAS = [
   'QA / Testes',
   'Segurança da Informação'
 ];
+
+const PasswordStrengthMeter: React.FC<{ password: string }> = ({ password }) => {
+  const pwdEval = evaluatePasswordStrength(password);
+  if (!password) return null;
+
+  return (
+    <div className="space-y-2 p-3 rounded-xl bg-[#0D111A] border border-[#232D3F] mt-2 text-left">
+      <div className="flex items-center justify-between text-xs">
+        <span className="text-slate-400 font-medium">Classificação de Segurança:</span>
+        <span className="font-bold font-mono text-xs" style={{ color: pwdEval.color }}>
+          {pwdEval.label}
+        </span>
+      </div>
+
+      {/* Barra de Progresso Dinâmica */}
+      <div className="w-full bg-[#182130] rounded-full h-1.5 overflow-hidden">
+        <div
+          className="h-full transition-all duration-300 rounded-full"
+          style={{ width: `${pwdEval.percentage}%`, backgroundColor: pwdEval.color }}
+        />
+      </div>
+
+      {/* Checklist de Requisitos Obrigatórios */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-1.5 pt-1 text-[11px]">
+        {pwdEval.criteria.map((c) => (
+          <span
+            key={c.id}
+            className={`flex items-center gap-1.5 font-mono ${
+              c.met ? 'text-emerald-400 font-medium' : 'text-slate-500'
+            }`}
+          >
+            {c.met ? (
+              <Check className="w-3.5 h-3.5 text-emerald-400 shrink-0" />
+            ) : (
+              <X className="w-3.5 h-3.5 text-slate-600 shrink-0" />
+            )}
+            <span>{c.label}</span>
+          </span>
+        ))}
+      </div>
+    </div>
+  );
+};
 
 export const PersonaSelectorView: React.FC<{ onEnterApp: () => void; initialAuthNotice?: string }> = ({
   onEnterApp,
@@ -133,6 +191,33 @@ export const PersonaSelectorView: React.FC<{ onEnterApp: () => void; initialAuth
   // Modais: 'login' | 'signup' | 'demo' | null
   const [activeModal, setActiveModal] = useState<'login' | 'signup' | 'demo' | null>(null);
   const [authNotice, setAuthNotice] = useState<string>(initialAuthNotice || '');
+  const [heroPersonaTab, setHeroPersonaTab] = useState<'dev' | 'empresa'>('dev');
+
+  // Segurança: Trava Progressiva Anti-Força Bruta e Proteção contra Iframe/Clickjacking
+  const [lockoutSeconds, setLockoutSeconds] = useState<number>(() => getRemainingLockoutSeconds());
+  const [showPassword, setShowPassword] = useState(false);
+  const [isIframeDetected, setIsIframeDetected] = useState(false);
+
+  useEffect(() => {
+    // 1. Checagem Anti-Clickjacking & Spoofing
+    if (isEmbeddedInIframe()) {
+      setIsIframeDetected(true);
+      preventClickjacking();
+    }
+
+    // 2. Trava Progressiva com Prevenção de Bypass via Reload (Cookie + LocalStorage)
+    const initialLock = getRemainingLockoutSeconds();
+    if (initialLock > 0) {
+      setLockoutSeconds(initialLock);
+    }
+
+    const interval = setInterval(() => {
+      const remaining = getRemainingLockoutSeconds();
+      setLockoutSeconds(remaining);
+    }, 1000);
+
+    return () => clearInterval(interval);
+  }, []);
 
   useEffect(() => {
     if (initialAuthNotice) {
@@ -184,12 +269,25 @@ export const PersonaSelectorView: React.FC<{ onEnterApp: () => void; initialAuth
 
   const handleLoginSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    if (lockoutSeconds > 0) {
+      setLoginError(`Acesso bloqueado por segurança. Aguarde ${lockoutSeconds}s para tentar novamente.`);
+      return;
+    }
     setLoginError('');
     const res = loginWithCredentials(loginEmail, loginPassword);
     if (!res.success) {
-      setLoginError(res.error || 'Falha ao autenticar.');
+      const lockoutRes = recordFailedLoginAttempt();
+      if (lockoutRes.isLocked) {
+        setLockoutSeconds(lockoutRes.lockoutSeconds);
+        setLoginError(`Múltiplas tentativas incorretas (${lockoutRes.attempts} falhas consecutivas). Por segurança contra ataques de força bruta, o acesso foi temporariamente travado por ${lockoutRes.lockoutSeconds} segundos. A trava persiste mesmo recarregando a página (F5).`);
+      } else {
+        const remainingAttempts = 3 - lockoutRes.attempts;
+        setLoginError(`${res.error || 'Falha ao autenticar.'} (${remainingAttempts > 0 ? `${remainingAttempts} tentativa(s) restante(s) antes do bloqueio progressivo` : 'Bloqueio iminente'})`);
+      }
       return;
     }
+
+    clearLoginAttempts();
     setActiveModal(null);
     setAuthNotice('');
     onEnterApp();
@@ -201,6 +299,13 @@ export const PersonaSelectorView: React.FC<{ onEnterApp: () => void; initialAuth
 
     if (signupRole === 'admin') {
       setSignupError('O perfil Admin não permite auto-cadastro. Utilize o Acesso de Demonstração para entrar como Governança Q.I. Tech.');
+      return;
+    }
+
+    const currentPwd = signupRole === 'profissional' ? profPassword : compPassword;
+    const pwdEval = evaluatePasswordStrength(currentPwd);
+    if (!pwdEval.isStrongEnough) {
+      setSignupError('Sua senha não atende aos requisitos de segurança. A senha deve ter no mínimo 8 caracteres, letras maiúsculas e minúsculas, ao menos um número e um caractere especial (!@#$...).');
       return;
     }
 
@@ -246,384 +351,659 @@ export const PersonaSelectorView: React.FC<{ onEnterApp: () => void; initialAuth
   };
 
   return (
-    <div className="min-h-screen bg-background flex flex-col justify-between">
+    <div className="min-h-screen bg-[#0c0e12] text-[#e2e2e8] flex flex-col justify-between selection:bg-yellow-400 selection:text-black font-sans">
       
-      {/* BARRA DE NAVEGAÇÃO COMERCIAL */}
-      <header className="sticky top-0 z-40 bg-brandNavy text-white border-b border-white/10">
-        <div className="max-w-[1320px] mx-auto h-16 px-4 sm:px-8 flex items-center justify-between gap-3">
+      {/* 1. TOP NAVIGATION BAR */}
+      <header className="sticky top-0 z-40 bg-[#111318]/90 backdrop-blur-md border-b border-[#262F40]/80">
+        <div className="max-w-[1360px] mx-auto h-16 px-4 sm:px-6 flex items-center justify-between gap-4">
           
-          {/* Logo Comercial */}
+          {/* Logo & Protocol Title */}
           <div className="flex items-center gap-3">
-            <div className="w-9 h-9 rounded-base bg-yellow-400 flex items-center justify-center font-heading font-bold text-black text-lg shadow-xs">
+            <div className="w-8 h-8 rounded-lg bg-yellow-400 text-black flex items-center justify-center font-heading font-black text-sm shadow-[0_0_15px_rgba(250,204,21,0.4)]">
               Q
             </div>
             <div>
-              <span className="font-heading font-bold text-white text-lg tracking-tight block leading-none">
+              <span className="font-heading font-bold text-white text-base tracking-tight leading-none block">
                 Q.I. Tech
               </span>
-              <span className="text-[10px] text-brandNavySub block mt-0.5">
-                Talent & Community Cloud
+              <span className="font-mono text-[9px] text-[#9a9078] block tracking-wider uppercase mt-0.5">
+                INVERSE CORE • TALENT PROTOCOL
               </span>
             </div>
           </div>
 
-          {/* Links de Navegação do Site */}
-          <nav className="hidden lg:flex items-center gap-7 text-xs font-semibold text-brandNavySub">
-            <a href="#solucoes" className="hover:text-white transition-colors">Soluções</a>
-            <a href="#vagas" className="hover:text-white transition-colors">Vagas Abertas</a>
-            <a href="#para-empresas" className="hover:text-white transition-colors">Para Empresas</a>
+          {/* Quick Nav Links */}
+          <nav className="hidden lg:flex items-center gap-6 text-xs font-semibold text-[#9a9078]">
+            <a href="#solucoes" className="hover:text-yellow-400 transition-colors">Vitrine & Planos</a>
+            <button type="button" onClick={() => openDemoModal('candidato-lucas')} className="hover:text-yellow-400 transition-colors">Dashboard Dev</button>
+            <button type="button" onClick={() => openSignupModal('profissional')} className="hover:text-yellow-400 transition-colors">Onboarding Dev</button>
+            <button type="button" onClick={() => openDemoModal('empresa-orion')} className="hover:text-yellow-400 transition-colors">Painel Corporativo B2B</button>
+            <button type="button" onClick={() => openDemoModal('comunidade-rafael')} className="hover:text-yellow-400 transition-colors">Tech Points & Indicações</button>
+            <button type="button" onClick={() => openDemoModal('candidato-marina')} className="hover:text-yellow-400 transition-colors">Entrevista IA</button>
           </nav>
 
-          {/* AÇÕES DE AUTENTICAÇÃO: ACESSO DE DEMONSTRAÇÃO | ENTRAR | CRIAR CONTA */}
-          <div className="flex items-center gap-2">
-            <button
-              type="button"
-              onClick={toggleTheme}
-              className="w-9 h-9 rounded-base bg-white/10 hover:bg-white/15 border border-white/15 flex items-center justify-center text-white transition-all"
-              title={theme === 'dark' ? 'Ativar Modo Claro' : 'Ativar Modo Escuro'}
-              aria-label="Alternar tema claro/escuro"
-            >
-              {theme === 'dark' ? (
-                <Sun className="w-4 h-4 text-brandOrange" />
-              ) : (
-                <Moon className="w-4 h-4 text-brandNavySub" />
-              )}
-            </button>
+          {/* Engine Status & Auth Actions */}
+          <div className="flex items-center gap-2.5">
+            <div className="hidden sm:flex items-center gap-2 px-2.5 py-1 rounded-full bg-[#1a1c20] border border-[#262F40] text-[11px] font-mono text-[#9a9078]">
+              <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
+              <span>Motor IA Ativo (Whisper + Qwen)</span>
+            </div>
 
             <button
               type="button"
               onClick={() => openDemoModal('candidato-lucas')}
-              className="hidden sm:flex items-center gap-1.5 px-3 py-2 rounded-base bg-white/5 hover:bg-white/10 border border-white/15 text-[11px] font-semibold text-brandNavySub hover:text-white transition-all"
-              title="Acessar contas seedadas de demonstração"
+              className="hidden md:flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-[#1a1c20] hover:bg-[#282a2e] border border-[#262F40] text-xs font-semibold text-slate-300 transition-all"
             >
-              <PlayCircle className="w-3.5 h-3.5 text-brandOrange" />
-              <span>Acesso de demonstração</span>
+              <PlayCircle className="w-3.5 h-3.5 text-yellow-400" />
+              <span>Acesso Demo</span>
             </button>
 
             <button
               type="button"
               onClick={openLoginModal}
-              className="flex items-center gap-1.5 px-3.5 py-2 rounded-base bg-white/10 hover:bg-white/15 border border-white/20 text-xs font-bold text-white transition-all"
+              className="px-3.5 py-1.5 rounded-lg bg-transparent hover:bg-white/5 border border-[#262F40] text-xs font-bold text-white transition-all flex items-center gap-1.5"
             >
-              <LogIn className="w-3.5 h-3.5 text-[#4AD6E8]" />
+              <LogIn className="w-3.5 h-3.5 text-yellow-400" />
               <span>Entrar</span>
             </button>
 
             <button
               type="button"
               onClick={() => openSignupModal('profissional')}
-              className="flex items-center gap-1.5 px-3.5 py-2 rounded-base bg-yellow-400 hover:bg-yellow-300 text-xs font-bold text-black shadow-xs transition-all"
+              className="px-4 py-1.5 rounded-lg bg-yellow-400 hover:bg-yellow-300 text-black text-xs font-bold shadow-[0_0_15px_rgba(250,204,21,0.3)] transition-all"
             >
-              <UserPlus className="w-3.5 h-3.5" />
-              <span>Criar conta</span>
+              Criar Conta
             </button>
           </div>
 
         </div>
       </header>
 
-      {/* AVISO DE ROTA PROTEGIDA SE REDIRECIONADO */}
+      {/* AVISO DE SESSÃO / ROTA PROTEGIDA */}
       {authNotice && (
-        <div className="bg-brandOrange/15 border-b border-brandOrange/30 px-4 py-2.5 text-center text-xs font-semibold text-foreground flex items-center justify-center gap-2">
-          <AlertCircle className="w-4 h-4 text-brandOrange shrink-0" />
+        <div className="bg-yellow-500/10 border-b border-yellow-500/30 px-4 py-2.5 text-center text-xs font-semibold text-yellow-300 flex items-center justify-center gap-2">
+          <AlertCircle className="w-4 h-4 text-yellow-400 shrink-0" />
           <span>{authNotice}</span>
-          <button
-            type="button"
-            onClick={openLoginModal}
-            className="underline font-bold text-primary ml-1"
-          >
+          <button type="button" onClick={openLoginModal} className="underline font-bold text-yellow-400 ml-1">
             Fazer login agora
           </button>
         </div>
       )}
 
-      {/* HERO COMERCIAL */}
-      <section className="bg-brandNavy text-white py-14 sm:py-20 border-b border-white/10">
-        <div className="max-w-[1320px] mx-auto px-4 sm:px-8 grid grid-cols-1 lg:grid-cols-12 gap-10 items-center">
+      {/* 2. HERO PRINCIPAL */}
+      <section className="relative overflow-hidden pt-12 pb-16 sm:pt-20 sm:pb-24 border-b border-[#262F40]/60">
+        {/* Ambient Glows */}
+        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[700px] h-[350px] bg-gradient-to-b from-yellow-500/15 via-emerald-500/5 to-transparent blur-3xl pointer-events-none -z-10" />
+        
+        <div className="max-w-[1280px] mx-auto px-4 sm:px-6 flex flex-col items-center text-center">
           
-          <div className="lg:col-span-7 space-y-5">
-            <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-white/10 text-yellow-400 text-xs font-bold border border-white/10">
-              <Sparkles className="w-3.5 h-3.5" /> Plataforma de Recrutamento Invertido & Comunidade Tech
+          {/* Protocol Pill */}
+          <div className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-yellow-400/10 border border-yellow-400/25 text-yellow-400 font-mono text-[11px] tracking-wider uppercase mb-6 shadow-sm">
+            <span className="w-2 h-2 rounded-full bg-yellow-400 animate-pulse" />
+            <span>PROTOCOLO DE RECRUTAMENTO 3.8 • ELEVAÇÃO DO TAX DE ACERTO SELETIVO</span>
+          </div>
+
+          {/* Headline */}
+          <h1 className="text-3xl sm:text-5xl lg:text-6xl font-heading font-extrabold text-white tracking-tight leading-[1.15] max-w-4xl">
+            O Fim dos Processos Seletivos <br />
+            <span className="text-transparent bg-clip-text bg-gradient-to-r from-emerald-400 via-yellow-300 to-yellow-400">
+              Cansativos e Sem Retorno
             </span>
+          </h1>
 
-            <h1 className="text-3xl sm:text-4xl lg:text-5xl font-heading font-bold leading-tight text-white">
-              Contratação técnica em dias, não meses — com <span className="text-yellow-400">1º Match Grátis</span> e Privacidade Total.
-            </h1>
+          {/* Subtitle */}
+          <p className="text-xs sm:text-sm md:text-base text-slate-300 max-w-2xl mt-5 leading-relaxed font-sans">
+            Matchmaking de alta precisão técnica com corte mínimo de 75% e recrutamento invertido. A inteligência artificial avalia raciocínio sistêmico, não testes genéricos.
+          </p>
 
-            <p className="text-sm sm:text-base text-brandNavySub max-w-2xl leading-relaxed">
-              Conectamos empresas a talentos de tecnologia pré-validados por IA com proteção de dados via Double Opt-In e indicações recompensadas na comunidade.
-            </p>
+          {/* Switcher: Sou Desenvolvedor vs Sou Empresa / RH */}
+          <div className="inline-flex p-1 rounded-xl bg-[#161B26] border border-[#262F40] mt-8 shadow-inner">
+            <button
+              type="button"
+              onClick={() => setHeroPersonaTab('dev')}
+              className={`px-5 py-2 rounded-lg text-xs font-bold transition-all flex items-center gap-2 ${
+                heroPersonaTab === 'dev'
+                  ? 'bg-yellow-400 text-black shadow-[0_0_16px_rgba(250,204,21,0.4)]'
+                  : 'text-slate-400 hover:text-white'
+              }`}
+            >
+              <User className="w-3.5 h-3.5" />
+              <span>Sou Desenvolvedor</span>
+            </button>
+            <button
+              type="button"
+              onClick={() => setHeroPersonaTab('empresa')}
+              className={`px-5 py-2 rounded-lg text-xs font-bold transition-all flex items-center gap-2 ${
+                heroPersonaTab === 'empresa'
+                  ? 'bg-yellow-400 text-black shadow-[0_0_16px_rgba(250,204,21,0.4)]'
+                  : 'text-slate-400 hover:text-white'
+              }`}
+            >
+              <Building2 className="w-3.5 h-3.5" />
+              <span>Sou Empresa / RH</span>
+            </button>
+          </div>
 
-            {/* Ações Principais + Acesso de Demonstração Separado Visualmente */}
-            <div className="space-y-3 pt-2">
-              <div className="flex flex-wrap items-center gap-3">
-                <button
-                  type="button"
-                  onClick={() => openSignupModal('profissional')}
-                  className="px-5 py-3 rounded-base bg-yellow-400 hover:bg-yellow-300 text-black text-xs sm:text-sm font-bold flex items-center gap-2 shadow-md transition-all"
-                >
-                  <UserPlus className="w-4 h-4" /> Criar conta <ArrowRight className="w-4 h-4" />
-                </button>
-
-                <button
-                  type="button"
-                  onClick={openLoginModal}
-                  className="px-5 py-3 rounded-base bg-white/10 hover:bg-white/15 border border-white/20 text-white text-xs sm:text-sm font-bold flex items-center gap-2 transition-all"
-                >
-                  <LogIn className="w-4 h-4 text-[#4AD6E8]" /> Entrar na minha conta
-                </button>
-              </div>
-
-              <div className="pt-1 flex items-center gap-2 text-xs text-brandNavySub">
-                <span>Avaliando o MVP?</span>
-                <button
-                  type="button"
-                  onClick={() => openDemoModal('candidato-lucas')}
-                  className="inline-flex items-center gap-1.5 font-bold text-[#4AD6E8] hover:underline"
-                >
-                  <PlayCircle className="w-3.5 h-3.5" /> Acesso de demonstração (Contas Seedadas)
-                </button>
-              </div>
+          {/* Dynamic Contextual Helper Card */}
+          <div className="max-w-2xl w-full mt-4 p-4 rounded-xl bg-[#161B26]/90 border border-[#262F40] flex items-start gap-3 text-left shadow-lg">
+            <ShieldCheck className="w-5 h-5 text-yellow-400 shrink-0 mt-0.5" />
+            <div>
+              <span className="font-mono text-[10px] text-yellow-400 uppercase tracking-wider block font-bold mb-0.5">
+                {heroPersonaTab === 'dev' ? 'Para Talentos Técnicos • Acesso em 24h' : 'Para Lideranças de Engenharia • B2B'}
+              </span>
+              <p className="text-xs text-slate-300 leading-relaxed">
+                {heroPersonaTab === 'dev'
+                  ? 'Faça sua entrevista multimodal por voz ou via I.A. uma única vez. Seu código e raciocínio são avaliados contextualmente, e empresas de elite enviam propostas diretamente para você.'
+                  : 'Acesse engenheiros qualificados acima de 75% com fit técnico comprovado. Pague apenas por slots de contratação sem mensalidades abusivas e receba relatórios auditáveis.'}
+              </p>
             </div>
           </div>
 
-          {/* Métricas de Impacto Comercial */}
-          <div className="lg:col-span-5 grid grid-cols-2 gap-3.5">
-            <div className="p-5 rounded-base bg-white/5 border border-white/10">
-              <span className="text-2xl sm:text-3xl font-heading font-bold text-yellow-400 block">R$ 0</span>
-              <span className="text-xs font-bold text-white mt-1 block">no 1º Candidato Aceito</span>
-              <span className="text-[11px] text-brandNavySub">Cortesia imediata no Match Express</span>
+          {/* Dual CTAs */}
+          <div className="flex flex-wrap items-center justify-center gap-3.5 mt-7">
+            <button
+              type="button"
+              onClick={() => openSignupModal(heroPersonaTab === 'dev' ? 'profissional' : 'empresa')}
+              className="px-6 py-3.5 rounded-lg bg-yellow-400 hover:bg-yellow-300 text-black text-xs sm:text-sm font-bold flex items-center gap-2 shadow-[0_0_24px_rgba(250,204,21,0.35)] transition-all transform hover:-translate-y-0.5"
+            >
+              <span>{heroPersonaTab === 'dev' ? 'Cadastrar como Desenvolvedor' : 'Contratar Talentos Pré-Avaliados'}</span>
+              <ArrowRight className="w-4 h-4" />
+            </button>
+            <button
+              type="button"
+              onClick={() => openDemoModal(heroPersonaTab === 'dev' ? 'candidato-lucas' : 'empresa-orion')}
+              className="px-5 py-3.5 rounded-lg bg-[#161B26] hover:bg-[#1f2636] border border-[#262F40] text-slate-200 text-xs sm:text-sm font-bold transition-all flex items-center gap-2 shadow-sm"
+            >
+              <PlayCircle className="w-4 h-4 text-yellow-400" />
+              <span>Acesso de Demonstração (Contas Seedadas)</span>
+            </button>
+          </div>
+
+          {/* 4 Telemetry Counters */}
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 sm:gap-6 w-full max-w-4xl mt-14 pt-8 border-t border-[#262F40]/80">
+            <div className="p-4 rounded-xl bg-[#161B26]/50 border border-[#262F40]/60 text-center">
+              <span className="font-heading font-black text-2xl sm:text-3xl text-white block">4.2 dias</span>
+              <span className="text-[11px] text-slate-400 mt-1 block font-medium">Tempo Médio de Contratação</span>
+            </div>
+            <div className="p-4 rounded-xl bg-[#161B26]/50 border border-[#262F40]/60 text-center">
+              <span className="font-heading font-black text-2xl sm:text-3xl text-emerald-400 block">94.8%</span>
+              <span className="text-[11px] text-slate-400 mt-1 block font-medium">Retenção de Engenharia</span>
+            </div>
+            <div className="p-4 rounded-xl bg-[#161B26]/50 border border-[#262F40]/60 text-center">
+              <span className="font-heading font-black text-2xl sm:text-3xl text-yellow-400 block">75.0%</span>
+              <span className="text-[11px] text-slate-400 mt-1 block font-medium">Score Mínimo Licenciável</span>
+            </div>
+            <div className="p-4 rounded-xl bg-[#161B26]/50 border border-[#262F40]/60 text-center">
+              <span className="font-heading font-black text-2xl sm:text-3xl text-white block">1.840+</span>
+              <span className="text-[11px] text-slate-400 mt-1 block font-medium">Engenheiros Ativos Validados</span>
+            </div>
+          </div>
+
+          {/* 3. BENTO SHOWCASE (Waveform + Radar de Habilidades) */}
+          <div className="w-full max-w-4xl mt-8 bg-[#161B26] rounded-2xl border border-[#262F40] p-5 sm:p-6 shadow-2xl grid grid-cols-1 md:grid-cols-12 gap-5 text-left">
+            {/* Box 1: Waveform Audio Capture */}
+            <div className="md:col-span-7 flex flex-col justify-between gap-3 bg-[#0c0e12] p-4 sm:p-5 rounded-xl border border-[#262F40]">
+              <div className="flex items-center justify-between">
+                <span className="font-mono text-[10px] text-yellow-400 uppercase tracking-wider font-semibold">
+                  Amostra de Entrevista Técnica Multimodal • 01 [FAST-041]
+                </span>
+                <span className="text-[10px] text-emerald-400 font-mono flex items-center gap-1.5">
+                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" /> IA Validada
+                </span>
+              </div>
+
+              {/* 28 Animated Waveform Bars */}
+              <div className="h-14 flex items-center justify-center gap-1 sm:gap-1.5 px-2 bg-[#12161E]/60 rounded-lg border border-[#262F40]/40 my-1">
+                {[45, 60, 25, 80, 95, 30, 70, 85, 40, 100, 65, 30, 90, 75, 50, 85, 60, 40, 95, 70, 35, 80, 55, 40, 65, 90, 50, 30].map((h, i) => (
+                  <span
+                    key={i}
+                    className="w-1 rounded-full transition-all duration-300"
+                    style={{
+                      height: `${h}%`,
+                      backgroundColor: i % 3 === 0 ? '#4edea3' : '#FACC15',
+                      opacity: 0.85
+                    }}
+                  />
+                ))}
+              </div>
+
+              <p className="text-[11px] text-slate-300 italic font-sans leading-relaxed border-t border-[#262F40] pt-2.5">
+                "Optamos pela adoção de arquitetura orientada a eventos via Kafka para mitigar dead-locks de concorrência no gateway de liquidação. O particionamento por hash de chave assegurou idempotência com zero perdas..."
+              </p>
+
+              <div className="flex items-center justify-between text-[10px] text-slate-400 font-mono pt-1">
+                <span>Latência Whisper: 18ms</span>
+                <span>Event-Driven: 9.8</span>
+                <span className="text-yellow-400 font-bold">Idempotência: 10.0</span>
+              </div>
             </div>
 
-            <div className="p-5 rounded-base bg-white/5 border border-white/10">
-              <span className="text-2xl sm:text-3xl font-heading font-bold text-[#4AD6E8] block">100%</span>
-              <span className="text-xs font-bold text-white mt-1 block">Double Opt-In LGPD</span>
-              <span className="text-[11px] text-brandNavySub">Dados liberados só após aceite</span>
-            </div>
+            {/* Box 2: Radar Metrics */}
+            <div className="md:col-span-5 flex flex-col justify-between gap-3 bg-[#0c0e12] p-4 sm:p-5 rounded-xl border border-[#262F40]">
+              <div className="flex items-center justify-between border-b border-[#262F40] pb-2">
+                <span className="font-heading text-xs font-bold text-white">Dimensões Auditadas</span>
+                <span className="font-mono text-[10px] text-yellow-400 font-bold">92.4 / 100</span>
+              </div>
 
-            <div className="p-5 rounded-base bg-white/5 border border-white/10">
-              <span className="text-2xl sm:text-3xl font-heading font-bold text-emerald-400 block">
-                +{commercialConfig.referralBonusEstalecas} 🪙
-              </span>
-              <span className="text-xs font-bold text-white mt-1 block">Estalecas Q.I.</span>
-              <span className="text-[11px] text-brandNavySub">Por indicação aprovada na vaga</span>
-            </div>
+              <div className="space-y-3 font-sans">
+                <div>
+                  <div className="flex justify-between text-[11px] mb-1">
+                    <span className="text-slate-300">Resiliência de Arquitetura</span>
+                    <strong className="text-emerald-400 font-mono">95%</strong>
+                  </div>
+                  <div className="h-1.5 bg-[#262F40] rounded-full overflow-hidden">
+                    <div className="h-full bg-emerald-400 rounded-full w-[95%]" />
+                  </div>
+                </div>
 
-            <div className="p-5 rounded-base bg-white/5 border border-white/10">
-              <span className="text-2xl sm:text-3xl font-heading font-bold text-white block">NFS-e</span>
-              <span className="text-xs font-bold text-white mt-1 block">Faturamento Automático</span>
-              <span className="text-[11px] text-brandNavySub">Desbloqueio avulso ou pacotes B2B</span>
+                <div>
+                  <div className="flex justify-between text-[11px] mb-1">
+                    <span className="text-slate-300">Padrão de Concorrência & Latência</span>
+                    <strong className="text-yellow-400 font-mono">92%</strong>
+                  </div>
+                  <div className="h-1.5 bg-[#262F40] rounded-full overflow-hidden">
+                    <div className="h-full bg-yellow-400 rounded-full w-[92%]" />
+                  </div>
+                </div>
+
+                <div>
+                  <div className="flex justify-between text-[11px] mb-1">
+                    <span className="text-slate-300">Clareza de Comunicação Técnica</span>
+                    <strong className="text-emerald-400 font-mono">88%</strong>
+                  </div>
+                  <div className="h-1.5 bg-[#262F40] rounded-full overflow-hidden">
+                    <div className="h-full bg-emerald-400 rounded-full w-[88%]" />
+                  </div>
+                </div>
+
+                <div>
+                  <div className="flex justify-between text-[11px] mb-1">
+                    <span className="text-slate-300">Práticas de Segurança & OWASP</span>
+                    <strong className="text-yellow-400 font-mono">90%</strong>
+                  </div>
+                  <div className="h-1.5 bg-[#262F40] rounded-full overflow-hidden">
+                    <div className="h-full bg-yellow-400 rounded-full w-[90%]" />
+                  </div>
+                </div>
+              </div>
+
+              <div className="text-[10px] text-slate-400 font-mono pt-2 border-t border-[#262F40] flex items-center justify-between">
+                <span>Status da Análise:</span>
+                <span className="text-emerald-400 font-bold">QUALIFICADO ≥ 75%</span>
+              </div>
             </div>
           </div>
 
         </div>
       </section>
 
-      {/* OS 3 PILARES DO ECOSSISTEMA */}
-      <section id="solucoes" className="py-14 max-w-[1320px] mx-auto px-4 sm:px-8 space-y-8">
+      {/* 4. OS TRÊS PILARES DA ENGENHARIA REVERSA */}
+      <section id="solucoes" className="py-16 max-w-[1280px] mx-auto px-4 sm:px-6 space-y-8">
         <div className="text-center max-w-2xl mx-auto space-y-2">
-          <h2 className="text-xl sm:text-2xl font-heading font-bold text-white">
-            Como funciona o ecossistema Q.I. Tech
+          <span className="font-mono text-[10px] text-yellow-400 uppercase tracking-widest font-semibold block">
+            ARQUITETURA DE AVALIAÇÃO
+          </span>
+          <h2 className="text-2xl sm:text-3xl font-heading font-extrabold text-white">
+            Os Três Pilares da Engenharia Reversa de Contratação
           </h2>
-          <p className="text-xs sm:text-sm text-slate-300">
-            Três motores integrados para acelerar contratações e recompensar a comunidade técnica.
+          <p className="text-xs sm:text-sm text-slate-400">
+            A dinâmica tradicional invertida: Desenvolvedores avaliados uma única vez por evidências de código e engenharia, e empresas abordando ativamente.
           </p>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           {/* Pilar 1 */}
-          <div className="bg-[#12161E] p-6 rounded-base border border-[#262F40] hover:border-yellow-400/50 shadow-md space-y-3 flex flex-col justify-between transition-all group">
+          <div className="bg-[#161B26] p-6 rounded-xl border border-[#262F40] hover:border-yellow-400/50 shadow-md space-y-4 flex flex-col justify-between transition-all group">
             <div className="space-y-3">
-              <div className="w-10 h-10 rounded-base bg-yellow-400/10 text-yellow-400 border border-yellow-400/20 flex items-center justify-center">
-                <Zap className="w-5 h-5" />
+              <div className="w-10 h-10 rounded-lg bg-yellow-400/10 text-yellow-400 border border-yellow-400/20 flex items-center justify-center font-bold">
+                <Sparkles className="w-5 h-5" />
               </div>
-              <h3 className="font-heading font-bold text-base text-white group-hover:text-yellow-400 transition-colors">
-                1. Motor Comercial B2B & Match Express
+              <span className="font-mono text-[10px] text-yellow-400 uppercase tracking-wider block font-semibold">
+                PILAR 01 • ANÁLISE MULTIMODAL
+              </span>
+              <h3 className="font-heading font-bold text-lg text-white group-hover:text-yellow-400 transition-colors">
+                Validação por I.A. & Áudio
               </h3>
-              <p className="text-xs text-slate-300 leading-relaxed">
-                Empresas publicam vagas com transparência salarial e recebem o <strong className="text-yellow-400 font-semibold">1º candidato com Double Opt-In gratuitamente</strong>. Perfis adicionais são desbloqueados sob demanda (R$ {commercialConfig.singleUnlockPriceBrl} ou pacotes de créditos com emissão automática de NFS-e).
+              <p className="text-xs text-slate-300 leading-relaxed font-sans">
+                Avaliação contextual de respostas e decisões de código em tempo real. Nada de desafios 'leet-code' anódinos que não refletem incidentes de produção do mundo real.
               </p>
             </div>
-            <button
-              type="button"
-              onClick={() => openSignupModal('empresa')}
-              className="text-xs font-bold text-yellow-400 hover:text-yellow-300 hover:underline flex items-center gap-1.5 pt-2"
-            >
-              Criar Conta Corporativa <ArrowRight className="w-3.5 h-3.5" />
-            </button>
+            <div className="pt-3 border-t border-[#262F40] flex items-center gap-1.5 text-[11px] text-emerald-400 font-mono">
+              <CheckCircle2 className="w-3.5 h-3.5" />
+              <span>Auditoria de Pensamento & Trade-offs</span>
+            </div>
           </div>
 
           {/* Pilar 2 */}
-          <div className="bg-[#12161E] p-6 rounded-base border border-[#262F40] hover:border-yellow-400/50 shadow-md space-y-3 flex flex-col justify-between transition-all group">
+          <div className="bg-[#161B26] p-6 rounded-xl border border-[#262F40] hover:border-yellow-400/50 shadow-md space-y-4 flex flex-col justify-between transition-all group">
             <div className="space-y-3">
-              <div className="w-10 h-10 rounded-base bg-yellow-400/10 text-yellow-400 border border-yellow-400/20 flex items-center justify-center">
-                <Award className="w-5 h-5" />
+              <div className="w-10 h-10 rounded-lg bg-yellow-400/10 text-yellow-400 border border-yellow-400/20 flex items-center justify-center font-bold">
+                <Zap className="w-5 h-5" />
               </div>
-              <h3 className="font-heading font-bold text-base text-white group-hover:text-yellow-400 transition-colors">
-                2. "Quem Indica" Gamificado (Estalecas Q.I.)
+              <span className="font-mono text-[10px] text-yellow-400 uppercase tracking-wider block font-semibold">
+                PILAR 02 • FLUXO INVERTIDO
+              </span>
+              <h3 className="font-heading font-bold text-lg text-white group-hover:text-yellow-400 transition-colors">
+                Recrutamento Invertido
               </h3>
-              <p className="text-xs text-slate-300 leading-relaxed">
-                Profissionais que indicam colegas por link rastreável ganham <strong className="text-yellow-400 font-semibold">+{commercialConfig.referralBonusEstalecas} Estalecas Q.I.</strong> na aprovação, resgatáveis por vouchers de certificação AWS, cursos e eventos (sem alterar o score técnico).
+              <p className="text-xs text-slate-300 leading-relaxed font-sans">
+                Desenvolvedores aprovados não precisam enviar currículos para buracos negros. As empresas visualizam os benchmarks e abordam os talentos com base em afinidade pré-comprovada.
               </p>
             </div>
-            <button
-              type="button"
-              onClick={() => openSignupModal('profissional')}
-              className="text-xs font-bold text-yellow-400 hover:text-yellow-300 hover:underline flex items-center gap-1.5 pt-2"
-            >
-              Cadastrar Perfil Profissional <ArrowRight className="w-3.5 h-3.5" />
-            </button>
+            <div className="pt-3 border-t border-[#262F40] flex items-center gap-1.5 text-[11px] text-yellow-400 font-mono">
+              <CheckCircle2 className="w-3.5 h-3.5" />
+              <span>Salário e Stack Abertos no Convite</span>
+            </div>
           </div>
 
           {/* Pilar 3 */}
-          <div className="bg-[#12161E] p-6 rounded-base border border-[#262F40] hover:border-yellow-400/50 shadow-md space-y-3 flex flex-col justify-between transition-all group">
+          <div className="bg-[#161B26] p-6 rounded-xl border border-[#262F40] hover:border-yellow-400/50 shadow-md space-y-4 flex flex-col justify-between transition-all group">
             <div className="space-y-3">
-              <div className="w-10 h-10 rounded-base bg-yellow-400/10 text-yellow-400 border border-yellow-400/20 flex items-center justify-center">
-                <Users className="w-5 h-5" />
+              <div className="w-10 h-10 rounded-lg bg-yellow-400/10 text-yellow-400 border border-yellow-400/20 flex items-center justify-center font-bold">
+                <Award className="w-5 h-5" />
               </div>
-              <h3 className="font-heading font-bold text-base text-white group-hover:text-yellow-400 transition-colors">
-                3. Comunidade por Grau de Afinidade & IA Explicável
+              <span className="font-mono text-[10px] text-yellow-400 uppercase tracking-wider block font-semibold">
+                PILAR 03 • FILTRO DE EXCELÊNCIA
+              </span>
+              <h3 className="font-heading font-bold text-lg text-white group-hover:text-yellow-400 transition-colors">
+                Corte Rigoroso de 75%
               </h3>
-              <p className="text-xs text-slate-300 leading-relaxed">
-                Conexões recomendadas pelo <strong className="text-yellow-400 font-semibold">grau de sobreposição de habilidades</strong> (1º, 2º e 3º grau) para destravar dúvidas técnicas, com entrevista opcional por IA auditável conforme o Art. 20 da LGPD.
+              <p className="text-xs text-slate-300 leading-relaxed font-sans">
+                Zero spam e candidaturas desqualificadas. Apenas engenheiros que atingem o score mínimo ingressam no pool ativo, garantindo relevância máxima para os líderes técnicos contratantes.
               </p>
             </div>
-            <button
-              type="button"
-              onClick={() => openDemoModal('comunidade-rafael')}
-              className="text-xs font-bold text-yellow-400 hover:text-yellow-300 hover:underline flex items-center gap-1.5 pt-2"
-            >
-              Explorar Comunidade Técnica <ArrowRight className="w-3.5 h-3.5" />
-            </button>
+            <div className="pt-3 border-t border-[#262F40] flex items-center gap-1.5 text-[11px] text-emerald-400 font-mono">
+              <CheckCircle2 className="w-3.5 h-3.5" />
+              <span>Apenas Top 25% com Fit Real</span>
+            </div>
           </div>
         </div>
       </section>
 
-      {/* VITRINE DE VAGAS COM TRANSPARÊNCIA SALARIAL */}
-      <section id="vagas" className="py-12 bg-[#0D1017] border-y border-[#262F40]">
-        <div className="max-w-[1320px] mx-auto px-4 sm:px-8 space-y-6">
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
-            <div>
-              <h2 className="text-lg sm:text-xl font-heading font-bold text-white">
-                Oportunidades em Destaque com Faixa Salarial Transparente
-              </h2>
-              <p className="text-xs text-slate-400">
-                Todas as empresas parceiras divulgam remuneração aberta antes do seu aceite.
-              </p>
-            </div>
-            <button
-              type="button"
-              onClick={openLoginModal}
-              className="text-xs font-bold text-yellow-400 hover:text-yellow-300 hover:underline flex items-center gap-1"
-            >
-              Entrar como candidato <ArrowRight className="w-3.5 h-3.5" />
-            </button>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            {vacancies.slice(0, 4).map((vac) => {
-              const comp = companies.find(c => c.id === vac.companyId);
-              return (
-                <div key={vac.id} className="p-5 rounded-base bg-[#141824] border border-[#262F40] hover:border-yellow-400/40 flex flex-col justify-between gap-4 transition-all shadow-sm">
-                  <div className="space-y-2">
-                    <div className="flex items-center justify-between gap-2">
-                      <span className="text-[11px] font-bold text-yellow-400 bg-yellow-400/10 border border-yellow-400/20 px-2.5 py-0.5 rounded">
-                        {vac.area} • {vac.seniority}
-                      </span>
-                      {vac.isUrgentMatchExpress && (
-                        <span className="text-[10px] bg-yellow-400 text-black font-bold px-2 py-0.5 rounded flex items-center gap-1">
-                          <Zap className="w-3 h-3" /> Match Express
-                        </span>
-                      )}
-                    </div>
-                    <h3 className="font-heading font-bold text-sm text-white">{vac.title}</h3>
-                    <p className="text-xs text-slate-400">
-                      {comp?.name} • {vac.modality} ({vac.location})
-                    </p>
-                    <div className="flex flex-wrap gap-1.5 pt-1">
-                      {vac.mandatorySkills.map((sk, idx) => (
-                        <span key={idx} className="text-[10px] bg-[#1E2536] border border-[#2D374D] px-2 py-0.5 rounded text-slate-200 font-medium">
-                          {sk}
-                        </span>
-                      ))}
-                    </div>
-                  </div>
-
-                  <div className="flex items-center justify-between pt-3 border-t border-[#262F40]">
-                    <div>
-                      <span className="text-[10px] text-slate-400 block">Faixa Salarial Mensal</span>
-                      <strong className="text-xs sm:text-sm font-bold text-white">
-                        R$ {vac.salaryMin.toLocaleString('pt-BR')} — R$ {vac.salaryMax.toLocaleString('pt-BR')}
-                      </strong>
-                    </div>
-                    <button
-                      type="button"
-                      onClick={openLoginModal}
-                      className="px-3.5 py-1.5 rounded-base bg-yellow-400 hover:bg-yellow-300 text-black text-xs font-bold transition-all shadow-xs"
-                    >
-                      Ver Compatibilidade
-                    </button>
-                  </div>
-                </div>
-              );
-            })}
-          </div>
-        </div>
-      </section>
-
-      {/* PLANOS COMERCIAIS PARA EMPRESAS */}
-      <section id="para-empresas" className="py-12 max-w-[1320px] mx-auto px-4 sm:px-8">
-        <div className="bg-[#12161E] border border-[#262F40] text-white rounded-base p-6 sm:p-10 flex flex-col lg:flex-row items-start lg:items-center justify-between gap-6 shadow-xl">
-          <div className="space-y-2 max-w-xl">
-            <h2 className="text-xl sm:text-2xl font-heading font-bold text-white">
-              Recrutamento B2B sem mensalidade fixa obrigatória
+      {/* 5. PLANOS TRANSPARENTES E PRÉ-PAGOS PARA EMPRESAS (RN03/RN04) */}
+      <section id="planos" className="py-16 bg-[#0c0e12] border-y border-[#262F40]/80">
+        <div className="max-w-[1280px] mx-auto px-4 sm:px-6 space-y-8">
+          
+          <div className="text-center max-w-2xl mx-auto space-y-2">
+            <span className="font-mono text-[10px] text-yellow-400 uppercase tracking-widest font-semibold block">
+              MODELO ANTECIPADO TRANSPARENTE • ZERO TAXA OCULTA
+            </span>
+            <h2 className="text-2xl sm:text-3xl font-heading font-extrabold text-white">
+              Planos Transparentes e Pré-pagos para Empresas
             </h2>
-            <p className="text-xs sm:text-sm text-slate-300 leading-relaxed">
-              Publique sua vaga com Match Express, receba o 1º candidato confirmado gratuitamente e desbloqueie novos perfis apenas quando quiser (R$ {commercialConfig.singleUnlockPriceBrl} avulso ou pacote de 5 créditos por R$ {commercialConfig.package5PriceBrl}).
+            <p className="text-xs sm:text-sm text-slate-400">
+              Contrate slots de vagas ativas com suporte a múltiplos perfis técnicos sem mensalidade abusiva. Pague pelo slot em aberto, substitua ou pause conforme sua demanda de engenharia.
             </p>
           </div>
-          <div className="flex flex-wrap items-center gap-3 shrink-0">
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 items-stretch">
+            {/* Plano 1 Slot */}
+            <div className="p-6 rounded-2xl bg-[#161B26] border border-[#262F40] flex flex-col justify-between gap-6 shadow-lg">
+              <div className="space-y-4">
+                <div className="flex items-center justify-between">
+                  <h3 className="font-heading font-bold text-base text-white">Plano 1 Slot</h3>
+                  <span className="font-mono text-[10px] bg-white/5 border border-white/10 px-2 py-0.5 rounded text-slate-300">PILOTO</span>
+                </div>
+                <div>
+                  <div className="flex items-baseline gap-1">
+                    <span className="text-3xl font-heading font-black text-white">R$ 450</span>
+                    <span className="text-xs text-slate-400">/mês</span>
+                  </div>
+                  <span className="text-[10px] text-slate-400 font-mono">Consumo de R$ 450 por slot ativo</span>
+                </div>
+                <ul className="space-y-2.5 text-xs text-slate-300 font-sans border-t border-[#262F40] pt-4">
+                  <li className="flex items-center gap-2">
+                    <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0" />
+                    <span><strong>1 vaga simultânea</strong> aberta</span>
+                  </li>
+                  <li className="flex items-center gap-2">
+                    <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0" />
+                    <span>Triagem autorizada via IA</span>
+                  </li>
+                  <li className="flex items-center gap-2">
+                    <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0" />
+                    <span>Acesso a critérios de corte e código</span>
+                  </li>
+                  <li className="flex items-center gap-2">
+                    <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0" />
+                    <span>Cancelamento configurável no SLA</span>
+                  </li>
+                </ul>
+              </div>
+
+              <button
+                type="button"
+                onClick={() => openSignupModal('empresa')}
+                className="w-full py-2.5 rounded-lg bg-transparent hover:bg-white/5 border border-[#262F40] hover:border-yellow-400/40 text-xs font-bold text-white transition-all text-center"
+              >
+                Ativar 1 Slot
+              </button>
+            </div>
+
+            {/* Plano 3 Slots - DESTAQUE */}
+            <div className="p-6 rounded-2xl bg-[#161B26] border-2 border-yellow-400 flex flex-col justify-between gap-6 shadow-[0_0_30px_rgba(250,204,21,0.15)] relative transform md:-translate-y-2">
+              <div className="absolute -top-3 left-1/2 -translate-x-1/2 px-3 py-0.5 rounded-full bg-yellow-400 text-black font-mono text-[10px] font-bold uppercase tracking-wider shadow-md">
+                MAIS ESCOLHIDO • ECONOMIA DE R$ 150
+              </div>
+              <div className="space-y-4">
+                <div className="flex items-center justify-between">
+                  <h3 className="font-heading font-bold text-base text-yellow-400">Plano 3 Slots</h3>
+                  <span className="font-mono text-[10px] bg-yellow-400/10 text-yellow-400 border border-yellow-400/30 px-2 py-0.5 rounded font-bold">R$ 400 / SLOT</span>
+                </div>
+                <div>
+                  <div className="flex items-baseline gap-1">
+                    <span className="text-3xl font-heading font-black text-yellow-400">R$ 1.200</span>
+                    <span className="text-xs text-slate-400">/mês</span>
+                  </div>
+                  <span className="text-[10px] text-slate-400 font-mono">Economia de R$ 150 comparado ao avulso</span>
+                </div>
+                <ul className="space-y-2.5 text-xs text-slate-300 font-sans border-t border-[#262F40] pt-4">
+                  <li className="flex items-center gap-2">
+                    <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0" />
+                    <span><strong>3 vagas simultâneas</strong> ativas</span>
+                  </li>
+                  <li className="flex items-center gap-2">
+                    <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0" />
+                    <span>Reposições de cancelamento em até 48h</span>
+                  </li>
+                  <li className="flex items-center gap-2">
+                    <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0" />
+                    <span>Exportação de relatórios e logs auditáveis</span>
+                  </li>
+                  <li className="flex items-center gap-2">
+                    <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0" />
+                    <span>Disponibilidade imediata de candidatos verificados</span>
+                  </li>
+                  <li className="flex items-center gap-2">
+                    <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0" />
+                    <span>Canal direto com suporte no SLA de 4 horas</span>
+                  </li>
+                </ul>
+              </div>
+
+              <button
+                type="button"
+                onClick={() => openSignupModal('empresa')}
+                className="w-full py-3 rounded-lg bg-yellow-400 hover:bg-yellow-300 text-black text-xs font-bold shadow-[0_0_20px_rgba(250,204,21,0.3)] transition-all text-center"
+              >
+                Contratar 3 Slots
+              </button>
+            </div>
+
+            {/* Plano 5 Slots */}
+            <div className="p-6 rounded-2xl bg-[#161B26] border border-[#262F40] flex flex-col justify-between gap-6 shadow-lg">
+              <div className="space-y-4">
+                <div className="flex items-center justify-between">
+                  <h3 className="font-heading font-bold text-base text-white">Plano 5 Slots</h3>
+                  <span className="font-mono text-[10px] bg-white/5 border border-white/10 px-2 py-0.5 rounded text-slate-300">ESCALA</span>
+                </div>
+                <div>
+                  <div className="flex items-baseline gap-1">
+                    <span className="text-3xl font-heading font-black text-white">R$ 2.200</span>
+                    <span className="text-xs text-slate-400">/mês</span>
+                  </div>
+                  <span className="text-[10px] text-slate-400 font-mono">Economia de R$ 250 comparado ao avulso</span>
+                </div>
+                <ul className="space-y-2.5 text-xs text-slate-300 font-sans border-t border-[#262F40] pt-4">
+                  <li className="flex items-center gap-2">
+                    <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0" />
+                    <span><strong>5 vagas simultâneas</strong> com rotação</span>
+                  </li>
+                  <li className="flex items-center gap-2">
+                    <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0" />
+                    <span>Suporte prioritário VIP com Tech Lead dedicado</span>
+                  </li>
+                  <li className="flex items-center gap-2">
+                    <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0" />
+                    <span>Validação de integração ATS (Greenhouse, Lever)</span>
+                  </li>
+                  <li className="flex items-center gap-2">
+                    <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0" />
+                    <span>Passe multi-track de novos fechamentos e CTOs</span>
+                  </li>
+                </ul>
+              </div>
+
+              <button
+                type="button"
+                onClick={() => openSignupModal('empresa')}
+                className="w-full py-2.5 rounded-lg bg-transparent hover:bg-white/5 border border-[#262F40] hover:border-yellow-400/40 text-xs font-bold text-white transition-all text-center"
+              >
+                Ativar 5 Slots Scaled
+              </button>
+            </div>
+          </div>
+
+          {/* Banner de Garantia & Não Renovação Forçada */}
+          <div className="p-3.5 rounded-xl bg-[#161B26]/80 border border-[#262F40] flex items-center gap-3 text-xs text-slate-300 max-w-4xl mx-auto">
+            <ShieldCheck className="w-4 h-4 text-yellow-400 shrink-0" />
+            <span>
+              <strong>Sem multas de rescisão:</strong> Cada slot permanece ativo até a finalização da contratação ou cancelamento voluntário do usuário sem renovação automática forçada.
+            </span>
+          </div>
+
+        </div>
+      </section>
+
+      {/* 6. TRANSPARÊNCIA ALGORÍTMICA E LGPD (ART. 20) */}
+      <section className="py-16 max-w-[1280px] mx-auto px-4 sm:px-6">
+        <div className="bg-[#161B26] rounded-2xl border border-[#262F40] p-6 sm:p-10 grid grid-cols-1 lg:grid-cols-12 gap-8 items-center shadow-xl">
+          
+          <div className="lg:col-span-7 space-y-4">
+            <span className="font-mono text-[10px] text-yellow-400 uppercase tracking-wider block font-bold">
+              GOVERNANÇA & ÉTICA EM IA
+            </span>
+            <h2 className="text-2xl sm:text-3xl font-heading font-extrabold text-white">
+              Transparência Algorítmica e Conformidade Estrita com a LGPD
+            </h2>
+            <p className="text-xs sm:text-sm text-slate-300 leading-relaxed font-sans">
+              Em conformidade com o <strong>Artigo 20 da LGPD (Lei nº 13.709/2018)</strong>, cada desenvolvedor e empresa possui direito a auditoria completa dos critérios adotados pela inteligência artificial. Sem decisões do tipo "caixa preta".
+            </p>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-3">
+              <div className="p-4 rounded-xl bg-[#0c0e12] border border-[#262F40] space-y-1.5">
+                <div className="flex items-center gap-2 text-yellow-400 font-bold text-xs">
+                  <Sparkles className="w-4 h-4" />
+                  <span>Direito à Explicação</span>
+                </div>
+                <p className="text-[11px] text-slate-400 leading-relaxed">
+                  Acesso aos relatórios preditivos com breakdown de pesos atribuídos em cada resposta e análise em código.
+                </p>
+              </div>
+
+              <div className="p-4 rounded-xl bg-[#0c0e12] border border-[#262F40] space-y-1.5">
+                <div className="flex items-center gap-2 text-emerald-400 font-bold text-xs">
+                  <ShieldCheck className="w-4 h-4" />
+                  <span>Isenção de Vieses Pessoais</span>
+                </div>
+                <p className="text-[11px] text-slate-400 leading-relaxed">
+                  Filtro puramente técnico e estatístico, sem análise de dados sensíveis como gênero, idade, raça ou posicionamento.
+                </p>
+              </div>
+            </div>
+          </div>
+
+          <div className="lg:col-span-5 flex flex-col gap-3">
+            <div className="p-4 rounded-xl bg-[#0c0e12] border border-[#262F40] flex items-center gap-3">
+              <ShieldCheck className="w-5 h-5 text-emerald-400 shrink-0" />
+              <div>
+                <span className="text-xs font-bold text-white block">Art. 20 LGPD Compliant</span>
+                <span className="text-[11px] text-slate-400">Modelo e explicabilidade técnica auditável</span>
+              </div>
+            </div>
+
+            <div className="p-4 rounded-xl bg-[#0c0e12] border border-[#262F40] flex items-center gap-3">
+              <Lock className="w-5 h-5 text-yellow-400 shrink-0" />
+              <div>
+                <span className="text-xs font-bold text-white block">Criptografia AES-256</span>
+                <span className="text-[11px] text-slate-400">Proteção de áudio e dados técnicos confidenciais</span>
+              </div>
+            </div>
+
+            <div className="p-4 rounded-xl bg-[#0c0e12] border border-[#262F40] flex items-center gap-3">
+              <Award className="w-5 h-5 text-yellow-400 shrink-0" />
+              <div>
+                <span className="text-xs font-bold text-white block">ISO/IEC 27001 Certified</span>
+                <span className="text-[11px] text-slate-400">Infraestrutura em servidores com auditoria regular</span>
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </section>
+
+      {/* 7. FINAL CTA BANNER */}
+      <section className="py-14 bg-gradient-to-b from-[#0c0e12] via-[#161B26] to-[#0c0e12] border-t border-[#262F40]/80">
+        <div className="max-w-3xl mx-auto px-4 text-center space-y-4">
+          <h2 className="text-2xl sm:text-3xl font-heading font-extrabold text-white">
+            Pronto para mudar a dinâmica do recrutamento de engenharia?
+          </h2>
+          <p className="text-xs sm:text-sm text-slate-300">
+            Seja avaliado com base no seu real domínio técnico ou encontre engenheiros testados sem intermediários.
+          </p>
+          <div className="flex flex-wrap items-center justify-center gap-3 pt-3">
+            <button
+              type="button"
+              onClick={() => openSignupModal('profissional')}
+              className="px-6 py-3 rounded-lg bg-yellow-400 hover:bg-yellow-300 text-black text-xs font-bold shadow-[0_0_20px_rgba(250,204,21,0.3)] transition-all"
+            >
+              Iniciar Avaliação Técnica Gratuita
+            </button>
             <button
               type="button"
               onClick={() => openSignupModal('empresa')}
-              className="px-5 py-3 rounded-base bg-yellow-400 hover:bg-yellow-300 text-black text-xs sm:text-sm font-bold flex items-center gap-2 shadow-md transition-all"
+              className="px-5 py-3 rounded-lg bg-[#161B26] hover:bg-[#1e2433] border border-[#262F40] text-slate-200 text-xs font-bold transition-all"
             >
-              <Building2 className="w-4 h-4" /> Criar Conta Empresa
-            </button>
-            <button
-              type="button"
-              onClick={() => openDemoModal('empresa-orion')}
-              className="px-4 py-3 rounded-base bg-white/5 hover:bg-white/10 border border-white/20 text-white text-xs font-bold flex items-center gap-1.5 transition-all"
-            >
-              <PlayCircle className="w-4 h-4 text-yellow-400" /> Ver Demo Empresa
+              Falar com Especialista B2B
             </button>
           </div>
         </div>
       </section>
 
-      {/* RODAPÉ COMERCIAL */}
+      {/* 8. GLOBAL FOOTER */}
       <footer className="bg-[#0A0C10] border-t border-[#262F40] py-6 text-xs text-slate-400">
-        <div className="max-w-[1320px] mx-auto px-4 sm:px-8 flex flex-col sm:flex-row items-center justify-between gap-2">
+        <div className="max-w-[1360px] mx-auto px-4 sm:px-6 flex flex-col sm:flex-row items-center justify-between gap-3">
           <div className="flex items-center gap-2">
-            <div className="w-6 h-6 rounded bg-yellow-400 text-black font-heading font-bold text-xs flex items-center justify-center">
+            <div className="w-5 h-5 rounded bg-yellow-400 text-black font-heading font-bold text-[10px] flex items-center justify-center">
               Q
             </div>
-            <span className="font-bold text-white">Q.I. Tech</span>
-            <span>© 2026 Todos os direitos reservados.</span>
+            <span className="font-bold text-white">Q.I. Tech v3.4.2-enterprise</span>
+            <span className="text-[#9a9078] hidden md:inline">• Conformidade LGPD & ISO 27001</span>
           </div>
-          <div className="flex items-center gap-4 text-[11px]">
-            <span className="hover:text-slate-300 cursor-pointer">Privacidade & LGPD</span>
-            <span className="hover:text-slate-300 cursor-pointer">Termos Corporativos</span>
+
+          <div className="flex items-center gap-4 text-[11px] text-[#9a9078]">
+            <span>© 2025 Q.I. Tech Engine. Inverse Technical Talent Protocol.</span>
             <button
               type="button"
               onClick={() => openDemoModal('admin-qitech')}
               className="hover:text-yellow-400 text-slate-400 font-semibold transition-colors"
             >
-              Acesso de Demonstração
+              Acesso Demo Admin
             </button>
           </div>
         </div>
       </footer>
+
 
       {/* ===================================================================== */}
       {/* 1. MODAL DE LOGIN ("ENTRAR")                                           */}
@@ -640,7 +1020,7 @@ export const PersonaSelectorView: React.FC<{ onEnterApp: () => void; initialAuth
                 <div>
                   <h3 className="font-heading font-bold text-sm text-foreground">Entrar na Q.I. Tech</h3>
                   <span className="text-[11px] text-muted-foreground block">
-                    Acesse sua conta de Profissional, Empresa ou Governança
+                    Acesso seguro de Profissional, Empresa ou Governança
                   </span>
                 </div>
               </div>
@@ -653,6 +1033,41 @@ export const PersonaSelectorView: React.FC<{ onEnterApp: () => void; initialAuth
               </button>
             </div>
 
+            {/* Selo Visual de Autenticidade e Proteção Anti-Phishing */}
+            <div className="p-2.5 rounded-xl bg-[#0D111A] border border-[#232D3F] flex items-center justify-between text-[11px]">
+              <span className="flex items-center gap-1.5 text-emerald-400 font-medium">
+                <AnimatedIcon type="shield" size={14} animation="pulse" />
+                <span>Ambiente Oficial Autêntico • Q.I. Tech</span>
+              </span>
+              <span className="text-slate-500 font-mono text-[10px]">Criptografia E2E / LGPD</span>
+            </div>
+
+            {/* Alerta de Iframe Malicioso / Clickjacking se detectado */}
+            {isIframeDetected && (
+              <div className="p-3 rounded-xl bg-amber-500/10 border border-amber-500/30 text-xs text-amber-200 flex items-start gap-2">
+                <AlertTriangle className="w-4 h-4 text-amber-400 shrink-0 mt-0.5" />
+                <span>
+                  <strong>Aviso Anti-Spoofing:</strong> Esta página foi detectada dentro de uma moldura externa. Abra em aba separada para evitar roubo de dados.
+                </span>
+              </div>
+            )}
+
+            {/* Alerta de Trava Progressiva contra Força Bruta */}
+            {lockoutSeconds > 0 && (
+              <div className="p-3.5 rounded-xl bg-red-950/40 border border-red-500/40 text-red-200 text-xs flex items-start gap-2.5">
+                <AlertTriangle className="w-4 h-4 text-red-400 shrink-0 mt-0.5" />
+                <div className="space-y-1">
+                  <strong className="text-red-400 block font-semibold">Trava de Segurança Ativa (Anti-Brute Force)</strong>
+                  <p className="leading-relaxed">
+                    Acesso bloqueado por segurança devido a erros sucessivos de senha. Aguarde <span className="font-mono font-bold text-white px-1.5 py-0.5 rounded bg-red-900/60 border border-red-500/30">{lockoutSeconds}s</span> para tentar novamente.
+                  </p>
+                  <span className="text-[10px] text-slate-400 block font-mono">
+                    * A trava persiste via cookie seguro mesmo ao recarregar a página (F5).
+                  </span>
+                </div>
+              </div>
+            )}
+
             <form onSubmit={handleLoginSubmit} className="space-y-3.5">
               <div>
                 <label className="block text-xs font-semibold text-foreground mb-1">E-mail</label>
@@ -660,13 +1075,14 @@ export const PersonaSelectorView: React.FC<{ onEnterApp: () => void; initialAuth
                   <Mail className="w-4 h-4 text-muted-foreground absolute left-3 top-2.5" />
                   <input
                     type="email"
+                    disabled={lockoutSeconds > 0}
                     value={loginEmail}
                     onChange={(e) => {
                       setLoginEmail(e.target.value);
                       setLoginError('');
                     }}
                     placeholder="seu.email@dominio.com.br"
-                    className="w-full h-9 pl-9 pr-3 text-xs bg-background border border-border rounded-base text-foreground focus:outline-none focus:ring-1 focus:ring-primary"
+                    className="w-full h-9 pl-9 pr-3 text-xs bg-background border border-border rounded-base text-foreground focus:outline-none focus:ring-1 focus:ring-primary disabled:opacity-50"
                   />
                 </div>
               </div>
@@ -676,15 +1092,24 @@ export const PersonaSelectorView: React.FC<{ onEnterApp: () => void; initialAuth
                 <div className="relative">
                   <KeyRound className="w-4 h-4 text-muted-foreground absolute left-3 top-2.5" />
                   <input
-                    type="password"
+                    type={showPassword ? 'text' : 'password'}
+                    disabled={lockoutSeconds > 0}
                     value={loginPassword}
                     onChange={(e) => {
                       setLoginPassword(e.target.value);
                       setLoginError('');
                     }}
                     placeholder="Digite sua senha"
-                    className="w-full h-9 pl-9 pr-3 text-xs bg-background border border-border rounded-base text-foreground focus:outline-none focus:ring-1 focus:ring-primary"
+                    className="w-full h-9 pl-9 pr-9 text-xs bg-background border border-border rounded-base text-foreground focus:outline-none focus:ring-1 focus:ring-primary disabled:opacity-50"
                   />
+                  <button
+                    type="button"
+                    onClick={() => setShowPassword(!showPassword)}
+                    className="absolute right-2.5 top-2.5 text-muted-foreground hover:text-foreground"
+                    title={showPassword ? 'Ocultar senha' : 'Ver senha'}
+                  >
+                    {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                  </button>
                 </div>
               </div>
 
@@ -697,10 +1122,25 @@ export const PersonaSelectorView: React.FC<{ onEnterApp: () => void; initialAuth
 
               <button
                 type="submit"
-                className="w-full h-10 font-bold text-xs rounded-base flex items-center justify-center gap-2 text-black bg-yellow-400 hover:bg-yellow-300 shadow-md transition-all"
+                disabled={lockoutSeconds > 0}
+                className="w-full h-10 font-bold text-xs rounded-base flex items-center justify-center gap-2 text-black bg-yellow-400 hover:bg-yellow-300 shadow-md transition-all disabled:opacity-50 disabled:cursor-not-allowed"
               >
-                <LogIn className="w-4 h-4" /> Entrar na Plataforma
+                {lockoutSeconds > 0 ? (
+                  <>
+                    <Lock className="w-4 h-4" />
+                    <span>Aguarde {lockoutSeconds}s para desbloquear</span>
+                  </>
+                ) : (
+                  <>
+                    <LogIn className="w-4 h-4" />
+                    <span>Entrar na Plataforma</span>
+                  </>
+                )}
               </button>
+
+              <p className="text-[10px] text-slate-400 text-center leading-relaxed">
+                Proteção Anti-Phishing: Certifique-se de que a barra de endereços do navegador exibe a URL oficial da Q.I. Tech antes de autenticar.
+              </p>
             </form>
 
             {/* Divisor Social OAuth */}
@@ -914,34 +1354,39 @@ export const PersonaSelectorView: React.FC<{ onEnterApp: () => void; initialAuth
                       </div>
                     </div>
 
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                      <div>
-                        <label className="block font-semibold text-foreground mb-1">Senha (mín. 6 caracteres) *</label>
-                        <input
-                          type="password"
-                          value={profPassword}
-                          onChange={(e) => {
-                            setProfPassword(e.target.value);
-                            setSignupError('');
-                          }}
-                          placeholder="Mínimo 6 caracteres"
-                          className="w-full h-9 px-3 bg-background border border-border rounded-base text-foreground focus:outline-none focus:ring-1 focus:ring-primary"
-                        />
+                    <div className="space-y-3">
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                        <div>
+                          <label className="block font-semibold text-foreground mb-1">Senha Forte *</label>
+                          <input
+                            type="password"
+                            value={profPassword}
+                            onChange={(e) => {
+                              setProfPassword(e.target.value);
+                              setSignupError('');
+                            }}
+                            placeholder="Mínimo 8 caracteres"
+                            className="w-full h-9 px-3 bg-background border border-border rounded-base text-foreground focus:outline-none focus:ring-1 focus:ring-primary"
+                          />
+                        </div>
+
+                        <div>
+                          <label className="block font-semibold text-foreground mb-1">Confirmação de Senha *</label>
+                          <input
+                            type="password"
+                            value={profConfirmPassword}
+                            onChange={(e) => {
+                              setProfConfirmPassword(e.target.value);
+                              setSignupError('');
+                            }}
+                            placeholder="Repita sua senha"
+                            className="w-full h-9 px-3 bg-background border border-border rounded-base text-foreground focus:outline-none focus:ring-1 focus:ring-primary"
+                          />
+                        </div>
                       </div>
 
-                      <div>
-                        <label className="block font-semibold text-foreground mb-1">Confirmação de Senha *</label>
-                        <input
-                          type="password"
-                          value={profConfirmPassword}
-                          onChange={(e) => {
-                            setProfConfirmPassword(e.target.value);
-                            setSignupError('');
-                          }}
-                          placeholder="Repita sua senha"
-                          className="w-full h-9 px-3 bg-background border border-border rounded-base text-foreground focus:outline-none focus:ring-1 focus:ring-primary"
-                        />
-                      </div>
+                      {/* Medidor de Força em Tempo Real */}
+                      <PasswordStrengthMeter password={profPassword} />
                     </div>
                   </>
                 ) : (
@@ -990,34 +1435,39 @@ export const PersonaSelectorView: React.FC<{ onEnterApp: () => void; initialAuth
                       </div>
                     </div>
 
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                      <div>
-                        <label className="block font-semibold text-foreground mb-1">Senha (mín. 6 caracteres) *</label>
-                        <input
-                          type="password"
-                          value={compPassword}
-                          onChange={(e) => {
-                            setCompPassword(e.target.value);
-                            setSignupError('');
-                          }}
-                          placeholder="Mínimo 6 caracteres"
-                          className="w-full h-9 px-3 bg-background border border-border rounded-base text-foreground focus:outline-none focus:ring-1 focus:ring-primary"
-                        />
+                    <div className="space-y-3">
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                        <div>
+                          <label className="block font-semibold text-foreground mb-1">Senha Forte *</label>
+                          <input
+                            type="password"
+                            value={compPassword}
+                            onChange={(e) => {
+                              setCompPassword(e.target.value);
+                              setSignupError('');
+                            }}
+                            placeholder="Mínimo 8 caracteres"
+                            className="w-full h-9 px-3 bg-background border border-border rounded-base text-foreground focus:outline-none focus:ring-1 focus:ring-primary"
+                          />
+                        </div>
+
+                        <div>
+                          <label className="block font-semibold text-foreground mb-1">Confirmação de Senha *</label>
+                          <input
+                            type="password"
+                            value={compConfirmPassword}
+                            onChange={(e) => {
+                              setCompConfirmPassword(e.target.value);
+                              setSignupError('');
+                            }}
+                            placeholder="Repita sua senha"
+                            className="w-full h-9 px-3 bg-background border border-border rounded-base text-foreground focus:outline-none focus:ring-1 focus:ring-primary"
+                          />
+                        </div>
                       </div>
 
-                      <div>
-                        <label className="block font-semibold text-foreground mb-1">Confirmação de Senha *</label>
-                        <input
-                          type="password"
-                          value={compConfirmPassword}
-                          onChange={(e) => {
-                            setCompConfirmPassword(e.target.value);
-                            setSignupError('');
-                          }}
-                          placeholder="Repita sua senha"
-                          className="w-full h-9 px-3 bg-background border border-border rounded-base text-foreground focus:outline-none focus:ring-1 focus:ring-primary"
-                        />
-                      </div>
+                      {/* Medidor de Força em Tempo Real para Empresa */}
+                      <PasswordStrengthMeter password={compPassword} />
                     </div>
                   </>
                 )}
@@ -1144,6 +1594,9 @@ export const PersonaSelectorView: React.FC<{ onEnterApp: () => void; initialAuth
           </div>
         </div>
       )}
+
+      {/* Banner & Modal de Consentimento de Cookies e Termos de Privacidade LGPD */}
+      <CookieConsentModal />
 
     </div>
   );
