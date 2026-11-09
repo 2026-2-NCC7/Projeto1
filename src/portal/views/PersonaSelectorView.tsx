@@ -372,31 +372,12 @@ export const PersonaSelectorView: React.FC<{ onEnterApp: () => void; initialAuth
             </div>
           </div>
 
-          {/* Quick Nav Links */}
-          <nav className="hidden lg:flex items-center gap-6 text-xs font-semibold text-[#9a9078]">
-            <a href="#solucoes" className="hover:text-yellow-400 transition-colors">Vitrine & Planos</a>
-            <button type="button" onClick={() => openDemoModal('candidato-lucas')} className="hover:text-yellow-400 transition-colors">Dashboard Dev</button>
-            <button type="button" onClick={() => openSignupModal('profissional')} className="hover:text-yellow-400 transition-colors">Onboarding Dev</button>
-            <button type="button" onClick={() => openDemoModal('empresa-orion')} className="hover:text-yellow-400 transition-colors">Painel Corporativo B2B</button>
-            <button type="button" onClick={() => openDemoModal('comunidade-rafael')} className="hover:text-yellow-400 transition-colors">Tech Points & Indicações</button>
-            <button type="button" onClick={() => openDemoModal('candidato-marina')} className="hover:text-yellow-400 transition-colors">Entrevista IA</button>
-          </nav>
-
           {/* Engine Status & Auth Actions */}
           <div className="flex items-center gap-2.5">
             <div className="hidden sm:flex items-center gap-2 px-2.5 py-1 rounded-full bg-[#1a1c20] border border-[#262F40] text-[11px] font-mono text-[#9a9078]">
               <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
               <span>Motor IA Ativo (Whisper + Qwen)</span>
             </div>
-
-            <button
-              type="button"
-              onClick={() => openDemoModal('candidato-lucas')}
-              className="hidden md:flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-[#1a1c20] hover:bg-[#282a2e] border border-[#262F40] text-xs font-semibold text-slate-300 transition-all"
-            >
-              <PlayCircle className="w-3.5 h-3.5 text-yellow-400" />
-              <span>Acesso Demo</span>
-            </button>
 
             <button
               type="button"

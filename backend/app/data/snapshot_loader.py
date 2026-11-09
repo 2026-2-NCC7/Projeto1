@@ -56,3 +56,4 @@ def load_snapshot_if_empty(db):
         logger.info("Snapshot inicial carregado com sucesso no banco de dados!")
     except Exception as e:
         logger.error(f"Erro ao carregar snapshot inicial: {e}", exc_info=True)
+
