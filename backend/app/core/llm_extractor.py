@@ -11,7 +11,7 @@ from app.core.evidence_verifier import EvidenceVerifier
 
 logger = logging.getLogger(__name__)
 
-SYSTEM_PROMPT = """Você é o motor de inteligência de competências do Q.I. Tech Matchmaker Engine.
+SYSTEM_PROMPT = """Você é o motor de inteligência de competências do Q.I. Match Matchmaker Engine.
 Sua missão é analisar as respostas de entrevistas técnicas de candidatos e extrair evidências reais e verificáveis de competências profissionais.
 
 DIRETRIZES DE SEGURANÇA E INTEGRIDADE:

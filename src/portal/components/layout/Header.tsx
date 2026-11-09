@@ -46,7 +46,7 @@ export const Header: React.FC<HeaderProps> = ({ currentViewTitle }) => {
     userBadge = 'Perfil Empresa B2B';
     currentUserId = currentUser?.id || 'user-orion';
   } else if (session?.role === 'admin' || activePersona === 'admin-qitech') {
-    userDisplayName = currentUser?.name || 'Governança Q.I. Tech';
+    userDisplayName = currentUser?.name || 'Governança Q.I. Match';
     userAvatar = '';
     userBadge = 'Perfil Admin & Auditoria IA';
     currentUserId = currentUser?.id || 'user-admin';
@@ -79,7 +79,7 @@ export const Header: React.FC<HeaderProps> = ({ currentViewTitle }) => {
           </div>
           <div>
             <span className="font-heading font-bold text-foreground text-base leading-tight block">
-              Q.I. Tech
+              Q.I. Match
             </span>
             <span className="text-[11px] text-muted-foreground font-medium">
               {currentViewTitle}

@@ -58,7 +58,7 @@ export const SidebarNav: React.FC<SidebarNavProps> = ({ currentTab, setCurrentTa
             </div>
             <div>
               <span className="font-heading font-bold text-sm text-white block leading-tight">
-                Q.I. Tech
+                Q.I. Match
               </span>
               <span className="font-mono text-[9px] uppercase tracking-wider text-brand-yellow block mt-0.5">
                 {isCandidate && 'DESENVOLVEDOR'}

@@ -192,7 +192,7 @@ export const CandidateRewardsView: React.FC = () => {
               Indique Bons Desenvolvedores & Ganhe Tech Points
             </h1>
             <p className="text-xs sm:text-sm text-slate-300 max-w-2xl leading-relaxed">
-              Monetize sua rede de confiança técnica. No recrutamento invertido da Q.I. Tech, indicações com fit comprovado aceleram o pipeline e distribuem bônus reais direto para sua carteira.
+              Monetize sua rede de confiança técnica. No recrutamento invertido da Q.I. Match, indicações com fit comprovado aceleram o pipeline e distribuem bônus reais direto para sua carteira.
             </p>
           </div>
 

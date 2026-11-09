@@ -1,6 +1,6 @@
-# Q.I. Tech Matchmaker Engine - Setup Script (Windows PowerShell)
+# Q.I. Match Matchmaker Engine - Setup Script (Windows PowerShell)
 Write-Host "==========================================================" -ForegroundColor Cyan
-Write-Host "   Q.I. Tech Matchmaker Engine - Setup do Ambiente Local" -ForegroundColor Cyan
+Write-Host "   Q.I. Match Matchmaker Engine - Setup do Ambiente Local" -ForegroundColor Cyan
 Write-Host "==========================================================" -ForegroundColor Cyan
 
 # 1. Verifica Python

@@ -510,7 +510,7 @@ export const CompanyDashboardView: React.FC<CompanyDashboardViewProps> = ({
               <span className="font-mono font-bold text-emerald-400 bg-emerald-500/10 px-1.5 py-0.5 rounded">
                 ≥ 75% IA
               </span>
-              <span className="text-slate-400">| Exclusivo Q.I. Tech</span>
+              <span className="text-slate-400">| Exclusivo Q.I. Match</span>
             </div>
           </div>
 

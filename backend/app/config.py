@@ -9,7 +9,7 @@ class Settings(BaseSettings):
         extra="ignore"
     )
 
-    APP_NAME: str = "Q.I. Tech Matchmaker Engine"
+    APP_NAME: str = "Q.I. Match Matchmaker Engine"
     APP_VERSION: str = "1.0.0"
     APP_ENV: str = "development"
     DEBUG: bool = True

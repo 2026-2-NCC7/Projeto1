@@ -913,7 +913,7 @@ export const CandidateOpportunitiesView: React.FC<CandidateOpportunitiesViewProp
                     : `Sua pontuação de ${selectedDetailVacancy.score}% indica aderência conceitual satisfatória. Embora existam requisitos complementares não identificados no seu perfil atual, sua candidatura é incentivada caso queira expandir sua stack de atuação.`}
                 </p>
                 <div className="text-[11px] text-slate-400 pt-1 font-mono">
-                  Garantia Q.I. Tech: Critérios demográficos (idade, gênero, etnia e endereço pessoal) são 100% excluídos do cálculo.
+                  Garantia Q.I. Match: Critérios demográficos (idade, gênero, etnia e endereço pessoal) são 100% excluídos do cálculo.
                 </div>
               </div>
 

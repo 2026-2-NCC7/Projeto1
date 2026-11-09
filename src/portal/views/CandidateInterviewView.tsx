@@ -1523,13 +1523,13 @@ export const CandidateInterviewView: React.FC<CandidateInterviewViewProps> = ({
           7. RODAPÉ DE AUDITORIA & METADADOS LEGAIS
       ========================================================================= */}
       <div className="flex flex-col sm:flex-row items-center justify-between gap-3 pt-6 border-t border-[#262F40]/60 text-[11px] font-mono text-[#9a9078]">
-        <span className="text-yellow-400">Q.I. Tech v3.4.2-enterprise</span>
+        <span className="text-yellow-400">Q.I. Match v3.4.2-enterprise</span>
         <div className="flex items-center gap-4">
           <span>Conformidade LGPD & ISO 27001</span>
           <span>•</span>
           <span>Radar de Habilidades</span>
           <span>•</span>
-          <span>© 2025 Q.I. Tech Engine. Inverse Technical Talent Protocol.</span>
+          <span>© 2025 Q.I. Match Engine. Inverse Technical Talent Protocol.</span>
         </div>
       </div>
 

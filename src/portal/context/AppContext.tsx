@@ -324,7 +324,7 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
           id: currentUser.companyId || `comp-${currentUser.id}`,
           name: currentUser.companyName || currentUser.name,
           cnpj: currentUser.cnpj || '00.000.000/0001-00',
-          about: 'Empresa parceira registrada na plataforma Q.I. Tech.',
+          about: 'Empresa parceira registrada na plataforma Q.I. Match.',
           city: 'São Paulo',
           state: 'SP',
           website: 'https://empresa.com.br'
@@ -585,7 +585,7 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
       id: companyId,
       name: companyName,
       cnpj,
-      about: `${companyName} — conta corporativa registrada na Q.I. Tech.`,
+      about: `${companyName} — conta corporativa registrada na Q.I. Match.`,
       city: 'São Paulo',
       state: 'SP',
       website: ''
@@ -1173,7 +1173,7 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
     }));
 
     addAudit('COMMUNITY_JOINED', `Candidato ${cand.name} aderiu à comunidade técnica como pessoa física`, cand.name);
-    addNotification(cand.userId, 'Bem-vindo à Comunidade Q.I. Tech!', 'Seu perfil comunitário público foi criado respeitando suas preferências de privacidade.', 'comunidade');
+    addNotification(cand.userId, 'Bem-vindo à Comunidade Q.I. Match!', 'Seu perfil comunitário público foi criado respeitando suas preferências de privacidade.', 'comunidade');
   };
 
 
@@ -1692,9 +1692,9 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
       return updated;
     });
 
-    addAudit('SKILL_CURATION_APPROVED', `Habilidade "${cleanName}" aprovada e incorporada ao catálogo normalizado`, 'Admin Q.I. Tech');
+    addAudit('SKILL_CURATION_APPROVED', `Habilidade "${cleanName}" aprovada e incorporada ao catálogo normalizado`, 'Admin Q.I. Match');
     const targetUser = skillEntry.toLowerCase().includes('marina') ? 'user-marina' : 'user-lucas';
-    addNotification(targetUser, 'Habilidade Aprovada pela Curadoria!', `A tecnologia "${cleanName}" que você sugeriu foi revisada e aprovada no catálogo oficial da Q.I. Tech.`, 'sistema');
+    addNotification(targetUser, 'Habilidade Aprovada pela Curadoria!', `A tecnologia "${cleanName}" que você sugeriu foi revisada e aprovada no catálogo oficial da Q.I. Match.`, 'sistema');
   };
 
 
@@ -1717,7 +1717,7 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
       return updated;
     });
 
-    addAudit('SKILL_CURATION_REJECTED', `Sugestão de habilidade "${cleanName}" recusada pela curadoria`, 'Admin Q.I. Tech');
+    addAudit('SKILL_CURATION_REJECTED', `Sugestão de habilidade "${cleanName}" recusada pela curadoria`, 'Admin Q.I. Match');
     const targetUser = skillEntry.toLowerCase().includes('marina') ? 'user-marina' : 'user-lucas';
     addNotification(targetUser, 'Sugestão de Habilidade Revisada', `A sugestão "${cleanName}" não foi incorporada ao catálogo padronizado.`, 'sistema');
   };
@@ -1726,7 +1726,7 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
 
   const updateCommercialConfig = (newConfig: CommercialConfig) => {
     setCommercialConfig(newConfig);
-    addAudit('COMMERCIAL_PARAMS_UPDATED', `Parâmetros comerciais atualizados pelo Admin: Desbloqueio avulso R$ ${newConfig.singleUnlockPriceBrl}, Pacote R$ ${newConfig.package5PriceBrl}, Top N=${newConfig.matchExpressTopN}, Bônus Indicação=${newConfig.referralBonusEstalecas} Estalecas (RN05)`, 'Admin Q.I. Tech');
+    addAudit('COMMERCIAL_PARAMS_UPDATED', `Parâmetros comerciais atualizados pelo Admin: Desbloqueio avulso R$ ${newConfig.singleUnlockPriceBrl}, Pacote R$ ${newConfig.package5PriceBrl}, Top N=${newConfig.matchExpressTopN}, Bônus Indicação=${newConfig.referralBonusEstalecas} Estalecas (RN05)`, 'Admin Q.I. Match');
   };
 
 
@@ -1737,7 +1737,7 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
     if (deletePost && rep) {
       setPosts(prev => prev.filter(p => p.id !== rep.postId));
     }
-    addAudit('MODERATION_ACTION_TAKEN', `Denúncia ${reportId} tratada pela governança (${deletePost ? 'Conteúdo removido' : 'Arquivada após análise'})`, 'Admin Q.I. Tech');
+    addAudit('MODERATION_ACTION_TAKEN', `Denúncia ${reportId} tratada pela governança (${deletePost ? 'Conteúdo removido' : 'Arquivada após análise'})`, 'Admin Q.I. Match');
   };
 
 

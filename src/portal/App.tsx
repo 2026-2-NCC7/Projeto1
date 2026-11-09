@@ -209,7 +209,7 @@ export const MainLayout: React.FC = () => {
         </main>
         <footer className="bg-card border-t border-border py-4 text-center text-xs text-muted-foreground">
           <div className="max-w-[1440px] mx-auto px-4 flex flex-col sm:flex-row items-center justify-between gap-2">
-            <span>© 2026 Q.I. Tech — Ecossistema Unificado de Recrutamento Invertido, Comunidade & Motor IA</span>
+            <span>© 2026 Q.I. Match — Ecossistema Unificado de Recrutamento Invertido, Comunidade & Motor IA</span>
             <span className="text-[11px]">Proteção de Dados, Double Opt-In e Direito de Réplica (Art. 20 LGPD)</span>
           </div>
         </footer>
@@ -244,7 +244,7 @@ export const MainLayout: React.FC = () => {
       case 'admin-revisoes': return 'Fila de Revisão de Avaliações';
       case 'admin-laboratorio': return 'Catálogo de Dados e APIs';
       case 'vitrine-planos': return 'Gestão de Planos & Slots B2B';
-      default: return 'Q.I. Tech';
+      default: return 'Q.I. Match';
     }
   };
 
@@ -487,7 +487,7 @@ export const MainLayout: React.FC = () => {
       </main>
       <footer className="bg-card border-t border-border py-4 text-center text-xs text-muted-foreground">
         <div className="max-w-[1440px] mx-auto px-4 flex flex-col sm:flex-row items-center justify-between gap-2">
-          <span>© 2026 Q.I. Tech — Ecossistema Unificado: Recrutamento Invertido, Comunidade & Motor de IA Local (TCC FECAP)</span>
+          <span>© 2026 Q.I. Match — Ecossistema Unificado: Recrutamento Invertido, Comunidade & Motor de IA Local (TCC FECAP)</span>
           <span className="text-[11px]">Faster-Whisper (int8) • Qwen3 + EvidenceVerifier • Multilingual-E5 • LGPD Double Opt-In & Art. 20</span>
         </div>
       </footer>

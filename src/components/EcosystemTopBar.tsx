@@ -29,7 +29,7 @@ export const EcosystemTopBar: React.FC = () => {
       {/* IDENTIFICAÇÃO ENXUTA */}
       <div className="flex items-center gap-2.5">
         <span className="font-heading font-black text-[11px] tracking-wider text-primary bg-primary/10 px-2 py-0.5 rounded border border-primary/20">
-          Q.I. TECH
+          Q.I. MATCH
         </span>
         <span className="text-[11px] text-slate-400 hidden sm:inline">
           Ecossistema Unificado de Recrutamento & IA Explicável

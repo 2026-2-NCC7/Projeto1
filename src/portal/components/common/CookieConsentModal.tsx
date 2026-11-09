@@ -159,7 +159,7 @@ export const CookieConsentModal: React.FC = () => {
                   <span>1. Princípio da Minimização de Dados & Ticket Magro</span>
                 </h4>
                 <p>
-                  A plataforma Q.I. Tech adota a arquitetura de <strong>Ticket Magro de Autenticação (Lean Session Token)</strong>. Nossos cookies de sessão não transportam CPF, nome completo, faixa salarial ou contatos pessoais. Apenas um identificador opaco criptográfico (`ticketId`) transita pelo navegador com bandeira `SameSite=Strict`.
+                  A plataforma Q.I. Match adota a arquitetura de <strong>Ticket Magro de Autenticação (Lean Session Token)</strong>. Nossos cookies de sessão não transportam CPF, nome completo, faixa salarial ou contatos pessoais. Apenas um identificador opaco criptográfico (`ticketId`) transita pelo navegador com bandeira `SameSite=Strict`.
                 </p>
               </section>
 

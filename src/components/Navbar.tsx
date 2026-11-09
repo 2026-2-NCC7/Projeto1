@@ -41,7 +41,7 @@ export const Navbar: React.FC<NavbarProps> = ({ activeTab, setActiveTab, onSwitc
     <header className="navbar">
       <div className="brand" onClick={() => setActiveTab('dashboard')}>
         <Brain size={26} color="#00E8C6" />
-        <span>Q.I. Tech <span className="brand-badge">Matchmaker</span></span>
+        <span>Q.I. Match <span className="brand-badge">Matchmaker</span></span>
       </div>
 
       <nav className="nav-links">

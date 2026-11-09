@@ -1,6 +1,6 @@
-# Q.I. Tech - Ecossistema Unificado (Portal + Matchmaker Engine)
+# Q.I. Match - Ecossistema Unificado (Portal + Matchmaker Engine)
 Write-Host "==========================================================" -ForegroundColor Cyan
-Write-Host "       Q.I. TECH — ECOSSISTEMA UNIFICADO (FECAP 2026)      " -ForegroundColor Yellow
+Write-Host "       Q.I. MATCH — ECOSSISTEMA UNIFICADO (FECAP 2026)      " -ForegroundColor Yellow
 Write-Host "==========================================================" -ForegroundColor Cyan
 Write-Host "Iniciando Backend FastAPI (Porta 8000) e Frontend (Porta 5173)..." -ForegroundColor White
 

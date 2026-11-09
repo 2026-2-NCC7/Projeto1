@@ -6,7 +6,7 @@ description: Analisa interfaces digitais para identificar sobrecarga cognitiva, 
 # UX Audit Skill
 
 ## Finalidade
-Identificar problemas de usabilidade, sobrecarga cognitiva e fricções visuais em cada tela do sistema Q.I. Tech.
+Identificar problemas de usabilidade, sobrecarga cognitiva e fricções visuais em cada tela do sistema Q.I. Match.
 
 ## Responsabilidades
 1. Avaliar cada tela sob os três pilares de clareza:

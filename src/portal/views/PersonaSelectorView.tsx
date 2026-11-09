@@ -172,7 +172,7 @@ export const PersonaSelectorView: React.FC<{ onEnterApp: () => void; initialAuth
     },
     {
       id: 'admin-qitech',
-      name: 'Governança Q.I. Tech',
+      name: 'Governança Q.I. Match',
       roleLabel: 'Backoffice & Operações',
       badge: 'Admin',
       email: 'admin@qitech.com.br',
@@ -298,7 +298,7 @@ export const PersonaSelectorView: React.FC<{ onEnterApp: () => void; initialAuth
     setSignupError('');
 
     if (signupRole === 'admin') {
-      setSignupError('O perfil Admin não permite auto-cadastro. Utilize o Acesso de Demonstração para entrar como Governança Q.I. Tech.');
+      setSignupError('O perfil Admin não permite auto-cadastro. Utilize o Acesso de Demonstração para entrar como Governança Q.I. Match.');
       return;
     }
 
@@ -364,7 +364,7 @@ export const PersonaSelectorView: React.FC<{ onEnterApp: () => void; initialAuth
             </div>
             <div>
               <span className="font-heading font-bold text-white text-base tracking-tight leading-none block">
-                Q.I. Tech
+                Q.I. Match
               </span>
               <span className="font-mono text-[9px] text-[#9a9078] block tracking-wider uppercase mt-0.5">
                 INVERSE CORE • TALENT PROTOCOL
@@ -987,12 +987,12 @@ export const PersonaSelectorView: React.FC<{ onEnterApp: () => void; initialAuth
             <div className="w-5 h-5 rounded bg-yellow-400 text-black font-heading font-bold text-[10px] flex items-center justify-center">
               Q
             </div>
-            <span className="font-bold text-white">Q.I. Tech v3.4.2-enterprise</span>
+            <span className="font-bold text-white">Q.I. Match v3.4.2-enterprise</span>
             <span className="text-[#9a9078] hidden md:inline">• Conformidade LGPD & ISO 27001</span>
           </div>
 
           <div className="flex items-center gap-4 text-[11px] text-[#9a9078]">
-            <span>© 2025 Q.I. Tech Engine. Inverse Technical Talent Protocol.</span>
+            <span>© 2025 Q.I. Match Engine. Inverse Technical Talent Protocol.</span>
             <button
               type="button"
               onClick={() => openDemoModal('admin-qitech')}
@@ -1018,7 +1018,7 @@ export const PersonaSelectorView: React.FC<{ onEnterApp: () => void; initialAuth
                   Q
                 </div>
                 <div>
-                  <h3 className="font-heading font-bold text-sm text-foreground">Entrar na Q.I. Tech</h3>
+                  <h3 className="font-heading font-bold text-sm text-foreground">Entrar na Q.I. Match</h3>
                   <span className="text-[11px] text-muted-foreground block">
                     Acesso seguro de Profissional, Empresa ou Governança
                   </span>
@@ -1037,7 +1037,7 @@ export const PersonaSelectorView: React.FC<{ onEnterApp: () => void; initialAuth
             <div className="p-2.5 rounded-xl bg-[#0D111A] border border-[#232D3F] flex items-center justify-between text-[11px]">
               <span className="flex items-center gap-1.5 text-emerald-400 font-medium">
                 <AnimatedIcon type="shield" size={14} animation="pulse" />
-                <span>Ambiente Oficial Autêntico • Q.I. Tech</span>
+                <span>Ambiente Oficial Autêntico • Q.I. Match</span>
               </span>
               <span className="text-slate-500 font-mono text-[10px]">Criptografia E2E / LGPD</span>
             </div>
@@ -1139,7 +1139,7 @@ export const PersonaSelectorView: React.FC<{ onEnterApp: () => void; initialAuth
               </button>
 
               <p className="text-[10px] text-slate-400 text-center leading-relaxed">
-                Proteção Anti-Phishing: Certifique-se de que a barra de endereços do navegador exibe a URL oficial da Q.I. Tech antes de autenticar.
+                Proteção Anti-Phishing: Certifique-se de que a barra de endereços do navegador exibe a URL oficial da Q.I. Match antes de autenticar.
               </p>
             </form>
 
@@ -1223,7 +1223,7 @@ export const PersonaSelectorView: React.FC<{ onEnterApp: () => void; initialAuth
                   Q
                 </div>
                 <div>
-                  <h3 className="font-heading font-bold text-sm text-foreground">Criar Conta na Q.I. Tech</h3>
+                  <h3 className="font-heading font-bold text-sm text-foreground">Criar Conta na Q.I. Match</h3>
                   <span className="text-[11px] text-muted-foreground block">
                     Selecione seu perfil para iniciar
                   </span>
@@ -1281,7 +1281,7 @@ export const PersonaSelectorView: React.FC<{ onEnterApp: () => void; initialAuth
             {signupRole === 'admin' ? (
               <div className="p-4 rounded-base bg-secondary/50 border border-border space-y-3 text-xs">
                 <div className="flex items-center gap-2 text-foreground font-heading font-bold">
-                  <Lock className="w-4 h-4 text-primary" /> Cadastro Restrito — Governança Q.I. Tech
+                  <Lock className="w-4 h-4 text-primary" /> Cadastro Restrito — Governança Q.I. Match
                 </div>
                 <p className="text-muted-foreground leading-relaxed">
                   Contas de <strong>Admin</strong> são exclusivas para a operação de governança e não permitem auto-cadastro público. Para inspecionar o painel administrativo no MVP, utilize a conta seedada de demonstração.

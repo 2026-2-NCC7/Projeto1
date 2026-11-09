@@ -1,6 +1,6 @@
 # Prompts de Design de Interface para Google Stitch & I.A. Generativa
 
-**Projeto:** Plataforma QI Tech - Matchmaking & Recrutamento Tech Invertido  
+**Projeto:** Plataforma Q.I. Match - Matchmaking & Recrutamento Tech Invertido  
 **Estilo Visual:** Dark Industrial Tech / Preto & Dourado/Amarelo (#0B0F17, #12161E, #FACC15)  
 **Compatibilidade:** TCC & Documentação Oficial do Produto
 
@@ -77,11 +77,11 @@ Layout & Structure:
 
 ```text
 Role & Goal:
-Crie a Landing Page / Vitrine Comercial da QI Tech, uma plataforma de recrutamento invertido orientada por inteligência artificial, destacando o modelo de precificação transparente e a divisão de personas.
+Crie a Landing Page / Vitrine Comercial da Q.I. Match, uma plataforma de recrutamento invertido orientada por inteligência artificial, destacando o modelo de precificação transparente e a divisão de personas.
 
 Layout & Structure:
 1. Navbar Superior:
-   - Logo "QI Tech Matchmaker" com detalhe em amarelo tech.
+   - Logo "Q.I. Match Matchmaker" com detalhe em amarelo tech.
    - Menu simples: "Como Funciona", "Para Empresas", "Para Desenvolvedores", "Tabela de Preços".
    - Botão no canto: "Acessar Plataforma".
 
@@ -127,7 +127,7 @@ Layout & Structure:
 
 ```text
 Role & Goal:
-Crie o fluxo de Onboarding e Criação de Perfil para Desenvolvedores na QI Tech, com validações inteligentes de acordo com o nível de senioridade e controle estrito de privacidade LGPD.
+Crie o fluxo de Onboarding e Criação de Perfil para Desenvolvedores na Q.I. Match, com validações inteligentes de acordo com o nível de senioridade e controle estrito de privacidade LGPD.
 
 Layout & Structure:
 1. Stepper Superior (Barra de Progresso em 3 passos):
@@ -174,7 +174,7 @@ Layout & Structure:
 
 ```text
 Role & Goal:
-Crie a tela principal do Dashboard do Desenvolvedor na QI Tech, ilustrando a dinâmica de Recrutamento Invertido (empresas convidam o candidato) e a explicabilidade algorítmica exigida pela LGPD (Art. 20).
+Crie a tela principal do Dashboard do Desenvolvedor na Q.I. Match, ilustrando a dinâmica de Recrutamento Invertido (empresas convidam o candidato) e a explicabilidade algorítmica exigida pela LGPD (Art. 20).
 
 Layout & Structure:
 1. Header do Painel:
@@ -211,7 +211,7 @@ Layout & Structure:
 
 ```text
 Role & Goal:
-Crie a interface do Programa de Indicação Técnica (Bounty / Tech Points) da QI Tech, permitindo que desenvolvedores recomendem colegas de stack com limite de proteção anti-spam.
+Crie a interface do Programa de Indicação Técnica (Bounty / Tech Points) da Q.I. Match, permitindo que desenvolvedores recomendem colegas de stack com limite de proteção anti-spam.
 
 Layout & Structure:
 1. Hero de Recompensas:
@@ -247,7 +247,7 @@ Layout & Structure:
 
 ```text
 Role & Goal:
-Crie o Painel de Gestão de Vagas e Triagem de Talentos para Recrutadores e Gestores de Tecnologia de Empresas B2B na plataforma QI Tech.
+Crie o Painel de Gestão de Vagas e Triagem de Talentos para Recrutadores e Gestores de Tecnologia de Empresas B2B na plataforma Q.I. Match.
 
 Layout & Structure:
 1. Header da Empresa & Gerenciador de Slots:

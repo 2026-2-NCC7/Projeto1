@@ -6,7 +6,7 @@ description: Organiza rotas, menus, hierarquias de conteúdo e progressive discl
 # Information Architecture Skill
 
 ## Finalidade
-Garantir que a navegação e a hierarquia de conteúdo do sistema Q.I. Tech sejam orientadas à intenção do usuário, respeitando os 4 perfis de acesso: Candidato, Empresa, Comunidade e Admin.
+Garantir que a navegação e a hierarquia de conteúdo do sistema Q.I. Match sejam orientadas à intenção do usuário, respeitando os 4 perfis de acesso: Candidato, Empresa, Comunidade e Admin.
 
 ## Responsabilidades
 1. Mapear as jornadas principais e fluxos de decisão.

@@ -1,5 +1,5 @@
 /**
- * MÓDULO OFICIAL DE SEGURANÇA E CONFORMIDADE LGPD - Q.I. TECH
+ * MÓDULO OFICIAL DE SEGURANÇA E CONFORMIDADE LGPD - Q.I. MATCH
  * - Avaliação de Força de Senha em Tempo Real
  * - Trava Progressiva contra Ataques de Força Bruta (Rate Limiting com Anti-Reload Cookie)
  * - Sanitização e Prevenção de XSS e Clickjacking
@@ -194,7 +194,7 @@ export function preventClickjacking(): boolean {
         return true;
       }
     } catch {
-      console.warn('[Segurança Q.I. Tech] Tentativa de embutir a plataforma em site terceiro detectada e bloqueada.');
+      console.warn('[Segurança Q.I. Match] Tentativa de embutir a plataforma em site terceiro detectada e bloqueada.');
     }
   }
   return false;

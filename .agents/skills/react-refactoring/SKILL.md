@@ -6,7 +6,7 @@ description: Executa refatorações seguras no código React e TypeScript, prese
 # React Refactoring Skill
 
 ## Finalidade
-Realizar refatorações limpas e modulares nos componentes React da plataforma Q.I. Tech, preservando 100% da lógica de negócio e estabilidade de execução.
+Realizar refatorações limpas e modulares nos componentes React da plataforma Q.I. Match, preservando 100% da lógica de negócio e estabilidade de execução.
 
 ## Responsabilidades
 1. Reduzir duplicações e linhas de código desnecessárias.

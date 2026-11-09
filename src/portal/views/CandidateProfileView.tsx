@@ -191,7 +191,7 @@ export const CandidateProfileView: React.FC = () => {
         <div className="bg-secondary/40 border border-accent p-4 rounded-base flex flex-col sm:flex-row sm:items-center justify-between gap-3">
           <div className="space-y-0.5">
             <strong className="text-xs font-bold text-primary flex items-center gap-1.5">
-              🚀 Participe da Comunidade Técnica Q.I. Tech
+              🚀 Participe da Comunidade Técnica Q.I. Match
             </strong>
             <p className="text-xs text-foreground">
               Conecte-se com outros desenvolvedores, compartilhe artigos e participe do programa "Quem Indica" para acumular Estalecas Q.I.
@@ -475,7 +475,7 @@ export const CandidateProfileView: React.FC = () => {
       {showCommunityModal && (
         <div className="fixed inset-0 z-50 bg-black/40 flex items-center justify-center p-4">
           <div className="bg-card rounded-base border border-border p-5 max-w-md w-full shadow-lg space-y-4">
-            <h4 className="font-heading font-bold text-sm text-foreground">Entrar na Comunidade Q.I. Tech</h4>
+            <h4 className="font-heading font-bold text-sm text-foreground">Entrar na Comunidade Q.I. Match</h4>
             <p className="text-xs text-muted-foreground leading-relaxed">
               Confirmando sua adesão, criaremos seu perfil social como <strong>pessoa física</strong> aproveitando suas hard skills públicas, foto e biografia.
             </p>

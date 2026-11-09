@@ -46,7 +46,7 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({ onNavigate }) => {
           <span style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>Windows Local Execution (CPU)</span>
         </div>
         <h1 style={{ fontSize: '2.25rem', marginBottom: '0.5rem' }}>
-          Q.I. Tech Matchmaker <span className="brand-badge">Engine</span>
+          Q.I. Match Matchmaker <span className="brand-badge">Engine</span>
         </h1>
         <p style={{ color: 'var(--text-secondary)', maxWidth: '850px' }}>
           Mapeamento inteligente de competências profissionais a partir de entrevistas e autodeclaração,

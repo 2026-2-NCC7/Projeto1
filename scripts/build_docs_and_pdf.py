@@ -195,7 +195,7 @@ def create_full_html_document(title: str, subtitle: str, body_html: str, show_co
             <div class="cover-institution">FECAP &mdash; FUNDAÇÃO ESCOLA DE COMÉRCIO ÁLVARES PENTEADO</div>
             <div class="cover-discipline">BACHARELADO EM CIÊNCIA DA COMPUTAÇÃO &bull; ENGENHARIA DE SOFTWARE</div>
             <div class="cover-center">
-                <div class="cover-badge">Q.I. TECH MATCHMAKER ENGINE</div>
+                <div class="cover-badge">Q.I. MATCH MATCHMAKER ENGINE</div>
                 <h1 class="cover-title">{title}</h1>
                 <div class="cover-subtitle">{subtitle}</div>
             </div>
@@ -583,7 +583,7 @@ def build_all_documents():
         xp_html_body = parse_markdown_to_html(xp_content)
         xp_doc_html = create_full_html_document(
             title="Diário de Bordo — Extreme Programming",
-            subtitle="Relatório de Práticas XP: TDD, Refatoração, Programação em Par e Design Simples no Q.I. Tech Matchmaker Engine",
+            subtitle="Relatório de Práticas XP: TDD, Refatoração, Programação em Par e Design Simples no Q.I. Match Matchmaker Engine",
             body_html=xp_html_body,
             show_cover=True
         )
@@ -635,7 +635,7 @@ def build_all_documents():
             )
 
     full_combined_html = create_full_html_document(
-        title="Q.I. Tech Matchmaker Engine",
+        title="Q.I. Match Matchmaker Engine",
         subtitle="Dossiê Acadêmico e Técnico Completo &bull; Metodologia Ágil (XP), Engenharia de Software, Modelos Locais de IA e Avaliação Empírica",
         body_html="\n".join(consolidated_parts),
         show_cover=True

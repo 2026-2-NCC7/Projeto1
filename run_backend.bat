@@ -1,7 +1,7 @@
 @echo off
-title Q.I. Tech Unificado - Backend FastAPI + IA Local
+title Q.I. Match Unificado - Backend FastAPI + IA Local
 echo ====================================================================
-echo   Q.I. Tech - Sistema Unificado (Backend FastAPI + SQLite + IA)
+echo   Q.I. Match - Sistema Unificado (Backend FastAPI + SQLite + IA)
 echo   URL da API: http://127.0.0.1:8000
 echo   Swagger Docs: http://127.0.0.1:8000/docs
 echo ====================================================================

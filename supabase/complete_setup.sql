@@ -1,5 +1,5 @@
 -- ==============================================================================
--- Q.I. TECH - SCHEMA COMPLETO SUPABASE (POSTGRESQL + RLS + TRIGGERS + SEEDS)
+-- Q.I. MATCH - SCHEMA COMPLETO SUPABASE (POSTGRESQL + RLS + TRIGGERS + SEEDS)
 -- Plataforma de Recrutamento Invertido, Matching Explicável e IA Local
 -- ==============================================================================
 

@@ -6,7 +6,7 @@ description: Valida fluxos ponta a ponta nas jornadas de candidato, empresa, com
 # End-to-End Regression Skill
 
 ## Finalidade
-Garantir que as melhorias visuais e de usabilidade não introduzam regressões nos fluxos críticos de negócio da plataforma Q.I. Tech.
+Garantir que as melhorias visuais e de usabilidade não introduzam regressões nos fluxos críticos de negócio da plataforma Q.I. Match.
 
 ## Responsabilidades
 1. Testar os 5 cenários canônicos de validação:

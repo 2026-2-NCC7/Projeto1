@@ -1,6 +1,6 @@
 <div align="center">
 
-# ⚡ Q.I. Tech — Sistema de Recrutamento Invertido & IA Explicável
+# ⚡ Q.I. Match — Sistema de Recrutamento Invertido & IA Explicável
 ### Plataforma Full-Stack de Talent Acquisition Técnico Orientada a Evidências, Privacidade Rigorosa e Algoritmos Auditáveis (LGPD Art. 20)
 
 [![Status](https://img.shields.io/badge/Status-Produção%20%2F%20TCC%20FECAP-success?style=for-the-badge&logo=rocket)](#)
@@ -23,7 +23,7 @@
 ## 📌 Sumário Executivo
 
 - [1. Visão Geral da Plataforma](#-1-visão-geral-da-plataforma)
-- [2. O Paradigma Q.I. Tech vs. Recrutamento Tradicional](#-o-paradigma-qi-tech-vs-recrutamento-tradicional)
+- [2. O Paradigma Q.I. Match vs. Recrutamento Tradicional](#-o-paradigma-qi-tech-vs-recrutamento-tradicional)
 - [3. Arquitetura de Alto Nível & Pipeline de IA](#-arquitetura-técnica--pipeline-de-ia)
 - [4. Showcase de Funcionalidades por Persona](#-showcase-de-funcionalidades-por-persona)
   - [4.1 Área do Candidato / Desenvolvedor](#41-área-do-candidato--desenvolvedor)
@@ -38,7 +38,7 @@
 
 ## 🚀 1. Visão Geral da Plataforma
 
-O **Q.I. Tech** é uma solução de engenharia de software desenvolvida como Trabalho de Conclusão de Curso (TCC) em Ciência da Computação pela **FECAP**. O projeto ataca as principais patologias dos sistemas tradicionais de Applicant Tracking System (ATS), como:
+O **Q.I. Match** é uma solução de engenharia de software desenvolvida como Trabalho de Conclusão de Curso (TCC) em Ciência da Computação pela **FECAP**. O projeto ataca as principais patologias dos sistemas tradicionais de Applicant Tracking System (ATS), como:
 1. **Falta de transparência algorítmica** e decisões "caixa-preta" sem explicabilidade (violação do Art. 20 da LGPD);
 2. **Exposição indiscriminada de dados de contato** e SPAM corporativo;
 3. **Triagem superficial de palavras-chave** que penaliza candidatos legítimos e favorece currículos artificialmente inflados.
@@ -47,9 +47,9 @@ Nossa arquitetura combina um **Pipeline de IA Local** (*faster-whisper* + *Qwen3
 
 ---
 
-## ⚖️ O Paradigma Q.I. Tech vs. Recrutamento Tradicional
+## ⚖️ O Paradigma Q.I. Match vs. Recrutamento Tradicional
 
-| Dimensão | Recrutamento Convencional (Gupy, LinkedIn, Catho) | Q.I. Tech (Sistema Unificado) |
+| Dimensão | Recrutamento Convencional (Gupy, LinkedIn, Catho) | Q.I. Match (Sistema Unificado) |
 |---|---|---|
 | **Fluxo de Entrada** | Candidato envia centenas de currículos cegos para pilhas de triagem | **Recrutamento Invertido**: Empresas competem por perfis qualificados pelo radar técnico |
 | **Avaliação Técnica** | Palavras-chave estáticas em PDF e formulários superficiais | **Entrevista Técnica Real** com fala transcrita via Whisper e extração de fatos |
@@ -264,7 +264,7 @@ Este projeto constitui o Trabalho de Conclusão de Curso (TCC) do curso de **Bac
 
 <div align="center">
 
-**Q.I. Tech • Inteligência Técnica Aplicada ao Recrutamento Justo**  
+**Q.I. Match • Inteligência Técnica Aplicada ao Recrutamento Justo**  
 *Desenvolvido com foco em ética algorítmica, privacidade por design e soberania de dados.*
 
 </div>
