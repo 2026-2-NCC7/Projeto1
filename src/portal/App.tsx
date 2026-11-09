@@ -251,10 +251,10 @@ export const MainLayout: React.FC = () => {
   return (
     <div className="min-h-screen flex flex-col justify-between bg-background qi-portal-container">
       <Header currentViewTitle={getTitle()} />
-      <main className="flex-1 max-w-[1440px] w-full mx-auto px-4 py-6">
-        <div className="flex flex-col lg:flex-row gap-6">
-          <SidebarNav currentTab={safeTab} setCurrentTab={setCurrentTab} />
-          <div className="flex-1 min-w-0">
+      <div className="flex-1 flex flex-col lg:flex-row w-full min-h-[calc(100vh-4rem)]">
+        <SidebarNav currentTab={safeTab} setCurrentTab={setCurrentTab} />
+        <main className="flex-1 min-w-0 p-4 sm:p-6 lg:p-8">
+          <div className="max-w-[1440px] mx-auto">
             {/* ==================== ROTAS PERFIL CANDIDATO ==================== */}
             {safeTab === 'candidato-inicio' && <CandidateDashboardView onNavigateToTab={setCurrentTab} />}
             {safeTab === 'candidato-perfil' && <CandidateProfileView />}
@@ -483,8 +483,8 @@ export const MainLayout: React.FC = () => {
               </div>
             )}
           </div>
-        </div>
-      </main>
+        </main>
+      </div>
       <footer className="bg-card border-t border-border py-4 text-center text-xs text-muted-foreground">
         <div className="max-w-[1440px] mx-auto px-4 flex flex-col sm:flex-row items-center justify-between gap-2">
           <span>© 2026 Q.I. Match — Ecossistema Unificado: Recrutamento Invertido, Comunidade & Motor de IA Local (TCC FECAP)</span>
