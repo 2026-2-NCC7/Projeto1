@@ -76,7 +76,7 @@ export const Header: React.FC<HeaderProps> = ({ currentViewTitle }) => {
         
         {/* Marca e Seção Atual */}
         <div className="flex items-center gap-3">
-          <div className="w-9 h-9 rounded-base bg-primary flex items-center justify-center font-heading font-bold text-white text-lg shadow-xs">
+          <div className="w-9 h-9 rounded-base bg-primary flex items-center justify-center font-heading font-black text-black text-lg shadow-xs">
             Q
           </div>
           <div>
@@ -103,8 +103,8 @@ export const Header: React.FC<HeaderProps> = ({ currentViewTitle }) => {
 
         {/* Indicador de Perfil, Alternador de Tema, Notificações e Conta */}
         <div className="flex items-center gap-2.5">
-          <span className="hidden sm:inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-base text-xs font-bold bg-secondary text-primary border border-primary/20">
-            <Brain className="w-3.5 h-3.5 text-primary" />
+          <span className="hidden sm:inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-base text-xs font-bold bg-amber-500/10 text-amber-800 dark:bg-amber-400/10 dark:text-amber-300 border border-amber-500/25 dark:border-amber-400/20">
+            <Brain className="w-3.5 h-3.5 text-amber-600 dark:text-amber-400" />
             <span>{userBadge}</span>
           </span>
           
@@ -112,14 +112,14 @@ export const Header: React.FC<HeaderProps> = ({ currentViewTitle }) => {
           <button
             type="button"
             onClick={toggleTheme}
-            className="w-9 h-9 rounded-base border border-border flex items-center justify-center hover:bg-secondary text-foreground transition-colors"
+            className="w-9 h-9 rounded-base border border-border flex items-center justify-center hover:bg-muted text-foreground transition-colors"
             title={theme === 'dark' ? 'Ativar Modo Claro' : 'Ativar Modo Escuro'}
             aria-label="Alternar tema claro/escuro"
           >
             {theme === 'dark' ? (
-              <Sun className="w-4 h-4 text-brandOrange" />
+              <Sun className="w-4 h-4 text-amber-400" />
             ) : (
-              <Moon className="w-4 h-4 text-muted-foreground" />
+              <Moon className="w-4 h-4 text-slate-700" />
             )}
           </button>
 

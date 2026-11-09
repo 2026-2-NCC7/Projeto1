@@ -148,7 +148,7 @@ export const CandidateDashboardView: React.FC<CandidateDashboardViewProps> = ({
   const candidateIdShort = candidate?.id?.replace('cand-', '').toUpperCase() || '8849';
 
   return (
-    <div className="space-y-6 text-[#e2e2e8] font-sans pb-12">
+    <div className="space-y-6 text-foreground dark:text-[#e2e2e8] font-sans pb-12">
       
       {/* 1. SAUDAÇÃO & HEADER DO DASHBOARD */}
       <div className="bg-[#121722] p-6 rounded-2xl border border-[#232D3F] flex flex-col lg:flex-row lg:items-center justify-between gap-6">

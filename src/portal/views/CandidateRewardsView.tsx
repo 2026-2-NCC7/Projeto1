@@ -165,7 +165,7 @@ export const CandidateRewardsView: React.FC = () => {
   const displayBalance = rewardBalance || 1250;
 
   return (
-    <div className="space-y-6 text-[#e2e2e8] font-sans">
+    <div className="space-y-6 text-foreground dark:text-[#e2e2e8] font-sans">
 
       {/* 1. PROTOCOL STATUS BAR */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs border-b border-[#262F40]/80 pb-3">

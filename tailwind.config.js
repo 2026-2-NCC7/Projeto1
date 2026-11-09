@@ -17,12 +17,12 @@ export default {
           dark: '#EAB308',
         },
         secondary: {
-          DEFAULT: '#4edea3',
-          foreground: '#002113',
+          DEFAULT: 'rgb(var(--secondary) / <alpha-value>)',
+          foreground: 'rgb(var(--secondary-foreground) / <alpha-value>)',
         },
         muted: {
-          DEFAULT: '#282a2e',
-          foreground: '#9a9078',
+          DEFAULT: 'rgb(var(--muted) / <alpha-value>)',
+          foreground: 'rgb(var(--muted-foreground) / <alpha-value>)',
         },
         accent: {
           DEFAULT: '#facc15',
@@ -32,8 +32,8 @@ export default {
           DEFAULT: '#ef4444',
           foreground: '#ffffff',
         },
-        border: '#262F40',
-        input: '#1a1c20',
+        border: 'rgb(var(--border) / <alpha-value>)',
+        input: 'rgb(var(--input) / <alpha-value>)',
         // Stitch / Cyber Dark Tokens
         canvas: '#0c0e12',
         surface: {

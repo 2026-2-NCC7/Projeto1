@@ -467,7 +467,7 @@ export const CandidateOnboardingView: React.FC<{ onComplete: () => void }> = ({ 
   };
 
   return (
-    <div className="min-h-screen bg-[#0A0D14] text-[#E2E8F0] p-3 sm:p-6 lg:p-8 font-sans selection:bg-amber-400 selection:text-black">
+    <div className="min-h-screen bg-background dark:bg-[#0A0D14] text-foreground dark:text-[#E2E8F0] p-3 sm:p-6 lg:p-8 font-sans selection:bg-amber-400 selection:text-black">
       <div className="max-w-5xl mx-auto space-y-6">
 
         {/* =========================================================================

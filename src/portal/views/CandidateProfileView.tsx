@@ -258,7 +258,7 @@ export const CandidateProfileView: React.FC = () => {
   };
 
   return (
-    <div className="space-y-6 text-[#E2E8F0] pb-10 selection:bg-amber-400 selection:text-black">
+    <div className="space-y-6 text-foreground dark:text-[#E2E8F0] pb-10 selection:bg-amber-400 selection:text-black">
 
       {/* =========================================================================
           1. HEADER RPG: FICHA TÉCNICA DO PERSONAGEM (CHARACTER SHEET HERO)
