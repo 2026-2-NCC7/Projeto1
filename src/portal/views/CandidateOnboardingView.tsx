@@ -471,7 +471,7 @@ export const CandidateOnboardingView: React.FC<{ onComplete: () => void }> = ({ 
       <div className="max-w-5xl mx-auto space-y-6">
 
         {/* =========================================================================
-            GAMIFIED HUD (Heads-Up Display): Barra de Nível, XP, Combos e Estalecas
+            GAMIFIED HUD (Heads-Up Display): Barra de Nível, XP, Combos e Tech Points
            ========================================================================= */}
         <div className="bg-[#111622] border border-[#232D3F] rounded-2xl p-4 sm:p-5 shadow-2xl relative overflow-hidden backdrop-blur-md">
           {/* Luz ambiente de fundo */}
@@ -516,10 +516,10 @@ export const CandidateOnboardingView: React.FC<{ onComplete: () => void }> = ({ 
 
             {/* Recompensas e Métricas de XP */}
             <div className="flex items-center gap-3 bg-[#0B0E17] border border-[#1F2737] p-2.5 sm:p-3 rounded-xl">
-              {/* Estalecas */}
+              {/* Tech Points */}
               <div className="flex items-center gap-2 px-3 py-1.5 bg-amber-400/10 border border-amber-400/25 rounded-lg text-amber-400 font-mono text-xs font-bold">
                 <Coins className="w-4 h-4 text-amber-400 animate-pulse" />
-                <span>+250 Estalecas</span>
+                <span>+250 Tech Points</span>
               </div>
 
               {/* XP Progress Tracker */}
@@ -1195,7 +1195,7 @@ export const CandidateOnboardingView: React.FC<{ onComplete: () => void }> = ({ 
                 <div className="p-4 rounded-xl bg-[#0D111A] border border-amber-400/30">
                   <div className="flex items-center gap-2 text-amber-400 font-bold text-xs mb-1">
                     <Coins className="w-4 h-4" />
-                    <span>+250 Estalecas</span>
+                    <span>+250 Tech Points</span>
                   </div>
                   <p className="text-[11px] text-slate-400 font-mono">
                     Créditos iniciais creditados para resgate de benefícios.

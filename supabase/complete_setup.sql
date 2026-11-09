@@ -301,7 +301,7 @@ CREATE TABLE IF NOT EXISTS public.audit_logs (
 );
 
 -- ==============================================================================
--- 11. COMUNIDADE E GAMIFICAÇÃO (ESTALECAS)
+-- 11. COMUNIDADE E GAMIFICAÇÃO (TECH POINTS / RECOMPENSAS)
 -- ==============================================================================
 CREATE TABLE IF NOT EXISTS public.community_posts (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
@@ -507,14 +507,14 @@ CREATE POLICY "Partes acessam seus processos seletivos" ON public.selection_proc
         OR company_id IN (SELECT id FROM public.companies WHERE profile_id = auth.uid())
     );
 
--- 13.8. COMUNIDADE E ESTALECAS
+-- 13.8. COMUNIDADE E TECH POINTS
 CREATE POLICY "Posts da comunidade visíveis para todos" ON public.community_posts
     FOR SELECT USING (true);
 
 CREATE POLICY "Usuário publica seus próprios posts" ON public.community_posts
     FOR INSERT TO authenticated WITH CHECK (author_id = auth.uid());
 
-CREATE POLICY "Usuário consulta seu extrato de Estalecas" ON public.reward_transactions
+CREATE POLICY "Usuário consulta seu extrato de Tech Points" ON public.reward_transactions
     FOR SELECT TO authenticated USING (profile_id = auth.uid());
 
 -- ==============================================================================

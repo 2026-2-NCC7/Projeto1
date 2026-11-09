@@ -383,7 +383,7 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
     currentUser.onboardingCompleted === false
   );
 
-  // Calcula o saldo de Estalecas Q.I. do candidato ativo
+  // Calcula o saldo de Tech Points do candidato ativo
   const rewardBalance = rewardTransactions
     .filter(t => t.candidateId === currentCandidateId)
     .reduce((acc, tx) => (tx.type === 'credito' ? acc + tx.amount : acc - tx.amount), 0);
@@ -747,7 +747,7 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
       setSelectionProcesses(prev => [...generatedProcs, ...prev]);
     }
 
-    // Concede bônus inicial de onboarding em Estalecas Q.I.
+    // Concede bônus inicial de onboarding em Tech Points
     const bonusTx: RewardTransaction = {
       id: `tx-onb-${Date.now()}`,
       candidateId,
@@ -763,7 +763,7 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
     addNotification(
       currentUser.id,
       'Perfil Técnico Configurado com Sucesso!',
-      'Seu onboarding foi concluído e você recebeu +50 Estalecas Q.I. de boas-vindas. Confira as vagas compatíveis!',
+      'Seu onboarding foi concluído e você recebeu +50 Tech Points de boas-vindas. Confira as vagas compatíveis!',
       'sistema'
     );
   };
@@ -1171,8 +1171,8 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
 
     setRewardTransactions(prev => [newTx, ...prev]);
     setReferrals(prev => prev.map((r, idx) => idx === prev.length - 1 ? { ...r, status: 'aprovada' } : r));
-    addAudit('ESTALECAS_REWARD_GRANTED', `Crédito de +${bonus} Estalecas Q.I. concedido após aprovação validada de indicado (RN14)`, 'Motor de Recompensas Q.I.');
-    addNotification(candidates[candidateId]?.userId || '', `🪙 +${bonus} Estalecas Q.I. Recebidas!`, `Sua indicação para "${vacancyTitle}" foi aprovada pela empresa! Seus créditos já estão disponíveis para resgate.`, 'sistema');
+    addAudit('TECH_POINTS_REWARD_GRANTED', `Crédito de +${bonus} Tech Points concedido após aprovação validada de indicado (RN14)`, 'Motor de Recompensas Q.I.');
+    addNotification(candidates[candidateId]?.userId || '', `🪙 +${bonus} Tech Points Recebidos!`, `Sua indicação para "${vacancyTitle}" foi aprovada pela empresa! Seus créditos já estão disponíveis para resgate.`, 'sistema');
   };
 
 
@@ -1198,7 +1198,7 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
 
 
     setRewardTransactions(prev => [newTx, ...prev]);
-    addAudit('REWARD_REDEEMED', `Resgate de benefício "${item.title}" por ${item.costEstalecas} Estalecas Q.I.`, candidates[candidateId]?.name || candidateId);
+    addAudit('REWARD_REDEEMED', `Resgate de benefício "${item.title}" por ${item.costEstalecas} Tech Points`, candidates[candidateId]?.name || candidateId);
     addNotification(candidates[candidateId]?.userId || '', '🎁 Benefício Resgatado com Sucesso!', `Seu voucher para "${item.title}" foi emitido e enviado ao seu e-mail cadastrado.`, 'sistema');
     return true;
   };
@@ -1793,7 +1793,7 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
 
   const updateCommercialConfig = (newConfig: CommercialConfig) => {
     setCommercialConfig(newConfig);
-    addAudit('COMMERCIAL_PARAMS_UPDATED', `Parâmetros comerciais atualizados pelo Admin: Desbloqueio avulso R$ ${newConfig.singleUnlockPriceBrl}, Pacote R$ ${newConfig.package5PriceBrl}, Top N=${newConfig.matchExpressTopN}, Bônus Indicação=${newConfig.referralBonusEstalecas} Estalecas (RN05)`, 'Admin Q.I. Match');
+    addAudit('COMMERCIAL_PARAMS_UPDATED', `Parâmetros comerciais atualizados pelo Admin: Desbloqueio avulso R$ ${newConfig.singleUnlockPriceBrl}, Pacote R$ ${newConfig.package5PriceBrl}, Top N=${newConfig.matchExpressTopN}, Bônus Indicação=${newConfig.referralBonusEstalecas} Tech Points (RN05)`, 'Admin Q.I. Match');
   };
 
 

@@ -151,7 +151,7 @@ export const AdminDashboardView: React.FC = () => {
           </div>
 
           <div>
-            <label className="block text-muted-foreground font-semibold mb-1">Bônus Indicação (🪙)</label>
+            <label className="block text-muted-foreground font-semibold mb-1">Bônus Indicação (Tech Points)</label>
             <input
               type="number"
               value={referralBonus}

@@ -228,7 +228,7 @@ export const MainLayout: React.FC = () => {
       case 'candidato-replica': return 'Solicitar Revisão de Avaliação (Art. 20 LGPD)';
       case 'candidato-vagas': return 'Oportunidades Compatíveis';
       case 'candidato-processos': return 'Meus Processos Seletivos';
-      case 'candidato-estalecas': return 'Indicações & Estalecas Q.I.';
+      case 'candidato-estalecas': return 'Indicações & Tech Points';
       case 'empresa-vagas': return 'Painel da Empresa & Vagas';
       case 'empresa-shortlist': return 'Talentos & Shortlist';
       case 'empresa-vaga-detalhe': return 'Gestão da Vaga & Candidatos';

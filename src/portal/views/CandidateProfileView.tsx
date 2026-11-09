@@ -318,14 +318,14 @@ export const CandidateProfileView: React.FC = () => {
             </div>
           </div>
 
-          {/* Medidores de Progresso (XP, Estalecas e Completude) */}
+          {/* Medidores de Progresso (XP, Tech Points e Completude) */}
           <div className="flex flex-wrap sm:flex-nowrap items-center gap-3 bg-[#0B0E17] border border-[#1E2638] p-3 rounded-xl shrink-0">
-            {/* Saldo de Estalecas */}
+            {/* Saldo de Tech Points */}
             <div className="px-3 py-2 bg-amber-400/10 border border-amber-400/25 rounded-lg text-amber-400 font-mono text-xs font-bold flex items-center gap-2">
               <Coins className="w-4 h-4 text-amber-400 animate-pulse" />
               <div>
                 <span className="text-[10px] text-slate-400 block font-normal">Recompensas</span>
-                <span>250 Estalecas</span>
+                <span>250 Tech Points</span>
               </div>
             </div>
 
@@ -419,7 +419,7 @@ export const CandidateProfileView: React.FC = () => {
               Desbloqueie a Guilda Técnica • Comunidade Q.I. Match
             </strong>
             <p className="text-xs text-slate-300 leading-relaxed max-w-2xl">
-              Conecte-se com outros desenvolvedores, compartilhe artigos técnicos, ganhe indicações e acumule Estalecas Q.I. para trocar por mentorias e certificações.
+              Conecte-se com outros desenvolvedores, compartilhe artigos técnicos, ganhe indicações e acumule Tech Points para trocar por mentorias e certificações.
             </p>
           </div>
           <button

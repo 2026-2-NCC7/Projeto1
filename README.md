@@ -161,7 +161,7 @@ A jornada do profissional prioriza a autonomia, clareza métrica e proteção co
         <li><strong>Taxa de Conversão Real:</strong> Acompanhamento gráfico de convites aceitos e propostas recebidas.</li>
         <li><strong>Aderência Média Verificada:</strong> Percentual consolidado de compatibilidade entre o perfil comprovado e as vagas ativas.</li>
         <li><strong>Radar de Competências:</strong> Visualização de proficiências comprovadas vs. em desenvolvimento.</li>
-        <li><strong>Saldo de Estalecas:</strong> Carteira de pontos acumulados através de indicações convertidas.</li>
+        <li><strong>Saldo de Tech Points:</strong> Carteira de pontos acumulados através de indicações convertidas.</li>
       </ul>
     </td>
     <td width="50%">
