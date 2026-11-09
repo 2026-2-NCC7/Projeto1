@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import {
   FileText, CheckCircle, AlertTriangle, MessageSquare, Quote,
-  RotateCcw, Sparkles, Shield, User, ChevronDown
+  RotateCcw, Sparkles, Shield, User, ChevronDown, RefreshCw
 } from 'lucide-react';
 import { Card } from '../components/Card';
 import { Badge } from '../components/Badge';
@@ -36,17 +36,20 @@ export const CompetencyReportPage: React.FC<CompetencyReportPageProps> = ({
   }, [selectedReportId]);
 
   const loadReports = async () => {
+    setLoading(true);
     try {
       const data = await api.listReports();
       setReports(data);
-      if (data.length > 0) {
-        const targetId = initialReportId && data.some((r) => r.id === initialReportId)
-          ? initialReportId
-          : data[0].id;
+      if (data && data.length > 0) {
+        // Se houver um initialReportId e ele existir na lista, usa ele;
+        // caso contrário, prioriza o relatório do cenário de injeção de prompt auditada (Rafael Costa) ou o primeiro
+        const foundInitial = initialReportId ? data.find((r) => r.id === initialReportId) : null;
+        const rafaelReport = data.find((r) => r.candidate_name?.includes('Rafael') || r.id === 'a18889cb-9d48-4505-8327-a993a66ca8ab');
+        const targetId = foundInitial?.id || rafaelReport?.id || data[0].id;
         setSelectedReportId(targetId);
       }
-    } catch {
-      // ignore
+    } catch (err) {
+      console.error('[CompetencyReportPage] Erro ao carregar relatórios:', err);
     } finally {
       setLoading(false);
     }
@@ -57,8 +60,8 @@ export const CompetencyReportPage: React.FC<CompetencyReportPageProps> = ({
       const rep = await api.getReport(id);
       setActiveReport(rep);
       setActiveVersion(rep.active_version || rep.versions?.[0] || null);
-    } catch {
-      // ignore
+    } catch (err) {
+      console.error('[CompetencyReportPage] Erro ao carregar detalhes:', err);
     }
   };
 
@@ -79,8 +82,8 @@ export const CompetencyReportPage: React.FC<CompetencyReportPageProps> = ({
       const v = await api.getReportVersions(activeReport.id);
       const found = v.find((ver) => ver.version_number === versionNumber);
       if (found) setActiveVersion(found);
-    } catch {
-      // ignore
+    } catch (err) {
+      console.error('[CompetencyReportPage] Erro ao selecionar versão:', err);
     }
   };
 
@@ -124,7 +127,37 @@ export const CompetencyReportPage: React.FC<CompetencyReportPageProps> = ({
         </div>
       )}
 
-      {activeReport && activeVersion && (
+      {/* Loading Skeleton */}
+      {loading && (
+        <div style={{ textAlign: 'center', padding: '4rem 1rem' }}>
+          <div className="w-8 h-8 border-2 border-amber-400 border-t-transparent rounded-full animate-spin mx-auto mb-3" />
+          <p style={{ color: 'var(--text-secondary)', fontSize: '0.9rem', fontFamily: 'monospace' }}>
+            Carregando laudo técnico consolidado e evidências de áudio...
+          </p>
+        </div>
+      )}
+
+      {/* Empty State com Recarga e Resiliência */}
+      {!loading && (!activeReport || !activeVersion) && (
+        <div style={{ textAlign: 'center', padding: '3rem 1.5rem', background: 'var(--bg-card)', borderRadius: '16px', border: '1px solid var(--border-subtle)', margin: '2rem 0' }}>
+          <AlertTriangle size={36} style={{ color: 'var(--accent-amber)', margin: '0 auto 1rem' }} />
+          <h3 style={{ fontSize: '1.1rem', marginBottom: '0.5rem', color: 'var(--text-primary)' }}>Nenhum laudo encontrado no servidor</h3>
+          <p style={{ color: 'var(--text-secondary)', fontSize: '0.85rem', maxWidth: '420px', margin: '0 auto 1.5rem' }}>
+            O laudo de competências está temporariamente inacessível. Clique abaixo para carregar os relatórios de auditoria técnica pré-computados.
+          </p>
+          <button
+            type="button"
+            onClick={loadReports}
+            className="btn btn-primary"
+            style={{ fontSize: '0.85rem', display: 'inline-flex', alignItems: 'center', gap: '0.5rem' }}
+          >
+            <RefreshCw size={14} /> Carregar Laudos Demonstrativos
+          </button>
+        </div>
+      )}
+
+      {/* Exibição Completa do Relatório */}
+      {!loading && activeReport && activeVersion && (
         <>
           {/* Metadata & Version Switcher Bar */}
           <div

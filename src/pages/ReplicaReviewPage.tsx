@@ -28,8 +28,8 @@ export const ReplicaReviewPage: React.FC<ReplicaReviewPageProps> = ({
 
   useEffect(() => {
     Promise.all([
-      api.listReports(),
-      api.listSkills(),
+      api.listReports().catch(() => []),
+      api.listSkills().catch(() => []),
     ]).then(([reps, sks]) => {
       setReports(reps);
       setSkillsCatalog(sks);

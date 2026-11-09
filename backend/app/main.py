@@ -80,6 +80,10 @@ def initialize_database_data():
         ]
         vector_store.index_skill_catalog(skills_for_indexing)
 
+        # 4. Seed demo snapshot (candidatos, entrevistas, laudos de IA) se banco for novo
+        from app.data.snapshot_loader import load_snapshot_if_empty
+        load_snapshot_if_empty(db)
+
     except Exception as e:
         logger.error(f"Error during database initialization: {e}")
         db.rollback()
