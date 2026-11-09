@@ -131,14 +131,14 @@ export const SidebarNav: React.FC<SidebarNavProps> = ({ currentTab, setCurrentTa
 
   return (
     <aside 
-      className={`shrink-0 transition-all duration-300 ease-in-out border-r border-[#1E2638] bg-[#0A0D14] flex flex-col justify-between ${
+      className={`shrink-0 transition-all duration-300 ease-in-out border-r border-[#1E2638] bg-[#0A0D14] lg:sticky lg:top-16 lg:self-start lg:h-[calc(100vh-4rem)] lg:max-h-[calc(100vh-4rem)] overflow-y-auto no-scrollbar z-20 flex flex-col ${
         isCollapsed ? 'w-full lg:w-[72px]' : 'w-full lg:w-[264px]'
       }`}
     >
-      <div className="p-4 space-y-6">
+      <div className={`p-4 flex flex-col ${isCollapsed ? 'space-y-4' : 'space-y-3.5'}`}>
         
         {/* Cabeçalho do Menu Lateral */}
-        <div className="flex items-center justify-between pb-4 border-b border-[#1E2638]">
+        <div className="flex items-center justify-between pb-3.5 border-b border-[#1E2638]">
           {!isCollapsed ? (
             <div className="flex items-center gap-3 min-w-0">
               <div className="w-9 h-9 rounded-xl bg-amber-400 text-black font-black font-heading text-sm flex items-center justify-center shrink-0 shadow-md shadow-amber-500/20">
@@ -184,8 +184,8 @@ export const SidebarNav: React.FC<SidebarNavProps> = ({ currentTab, setCurrentTa
           </div>
         )}
 
-        {/* Lista de Itens do Menu (Mais espaçados e maiores) */}
-        <nav className="space-y-2">
+        {/* Lista de Itens do Menu (Organizada e Conectada) */}
+        <nav className="space-y-1.5">
           {currentItems.map(item => {
             const isActive = currentTab === item.id;
 
@@ -221,13 +221,13 @@ export const SidebarNav: React.FC<SidebarNavProps> = ({ currentTab, setCurrentTa
               );
             }
 
-            // ==================== MODO ESTENDIDO (Mais espaçado e maior) ====================
+            // ==================== MODO ESTENDIDO ====================
             return (
               <button
                 key={item.id}
                 type="button"
                 onClick={() => setCurrentTab(item.id)}
-                className={`w-full flex items-center justify-between px-3.5 py-3 rounded-xl text-sm transition-all group text-left relative ${
+                className={`w-full flex items-center justify-between px-3.5 py-2.5 rounded-xl text-sm transition-all group text-left relative ${
                   isActive
                     ? 'bg-[#161E2E] text-amber-400 font-bold border-l-4 border-amber-400 shadow-sm'
                     : 'text-slate-300 hover:text-white hover:bg-[#121824] font-medium'
@@ -252,55 +252,99 @@ export const SidebarNav: React.FC<SidebarNavProps> = ({ currentTab, setCurrentTa
           })}
         </nav>
 
-      </div>
-
-      {/* =========================================================================
-          RODAPÉ LATERAL (APROVEITA O ESPAÇO EM BAIXO COM INFORMAÇÕES RELEVANTES)
-         ========================================================================= */}
-      <div className="p-4 border-t border-[#1E2638] space-y-3 bg-[#0B0E16]">
+        {/* =========================================================================
+            INFORMAÇÕES DE NÍVEL / STATUS (AGORA JUNTAS DAS OPÇÕES, SEM VAZIO)
+           ========================================================================= */}
         {isCollapsed ? (
-          <div className="flex flex-col items-center gap-3 py-2">
-            <span className="w-8 h-8 rounded-lg bg-[#161D2B] border border-[#232D3F] flex items-center justify-center font-mono font-bold text-xs text-amber-400" title={`Nível ${lvl}`}>
+          <div className="pt-3 border-t border-[#1E2638] flex flex-col items-center gap-2.5">
+            <div 
+              className="w-10 h-10 rounded-xl bg-[#121722] border border-[#1E2638] flex items-center justify-center font-mono font-bold text-xs text-amber-400 shadow-sm"
+              title={`Nível ${lvl} • ${seniority} (Rank ${lvl === 3 ? 'A' : 'B'})`}
+            >
               L{lvl}
-            </span>
-            <div className="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-pulse" title="Motor IA & Whisper Ativo" />
+            </div>
+            <div 
+              className="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-pulse" 
+              title="Motor IA & Whisper Ativo • LGPD Conforme" 
+            />
           </div>
         ) : (
-          <>
-            {/* Widget Informativo do Usuário / Ficha Técnica */}
+          <div className="pt-2.5 border-t border-[#1E2638] space-y-3">
+            {/* Widget Informativo do Candidato / Ficha Técnica RPG */}
             {isCandidate && (
-              <div className="p-3 rounded-xl bg-[#121722] border border-[#1E2638] space-y-2">
+              <div className="p-3 rounded-xl bg-[#121722] border border-[#1E2638] space-y-2 shadow-xs">
                 <div className="flex items-center justify-between text-xs font-mono">
                   <span className="text-slate-300 font-bold flex items-center gap-1.5">
                     <Award className="w-3.5 h-3.5 text-amber-400" />
                     <span>Nível {lvl} • {seniority}</span>
                   </span>
-                  <span className="text-amber-400 font-bold text-[11px]">Rank B</span>
+                  <span className="text-amber-400 font-bold text-[10px] px-1.5 py-0.5 rounded bg-amber-400/10 border border-amber-400/25">
+                    Rank {lvl === 3 ? 'A' : 'B'}
+                  </span>
                 </div>
 
                 {/* Mini Barra de XP */}
                 <div>
                   <div className="flex justify-between text-[10px] font-mono text-slate-400 mb-1">
                     <span>XP Técnico</span>
-                    <span className="text-amber-400">85%</span>
+                    <span className="text-amber-400 font-semibold">{lvl === 3 ? '95%' : lvl === 2 ? '85%' : '65%'}</span>
                   </div>
                   <div className="w-full h-1.5 bg-[#1B2230] rounded-full overflow-hidden">
-                    <div className="h-full bg-gradient-to-r from-amber-400 to-emerald-400 rounded-full w-[85%]" />
+                    <div 
+                      className="h-full bg-gradient-to-r from-amber-400 to-emerald-400 rounded-full" 
+                      style={{ width: lvl === 3 ? '95%' : lvl === 2 ? '85%' : '65%' }}
+                    />
                   </div>
                 </div>
 
-                <div className="flex items-center justify-between text-[10px] font-mono text-slate-400 pt-1 border-t border-[#1F2737]">
-                  <span className="flex items-center gap-1 text-emerald-400">
+                <div className="flex items-center justify-between text-[10px] font-mono text-slate-400 pt-1.5 border-t border-[#1F2737]">
+                  <span className="flex items-center gap-1 text-emerald-400 font-medium">
                     <Lock className="w-3 h-3" />
                     <span>Modo Ghost</span>
                   </span>
-                  <span>LGPD Art. 20</span>
+                  <span className="text-slate-400">LGPD Art. 20</span>
+                </div>
+              </div>
+            )}
+
+            {/* Widget B2B para Empresa */}
+            {isCompany && (
+              <div className="p-3 rounded-xl bg-[#121722] border border-[#1E2638] space-y-1.5 shadow-xs">
+                <div className="flex items-center justify-between text-xs font-mono">
+                  <span className="text-slate-300 font-bold flex items-center gap-1.5">
+                    <Building2 className="w-3.5 h-3.5 text-amber-400" />
+                    <span>Plano Corporativo</span>
+                  </span>
+                  <span className="text-emerald-400 font-bold text-[10px] px-1.5 py-0.5 rounded bg-emerald-400/10 border border-emerald-400/25">
+                    Ativo
+                  </span>
+                </div>
+                <div className="text-[11px] font-mono text-slate-400">
+                  Slots de Vagas: <span className="text-amber-400 font-bold">{companyCredits} disponíveis</span>
+                </div>
+              </div>
+            )}
+
+            {/* Widget Governança para Admin */}
+            {isAdmin && (
+              <div className="p-3 rounded-xl bg-[#121722] border border-[#1E2638] space-y-1.5 shadow-xs">
+                <div className="flex items-center justify-between text-xs font-mono">
+                  <span className="text-slate-300 font-bold flex items-center gap-1.5">
+                    <ShieldCheck className="w-3.5 h-3.5 text-amber-400" />
+                    <span>Auditoria TCC</span>
+                  </span>
+                  <span className="text-amber-400 font-bold text-[10px] px-1.5 py-0.5 rounded bg-amber-400/10 border border-amber-400/25">
+                    Governança
+                  </span>
+                </div>
+                <div className="text-[10px] font-mono text-slate-400">
+                  Logs de IA & Revisões Art. 20
                 </div>
               </div>
             )}
 
             {/* Badges de Status da Plataforma */}
-            <div className="space-y-1.5 pt-1">
+            <div className="space-y-1.5 px-0.5">
               <div className="flex items-center gap-2 text-[11px] font-mono text-emerald-400 font-medium">
                 <span className="w-2 h-2 rounded-full bg-emerald-400 shrink-0 animate-pulse" />
                 <span className="truncate">Motor IA & Whisper Ativo</span>
@@ -310,10 +354,10 @@ export const SidebarNav: React.FC<SidebarNavProps> = ({ currentTab, setCurrentTa
                 <span className="truncate">Criptografia & Double Opt-In</span>
               </div>
             </div>
-          </>
+          </div>
         )}
-      </div>
 
+      </div>
     </aside>
   );
 };
