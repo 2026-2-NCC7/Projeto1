@@ -138,43 +138,40 @@ export const SidebarNav: React.FC<SidebarNavProps> = ({ currentTab, setCurrentTa
     >
       <div className={`p-4 flex flex-col ${isCollapsed ? 'space-y-4' : 'space-y-3.5'}`}>
         
-        {/* Cabeçalho do Menu Lateral */}
-        <div className="flex items-center justify-between pb-3.5 border-b border-border dark:border-[#1E2638]">
+        {/* Cabeçalho do Menu Lateral: Perfil Ativo & Botão de Recolher */}
+        <div className="flex items-center justify-between pb-3 border-b border-border dark:border-[#1E2638]">
           {!isCollapsed ? (
-            <div className="flex items-center gap-3 min-w-0">
-              <div className="w-9 h-9 rounded-xl bg-amber-400 text-black font-black font-heading text-sm flex items-center justify-center shrink-0 shadow-md shadow-amber-500/20">
-                Q
-              </div>
-              <div className="min-w-0">
-                <span className="font-heading font-extrabold text-sm text-foreground dark:text-white block truncate leading-tight">
-                  Q.I. Match
-                </span>
-                <span className="font-mono text-[10px] uppercase tracking-wider text-amber-600 dark:text-amber-400 block font-bold truncate mt-0.5">
+            <>
+              <div className="flex items-center gap-2 min-w-0">
+                <span className="px-2.5 py-1 rounded-lg bg-amber-500/10 text-amber-700 dark:bg-amber-400/10 dark:text-amber-400 font-mono text-[10px] font-bold uppercase tracking-wider border border-amber-500/20 dark:border-amber-400/20 truncate">
                   {roleLabel}
                 </span>
+                <span className="text-[10px] text-emerald-600 dark:text-emerald-400 font-mono font-semibold flex items-center gap-1">
+                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 dark:bg-emerald-400 animate-pulse" />
+                  Ativo
+                </span>
               </div>
-            </div>
+              <button
+                type="button"
+                onClick={toggleCollapsed}
+                title="Recolher Menu Lateral"
+                className="p-1.5 rounded-lg text-muted-foreground hover:text-foreground hover:bg-muted dark:text-slate-400 dark:hover:text-white dark:hover:bg-[#161D2B] transition-colors shrink-0"
+              >
+                <PanelLeftClose className="w-4 h-4" />
+              </button>
+            </>
           ) : (
-            <div className="w-full flex justify-center py-1">
-              <div className="w-9 h-9 rounded-xl bg-amber-400 text-black font-black font-heading text-sm flex items-center justify-center shadow-md shadow-amber-500/20">
-                Q
-              </div>
+            <div className="w-full flex justify-center py-0.5">
+              <button
+                type="button"
+                onClick={toggleCollapsed}
+                title="Estender Menu Lateral"
+                className="p-1.5 rounded-lg text-muted-foreground hover:text-foreground hover:bg-muted dark:text-slate-400 dark:hover:text-white dark:hover:bg-[#161D2B] transition-colors"
+              >
+                <PanelLeft className="w-4 h-4 text-amber-500 dark:text-amber-400" />
+              </button>
             </div>
           )}
-
-          {/* Botão de Toggle Estender / Recolher */}
-          <button
-            type="button"
-            onClick={toggleCollapsed}
-            title={isCollapsed ? 'Estender Menu Lateral' : 'Recolher Menu Lateral'}
-            className="p-1.5 rounded-lg text-muted-foreground hover:text-foreground hover:bg-muted dark:text-slate-400 dark:hover:text-white dark:hover:bg-[#161D2B] transition-colors shrink-0"
-          >
-            {isCollapsed ? (
-              <PanelLeft className="w-4 h-4 text-amber-500 dark:text-amber-400" />
-            ) : (
-              <PanelLeftClose className="w-4 h-4" />
-            )}
-          </button>
         </div>
 
         {/* Rótulo de Seção (Apenas quando expandido) */}
