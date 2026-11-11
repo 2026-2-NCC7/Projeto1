@@ -87,6 +87,7 @@ export const CompanyDashboardView: React.FC<CompanyDashboardViewProps> = ({
     currentCompany,
     vacancies,
     selectionProcesses,
+    candidates,
     createVacancy
   } = useApp();
 
