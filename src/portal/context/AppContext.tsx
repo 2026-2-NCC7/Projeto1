@@ -140,6 +140,9 @@ interface AppContextType {
 
   // Ações Empresa
   createVacancy: (newVacancy: Omit<Vacancy, 'id' | 'companyId' | 'createdAt'>) => void;
+  isCreateVacancyModalOpen: boolean;
+  openCreateVacancyModal: () => void;
+  closeCreateVacancyModal: () => void;
   unlockCandidateProfile: (processId: string, method: 'credit' | 'single_purchase') => boolean;
   buyCompanyCreditPackage: (creditsCount: number, priceBrl: number, packageLabel: string) => void;
   updateProcessStage: (processId: string, nextStage: SelectionStage) => void;
@@ -352,6 +355,9 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
   const [companyInvoices, setCompanyInvoices] = useState<CompanyInvoice[]>(SEED_COMPANY_INVOICES);
   const [commercialConfig, setCommercialConfig] = useState<CommercialConfig>(SEED_COMMERCIAL_CONFIG);
   const [moderationReports, setModerationReports] = useState<ModerationReport[]>(SEED_MODERATION_REPORTS);
+  const [isCreateVacancyModalOpen, setIsCreateVacancyModalOpen] = useState(false);
+  const openCreateVacancyModal = () => setIsCreateVacancyModalOpen(true);
+  const closeCreateVacancyModal = () => setIsCreateVacancyModalOpen(false);
 
   // Identifica o candidato ativo (suporta contas demo e novos profissionais cadastrados)
   const currentCandidateId =
@@ -1905,6 +1911,9 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
       simulateReferralConversion,
       joinCommunity,
       createVacancy,
+      isCreateVacancyModalOpen,
+      openCreateVacancyModal,
+      closeCreateVacancyModal,
       unlockCandidateProfile,
       buyCompanyCreditPackage,
       updateProcessStage,

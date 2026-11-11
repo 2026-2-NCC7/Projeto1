@@ -43,7 +43,7 @@ interface NavItem {
 }
 
 export const SidebarNav: React.FC<SidebarNavProps> = ({ currentTab, setCurrentTab }) => {
-  const { activePersona, session, currentUser, companyCredits, candidates, currentCandidateId } = useApp();
+  const { activePersona, session, currentUser, companyCredits, candidates, currentCandidateId, openCreateVacancyModal } = useApp();
 
   const [isCollapsed, setIsCollapsed] = useState<boolean>(() => {
     try {
@@ -333,11 +333,14 @@ export const SidebarNav: React.FC<SidebarNavProps> = ({ currentTab, setCurrentTa
                 </div>
                 <button
                   type="button"
-                  onClick={() => setCurrentTab('empresa-vagas')}
-                  className="w-full mt-1.5 py-1.5 bg-amber-400/15 hover:bg-amber-400 hover:text-black border border-amber-400/30 text-amber-600 dark:text-amber-400 font-mono text-[10px] font-bold rounded-lg transition-all flex items-center justify-center gap-1.5 shadow-xs"
+                  onClick={() => {
+                    setCurrentTab('empresa-vagas');
+                    openCreateVacancyModal();
+                  }}
+                  className="w-full mt-2 py-2 bg-amber-400 hover:bg-amber-300 text-slate-950 font-mono text-[11px] font-black rounded-lg transition-all flex items-center justify-center gap-1.5 shadow-md shadow-amber-500/20 active:scale-95"
                 >
                   <Plus className="w-3.5 h-3.5 stroke-[3]" />
-                  <span>Publicar Nova Vaga</span>
+                  <span>+ Publicar Nova Vaga</span>
                 </button>
               </div>
             )}

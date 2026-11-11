@@ -95,7 +95,10 @@ export const CompanyDashboardView: React.FC<CompanyDashboardViewProps> = ({
     selectionProcesses,
     candidates,
     companyCredits,
-    createVacancy
+    createVacancy,
+    isCreateVacancyModalOpen,
+    openCreateVacancyModal,
+    closeCreateVacancyModal
   } = useApp();
 
   // Estados para Gestão de Vagas Criadas e Detalhes
@@ -282,6 +285,18 @@ export const CompanyDashboardView: React.FC<CompanyDashboardViewProps> = ({
   // Modal de Criação de Vaga em 3 etapas (funcionalidade existente preservada)
   const [showNewVacancyModal, setShowNewVacancyModal] = useState(false);
   const [modalStep, setModalStep] = useState<1 | 2 | 3>(1);
+
+  useEffect(() => {
+    if (isCreateVacancyModalOpen) {
+      setModalStep(1);
+      setShowNewVacancyModal(true);
+    }
+  }, [isCreateVacancyModalOpen]);
+
+  const handleCloseVacancyModal = () => {
+    setShowNewVacancyModal(false);
+    closeCreateVacancyModal();
+  };
   const [title, setTitle] = useState('');
   const [area, setArea] = useState('Backend');
   const [seniority, setSeniority] = useState<Seniority>('Sênior');
@@ -418,7 +433,7 @@ export const CompanyDashboardView: React.FC<CompanyDashboardViewProps> = ({
       setTitle('');
       setFormError('');
       setModalStep(1);
-      setShowNewVacancyModal(false);
+      handleCloseVacancyModal();
       showToast(`✓ Vaga "${title.trim()}" ativada! 1 Slot consumido no Pipeline.`);
     }
   };
@@ -1822,7 +1837,7 @@ export const CompanyDashboardView: React.FC<CompanyDashboardViewProps> = ({
       {/* =========================================================================
           MODAL GAMIFICADO: FORJA DE MISSÃO TÉCNICA EM 3 ETAPAS
       ========================================================================= */}
-      {showNewVacancyModal && (
+      {(showNewVacancyModal || isCreateVacancyModalOpen) && (
         <div className="fixed inset-0 z-50 bg-black/85 backdrop-blur-md flex items-center justify-center p-3 sm:p-4 overflow-y-auto">
           <div className="bg-[#0F1420] border border-[#232D3F] rounded-2xl max-w-2xl w-full p-5 sm:p-6 space-y-5 shadow-2xl relative overflow-hidden text-slate-100 my-auto">
             
@@ -1863,7 +1878,7 @@ export const CompanyDashboardView: React.FC<CompanyDashboardViewProps> = ({
                 </div>
                 <button
                   type="button"
-                  onClick={() => setShowNewVacancyModal(false)}
+                  onClick={handleCloseVacancyModal}
                   className="p-1.5 rounded-lg text-slate-400 hover:text-white hover:bg-[#161D2B] transition-colors"
                   title="Fechar forja de vaga"
                 >
