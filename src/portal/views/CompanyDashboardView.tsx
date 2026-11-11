@@ -26,7 +26,20 @@ import {
   Zap,
   Volume2,
   Eye,
-  Info
+  Info,
+  Globe,
+  Laptop,
+  MapPin,
+  Briefcase,
+  Swords,
+  Rocket,
+  Target,
+  Award,
+  Coins,
+  Flame,
+  Layers,
+  Gamepad2,
+  Sliders
 } from 'lucide-react';
 import { api } from '../../services/api';
 import { Job, Company as ApiCompany } from '../../types';
@@ -264,10 +277,51 @@ export const CompanyDashboardView: React.FC<CompanyDashboardViewProps> = ({
   const [salaryMax, setSalaryMax] = useState<string>('22000');
   const [mandatorySkillsInput, setMandatorySkillsInput] = useState('Go, Python, Kafka, PostgreSQL, Kubernetes');
   const [softSkillsInput, setSoftSkillsInput] = useState('Arquitetura Limpa, Comunicação Técnica, Liderança');
+  const [contractTypeChoice, setContractTypeChoice] = useState<'CLT' | 'PJ' | 'Ambos'>('PJ');
   const [description, setDescription] = useState('Atuação no core bancário de pagamentos escaláveis com microsserviços orientados a eventos.');
   const [isUrgentMatchExpress, setIsUrgentMatchExpress] = useState(true);
   const [formError, setFormError] = useState('');
   const [isSavingVacancy, setIsSavingVacancy] = useState(false);
+
+  const popularStacks = [
+    'Python', 'Go', 'React', 'TypeScript', 'Node.js', 
+    'Kafka', 'PostgreSQL', 'Docker', 'Kubernetes', 'AWS', 
+    'Java', 'Next.js', 'GraphQL', 'Terraform', 'Rust'
+  ];
+
+  const popularSoftSkills = [
+    'Arquitetura Limpa', 'Comunicação Técnica', 
+    'Resolução de Problemas', 'Liderança Técnica', 'Code Review'
+  ];
+
+  const toggleSkill = (skill: string) => {
+    const list = mandatorySkillsInput.split(',').map(s => s.trim()).filter(Boolean);
+    const exists = list.some(s => s.toLowerCase() === skill.toLowerCase());
+    if (exists) {
+      setMandatorySkillsInput(list.filter(s => s.toLowerCase() !== skill.toLowerCase()).join(', '));
+    } else {
+      setMandatorySkillsInput([...list, skill].join(', '));
+    }
+  };
+
+  const toggleSoftSkill = (soft: string) => {
+    const list = softSkillsInput.split(',').map(s => s.trim()).filter(Boolean);
+    const exists = list.some(s => s.toLowerCase() === soft.toLowerCase());
+    if (exists) {
+      setSoftSkillsInput(list.filter(s => s.toLowerCase() !== soft.toLowerCase()).join(', '));
+    } else {
+      setSoftSkillsInput([...list, soft].join(', '));
+    }
+  };
+
+  // Estimador ao vivo de alcance de candidatos com base nas skills selecionadas
+  const estimatedMatches = Object.values(candidates).filter(c => {
+    if (c.visibility === 'Pausado') return false;
+    const candSkills = c.skills.map(s => s.name.toLowerCase());
+    const inputSkills = mandatorySkillsInput.toLowerCase().split(',').map(s => s.trim()).filter(Boolean);
+    if (inputSkills.length === 0) return true;
+    return inputSkills.some(is => candSkills.some(cs => cs.includes(is) || is.includes(cs)));
+  }).length || 8;
 
   const handleStep1Next = () => {
     if (!title.trim()) {
@@ -311,7 +365,7 @@ export const CompanyDashboardView: React.FC<CompanyDashboardViewProps> = ({
       mandatorySkills: mandatory.length ? mandatory : ['Python', 'Kafka'],
       desirableSkills: ['Kubernetes', 'Terraform'],
       softSkills: softs.length ? softs : ['Comunicação'],
-      contractTypes: ['CLT', 'PJ'] as WorkContractType[],
+      contractTypes: (contractTypeChoice === 'Ambos' ? ['CLT', 'PJ'] : [contractTypeChoice]) as WorkContractType[],
       modality,
       location,
       salaryMin: min,
@@ -328,7 +382,7 @@ export const CompanyDashboardView: React.FC<CompanyDashboardViewProps> = ({
         description,
         tech_vertical: area,
         seniority,
-        contract_type: 'PJ',
+        contract_type: contractTypeChoice === 'CLT' ? 'CLT' : 'PJ',
         work_model: 'REMOTO',
         min_salary: min,
         max_salary: max,
@@ -426,15 +480,16 @@ export const CompanyDashboardView: React.FC<CompanyDashboardViewProps> = ({
             </div>
           </div>
 
-          {/* Botão de Adição de Vaga / Consumo de Slot */}
+          {/* Botão de Adição de Vaga / Consumo de Slot (Gamificado & Destacado) */}
           <button
             onClick={() => {
               setModalStep(1);
               setShowNewVacancyModal(true);
             }}
-            className="px-4 py-2.5 bg-brand-yellow hover:bg-yellow-400 text-slate-950 text-xs font-bold font-heading rounded-xl flex items-center justify-center gap-2 transition-all shadow-md active:scale-95 shrink-0"
+            className="px-5 py-3 bg-amber-400 hover:bg-amber-300 text-slate-950 text-xs sm:text-sm font-black font-heading rounded-xl flex items-center justify-center gap-2.5 transition-all shadow-lg shadow-amber-500/25 hover:shadow-amber-500/40 hover:scale-[1.02] active:scale-95 shrink-0 border border-amber-300"
           >
-            <Plus className="w-4 h-4" /> Adicionar Nova Vaga / Consumir Slot
+            <Plus className="w-4 h-4 stroke-[3]" />
+            <span>Adicionar Nova Vaga • Consumir Slot</span>
           </button>
         </div>
 
@@ -1145,92 +1200,267 @@ export const CompanyDashboardView: React.FC<CompanyDashboardViewProps> = ({
       )}
 
       {/* =========================================================================
-          MODAL: CADASTRO DE VAGA EM 3 ETAPAS PROGRESSIVAS (CONECTADO E FUNCIONAL)
+          MODAL GAMIFICADO: FORJA DE MISSÃO TÉCNICA EM 3 ETAPAS
       ========================================================================= */}
       {showNewVacancyModal && (
-        <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4">
-          <div className="bg-[#111318] border border-[#262F40] rounded-xl max-w-lg w-full p-6 space-y-4 shadow-2xl animate-in fade-in zoom-in-95 duration-200">
+        <div className="fixed inset-0 z-50 bg-black/85 backdrop-blur-md flex items-center justify-center p-3 sm:p-4 overflow-y-auto">
+          <div className="bg-[#0F1420] border border-[#232D3F] rounded-2xl max-w-2xl w-full p-5 sm:p-6 space-y-5 shadow-2xl relative overflow-hidden text-slate-100 my-auto">
             
-            {/* Cabeçalho do Modal */}
-            <div className="flex items-center justify-between border-b border-[#262F40] pb-3">
-              <div>
-                <span className="text-[10px] font-mono font-bold text-brand-yellow uppercase tracking-wider block">
-                  Etapa {modalStep} de 3
-                </span>
-                <h3 className="font-heading font-bold text-base text-white">
-                  {modalStep === 1 && 'Informações Básicas da Vaga'}
-                  {modalStep === 2 && 'Requisitos e Competências'}
-                  {modalStep === 3 && 'Revisão e Ativação do Slot'}
-                </h3>
+            {/* Efeitos de Luz Ambiente */}
+            <div className="absolute -top-20 -right-20 w-52 h-52 bg-amber-500/10 rounded-full blur-3xl pointer-events-none" />
+            <div className="absolute -bottom-20 -left-20 w-52 h-52 bg-emerald-500/10 rounded-full blur-3xl pointer-events-none" />
+
+            {/* Cabeçalho do HUD Gamificado */}
+            <div className="flex items-center justify-between border-b border-[#232D3F] pb-4">
+              <div className="flex items-center gap-3 min-w-0">
+                <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-amber-400 to-amber-600 p-0.5 shadow-md shadow-amber-500/20 shrink-0">
+                  <div className="w-full h-full bg-[#0D111A] rounded-[10px] flex items-center justify-center text-amber-400">
+                    <Rocket className="w-6 h-6" />
+                  </div>
+                </div>
+                <div className="min-w-0">
+                  <div className="flex items-center gap-2">
+                    <span className="text-[10px] font-mono font-bold text-amber-400 uppercase tracking-wider flex items-center gap-1">
+                      <Flame className="w-3 h-3 text-amber-400" /> FORJA DE MISSÃO TÉCNICA
+                    </span>
+                    <span className="text-slate-600">•</span>
+                    <span className="text-[10px] font-mono text-emerald-400 bg-emerald-400/10 px-2 py-0.5 rounded-full border border-emerald-400/20">
+                      Slot B2B Ativo
+                    </span>
+                  </div>
+                  <h3 className="font-heading font-extrabold text-base sm:text-lg text-white truncate">
+                    {modalStep === 1 && 'Fase 1: Diretrizes da Vaga & Recompensa Salarial'}
+                    {modalStep === 2 && 'Fase 2: Forja de Requisitos & Calibração de IA'}
+                    {modalStep === 3 && 'Fase 3: Contrato de Missão & Ativação de Slot'}
+                  </h3>
+                </div>
               </div>
-              <button
-                type="button"
-                onClick={() => setShowNewVacancyModal(false)}
-                className="text-slate-400 hover:text-white p-1"
-              >
-                <X className="w-5 h-5" />
-              </button>
+
+              <div className="flex items-center gap-2 shrink-0">
+                <div className="hidden sm:flex items-center gap-2 px-3 py-1 bg-amber-400/10 border border-amber-400/25 rounded-lg text-amber-400 font-mono text-xs font-bold">
+                  <Coins className="w-3.5 h-3.5 text-amber-400 animate-pulse" />
+                  <span>{companyCredits} Slots Livres</span>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setShowNewVacancyModal(false)}
+                  className="p-1.5 rounded-lg text-slate-400 hover:text-white hover:bg-[#161D2B] transition-colors"
+                  title="Fechar forja de vaga"
+                >
+                  <X className="w-5 h-5" />
+                </button>
+              </div>
             </div>
 
-            {/* Etapa 1: Básicas */}
+            {/* Barra de Progresso de XP da Missão */}
+            <div className="space-y-1.5">
+              <div className="flex justify-between items-center text-[11px] font-mono">
+                <span className="text-amber-400 font-bold flex items-center gap-1">
+                  <Zap className="w-3.5 h-3.5 text-amber-400" />
+                  {modalStep === 1 ? '100 XP' : modalStep === 2 ? '250 XP' : '400 XP'} de Governança
+                </span>
+                <span className="text-slate-400">Fase {modalStep} de 3 • {modalStep === 1 ? '33%' : modalStep === 2 ? '66%' : '100%'}</span>
+              </div>
+              <div className="w-full h-2 bg-[#1B2230] rounded-full overflow-hidden">
+                <div 
+                  className="h-full bg-gradient-to-r from-amber-400 to-emerald-400 rounded-full transition-all duration-500"
+                  style={{ width: modalStep === 1 ? '33%' : modalStep === 2 ? '66%' : '100%' }}
+                />
+              </div>
+            </div>
+
+            {/* Mapa de Fases (Stepper Gamificado) */}
+            <div className="grid grid-cols-3 gap-2">
+              {[
+                { step: 1, label: 'Diretrizes & Salário', icon: <Target className="w-3.5 h-3.5" /> },
+                { step: 2, label: 'Runas & Requisitos', icon: <Swords className="w-3.5 h-3.5" /> },
+                { step: 3, label: 'Ativação & Slot', icon: <Rocket className="w-3.5 h-3.5" /> }
+              ].map(s => {
+                const isCurrent = modalStep === s.step;
+                const isCompleted = modalStep > s.step;
+                return (
+                  <div 
+                    key={s.step}
+                    className={`p-2.5 rounded-xl border text-xs font-mono flex items-center gap-2 transition-all ${
+                      isCurrent
+                        ? 'bg-[#182030] border-amber-400/60 text-amber-300 shadow-sm'
+                        : isCompleted
+                        ? 'bg-emerald-500/10 border-emerald-500/30 text-emerald-400'
+                        : 'bg-[#0D111A] border-[#1F2737] text-slate-500'
+                    }`}
+                  >
+                    <div className={`w-5 h-5 rounded-md flex items-center justify-center font-bold text-[10px] shrink-0 ${
+                      isCurrent ? 'bg-amber-400 text-black' : isCompleted ? 'bg-emerald-400 text-black' : 'bg-[#161D2B] text-slate-400'
+                    }`}>
+                      {isCompleted ? <Check className="w-3 h-3 stroke-[3]" /> : s.step}
+                    </div>
+                    <span className="truncate font-semibold hidden sm:inline">{s.label}</span>
+                    <span className="truncate font-semibold sm:hidden">{s.step}ª Fase</span>
+                  </div>
+                );
+              })}
+            </div>
+
+            {/* ==================== FASE 1: DIRETRIZES & SALÁRIO ==================== */}
             {modalStep === 1 && (
-              <div className="space-y-3 text-xs">
+              <div className="space-y-4 text-xs">
+                
+                {/* Título da Vaga e Sugestões */}
                 <div>
-                  <label className="block font-semibold text-slate-200 mb-1">Título da Vaga *</label>
+                  <label className="block font-semibold text-slate-200 text-xs mb-1.5 flex items-center justify-between">
+                    <span>Título da Vaga / Posição *</span>
+                    <span className="text-[10px] text-amber-400 font-mono">+50 XP</span>
+                  </label>
                   <input
                     type="text"
                     value={title}
                     onChange={(e) => setTitle(e.target.value)}
                     placeholder="Ex: Engenheiro(a) de Software Backend Sênior"
-                    className="w-full h-9 px-3 bg-[#0c0e12] border border-[#262F40] rounded-lg text-white placeholder:text-slate-500 focus:outline-none focus:border-brand-yellow"
+                    className="w-full h-10 px-3.5 bg-[#0A0D14] border border-[#232D3F] rounded-xl text-white placeholder:text-slate-500 focus:outline-none focus:border-amber-400 text-xs font-medium"
                   />
+                  <div className="flex flex-wrap gap-1.5 mt-2">
+                    <span className="text-[10px] font-mono text-slate-500 uppercase tracking-wider self-center mr-1">Sugestões:</span>
+                    {[
+                      'Backend Go & Microserviços',
+                      'Frontend React & TypeScript',
+                      'Cloud DevOps & Kubernetes',
+                      'Full-Stack Node & React',
+                      'Engenharia de Dados Python'
+                    ].map((sug) => (
+                      <button
+                        key={sug}
+                        type="button"
+                        onClick={() => setTitle(sug)}
+                        className="text-[10px] font-mono px-2 py-0.5 rounded-md bg-[#161D2B] hover:bg-[#1E2638] text-slate-300 hover:text-amber-300 border border-[#232D3F] transition-colors"
+                      >
+                        + {sug}
+                      </button>
+                    ))}
+                  </div>
                 </div>
 
-                <div className="grid grid-cols-2 gap-3">
+                {/* Vertical Técnica */}
+                <div>
+                  <label className="block font-semibold text-slate-200 text-xs mb-1.5">Vertical Tecnológica</label>
+                  <div className="flex flex-wrap gap-1.5">
+                    {['Backend', 'Frontend', 'Full-Stack', 'Mobile', 'Cloud & DevOps', 'Data Engineering', 'AI & Machine Learning'].map((v) => {
+                      const isSelected = area === v;
+                      return (
+                        <button
+                          key={v}
+                          type="button"
+                          onClick={() => setArea(v)}
+                          className={`px-3 py-1.5 rounded-lg text-xs font-mono transition-all ${
+                            isSelected
+                              ? 'bg-amber-400 text-black font-bold shadow-sm'
+                              : 'bg-[#0D111A] text-slate-400 hover:text-white border border-[#232D3F]'
+                          }`}
+                        >
+                          {v}
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
+
+                {/* Modalidade de Trabalho em Cards Gamificados */}
+                <div>
+                  <label className="block font-semibold text-slate-200 text-xs mb-1.5">Modalidade de Trabalho *</label>
+                  <div className="grid grid-cols-3 gap-2.5">
+                    {[
+                      { id: 'Remoto', title: '100% Remoto', icon: <Globe className="w-4 h-4" />, desc: 'Qualquer lugar do país' },
+                      { id: 'Híbrido', title: 'Híbrido Flex', icon: <Laptop className="w-4 h-4" />, desc: '2-3 dias flexíveis' },
+                      { id: 'Presencial', title: 'Presencial', icon: <MapPin className="w-4 h-4" />, desc: 'Escritório sede' }
+                    ].map(m => {
+                      const isSelected = modality === m.id;
+                      return (
+                        <button
+                          key={m.id}
+                          type="button"
+                          onClick={() => setModality(m.id as WorkModality)}
+                          className={`p-3 rounded-xl border text-left transition-all flex flex-col justify-between gap-1 ${
+                            isSelected
+                              ? 'bg-amber-400/15 border-amber-400 shadow-sm ring-1 ring-amber-400/30'
+                              : 'bg-[#0D111A] border-[#232D3F] hover:border-slate-500/40 text-slate-300'
+                          }`}
+                        >
+                          <div className="flex items-center justify-between">
+                            <span className={isSelected ? 'text-amber-400' : 'text-slate-400'}>{m.icon}</span>
+                            {isSelected && <span className="w-2 h-2 rounded-full bg-amber-400 animate-pulse" />}
+                          </div>
+                          <div className="mt-1">
+                            <strong className={`text-xs block ${isSelected ? 'text-amber-300 font-bold' : 'text-white'}`}>{m.title}</strong>
+                            <span className="text-[10px] text-slate-400 block font-mono">{m.desc}</span>
+                          </div>
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
+
+                {/* Regime e Localização */}
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                   <div>
-                    <label className="block font-semibold text-slate-200 mb-1">Modalidade *</label>
-                    <select
-                      value={modality}
-                      onChange={(e) => setModality(e.target.value as WorkModality)}
-                      className="w-full h-9 px-2 bg-[#0c0e12] border border-[#262F40] rounded-lg text-white"
-                    >
-                      <option value="Remoto">Remoto</option>
-                      <option value="Híbrido">Híbrido</option>
-                      <option value="Presencial">Presencial</option>
-                    </select>
+                    <label className="block font-semibold text-slate-200 text-xs mb-1.5">Regime de Contratação *</label>
+                    <div className="grid grid-cols-3 gap-2">
+                      {(['PJ', 'CLT', 'Ambos'] as const).map(reg => {
+                        const isSelected = contractTypeChoice === reg;
+                        return (
+                          <button
+                            key={reg}
+                            type="button"
+                            onClick={() => setContractTypeChoice(reg)}
+                            className={`py-2 px-2.5 rounded-xl border text-center text-xs font-mono font-bold transition-all ${
+                              isSelected
+                                ? 'bg-amber-400/15 border-amber-400/60 text-amber-300 ring-1 ring-amber-400/30'
+                                : 'bg-[#0D111A] border-[#232D3F] text-slate-400 hover:text-white'
+                            }`}
+                          >
+                            {reg}
+                          </button>
+                        );
+                      })}
+                    </div>
                   </div>
                   <div>
-                    <label className="block font-semibold text-slate-200 mb-1">Localização</label>
+                    <label className="block font-semibold text-slate-200 text-xs mb-1.5">Localização / Polo</label>
                     <input
                       type="text"
                       value={location}
                       onChange={(e) => setLocation(e.target.value)}
-                      className="w-full h-9 px-3 bg-[#0c0e12] border border-[#262F40] rounded-lg text-white"
+                      className="w-full h-9 px-3 bg-[#0A0D14] border border-[#232D3F] rounded-xl text-white text-xs font-mono focus:outline-none focus:border-amber-400"
                     />
                   </div>
                 </div>
 
-                <div className="p-3 bg-[#161B26] border border-[#262F40] rounded-lg space-y-2">
-                  <span className="font-bold text-brand-yellow block text-[11px]">
-                    Faixa Salarial Transparente (Obrigatória):
-                  </span>
+                {/* Faixa Salarial Transparente */}
+                <div className="p-3.5 bg-gradient-to-r from-[#141A28] to-[#121E22] border border-amber-400/30 rounded-xl space-y-2.5">
+                  <div className="flex items-center justify-between text-xs">
+                    <span className="font-bold text-amber-400 flex items-center gap-1.5 font-mono">
+                      <ShieldCheck className="w-4 h-4 text-emerald-400" />
+                      Faixa Salarial Transparente (Lei 14.611 / Art. 5º)
+                    </span>
+                    <span className="text-[10px] font-mono text-emerald-400 bg-emerald-400/10 px-2 py-0.5 rounded border border-emerald-400/20">
+                      Anti-Ghosting Ativo
+                    </span>
+                  </div>
                   <div className="grid grid-cols-2 gap-3">
                     <div>
-                      <label className="block text-slate-400 mb-1">Mínimo (R$)</label>
+                      <label className="block text-[11px] font-mono text-slate-300 mb-1">Piso Salarial (R$)</label>
                       <input
                         type="number"
                         value={salaryMin}
                         onChange={(e) => setSalaryMin(e.target.value)}
-                        className="w-full h-9 px-3 bg-[#0c0e12] border border-[#262F40] rounded-lg font-bold text-white"
+                        className="w-full h-9 px-3 bg-[#0A0D14] border border-[#232D3F] rounded-lg font-bold text-amber-300 font-mono text-xs focus:outline-none focus:border-amber-400"
                       />
                     </div>
                     <div>
-                      <label className="block text-slate-400 mb-1">Máximo (R$)</label>
+                      <label className="block text-[11px] font-mono text-slate-300 mb-1">Teto Salarial (R$)</label>
                       <input
                         type="number"
                         value={salaryMax}
                         onChange={(e) => setSalaryMax(e.target.value)}
-                        className="w-full h-9 px-3 bg-[#0c0e12] border border-[#262F40] rounded-lg font-bold text-white"
+                        className="w-full h-9 px-3 bg-[#0A0D14] border border-[#232D3F] rounded-lg font-bold text-amber-300 font-mono text-xs focus:outline-none focus:border-amber-400"
                       />
                     </div>
                   </div>
@@ -1246,55 +1476,150 @@ export const CompanyDashboardView: React.FC<CompanyDashboardViewProps> = ({
                   <button
                     type="button"
                     onClick={handleStep1Next}
-                    className="px-4 py-2 bg-brand-yellow hover:bg-yellow-400 text-slate-950 font-bold rounded-lg flex items-center gap-1 transition-all"
+                    className="px-5 py-2.5 bg-amber-400 hover:bg-amber-300 text-slate-950 font-bold rounded-xl flex items-center gap-2 transition-all shadow-md shadow-amber-500/20 text-xs"
                   >
-                    Avançar para Requisitos <ArrowRight className="w-3.5 h-3.5" />
+                    <span>Avançar para Requisitos (+100 XP)</span>
+                    <ArrowRight className="w-3.5 h-3.5" />
                   </button>
                 </div>
               </div>
             )}
 
-            {/* Etapa 2: Requisitos */}
+            {/* ==================== FASE 2: RUNAS & REQUISITOS ==================== */}
             {modalStep === 2 && (
-              <div className="space-y-3 text-xs">
+              <div className="space-y-4 text-xs">
+                
+                {/* Seleção de Senioridade RPG */}
                 <div>
-                  <label className="block font-semibold text-slate-200 mb-1">Senioridade Esperada *</label>
-                  <select
-                    value={seniority}
-                    onChange={(e) => setSeniority(e.target.value as Seniority)}
-                    className="w-full h-9 px-2 bg-[#0c0e12] border border-[#262F40] rounded-lg text-white"
-                  >
-                    <option value="Júnior">Júnior</option>
-                    <option value="Pleno">Pleno</option>
-                    <option value="Sênior">Sênior</option>
-                    <option value="Especialista">Especialista</option>
-                  </select>
+                  <label className="block font-semibold text-slate-200 text-xs mb-1.5 flex items-center justify-between">
+                    <span>Senioridade da Missão *</span>
+                    <span className="text-[10px] text-amber-400 font-mono">+100 XP</span>
+                  </label>
+                  <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+                    {[
+                      { level: 'Júnior', rank: 'Rank C', xp: 'Lvl 1', time: '1-2 anos' },
+                      { level: 'Pleno', rank: 'Rank B', xp: 'Lvl 2', time: '3-5 anos' },
+                      { level: 'Sênior', rank: 'Rank A', xp: 'Lvl 3', time: '5+ anos' },
+                      { level: 'Especialista', rank: 'Rank S', xp: 'Lvl 4', time: 'Staff / Arquiteto' }
+                    ].map((sn) => {
+                      const isSelected = seniority === sn.level;
+                      return (
+                        <button
+                          key={sn.level}
+                          type="button"
+                          onClick={() => setSeniority(sn.level as Seniority)}
+                          className={`p-3 rounded-xl border text-left transition-all ${
+                            isSelected
+                              ? 'bg-amber-400/15 border-amber-400 text-amber-300 shadow-sm ring-1 ring-amber-400/30'
+                              : 'bg-[#0D111A] border-[#232D3F] text-slate-300 hover:border-slate-500/40'
+                          }`}
+                        >
+                          <div className="flex items-center justify-between text-[10px] font-mono">
+                            <span className={isSelected ? 'text-amber-400 font-bold' : 'text-slate-400'}>{sn.xp}</span>
+                            <span className={`px-1.5 py-0.2 rounded text-[9px] font-bold ${isSelected ? 'bg-amber-400 text-black' : 'bg-[#161D2B] text-slate-400'}`}>
+                              {sn.rank}
+                            </span>
+                          </div>
+                          <strong className="text-xs text-white block mt-1 font-bold">{sn.level}</strong>
+                          <span className="text-[10px] text-slate-400 font-mono block">{sn.time}</span>
+                        </button>
+                      );
+                    })}
+                  </div>
                 </div>
 
+                {/* Forja de Competências Mandatórias (Hard Skills) */}
                 <div>
-                  <label className="block font-semibold text-slate-200 mb-1">
-                    Competências Técnicas Obrigatórias (separadas por vírgula) *
-                  </label>
+                  <div className="flex items-center justify-between mb-1.5">
+                    <label className="font-semibold text-slate-200 text-xs">
+                      Forja de Hard Skills Mandatórias *
+                    </label>
+                    <span className="text-[10px] font-mono text-emerald-400 bg-emerald-400/10 px-2 py-0.5 rounded border border-emerald-400/20">
+                      {mandatorySkillsInput.split(',').filter(s => s.trim()).length} Runas Forjadas
+                    </span>
+                  </div>
+
+                  {/* Chips clicáveis de tecnologias populares */}
+                  <div className="flex flex-wrap gap-1.5 p-3 rounded-xl bg-[#0D111A] border border-[#232D3F] mb-2.5">
+                    <span className="text-[10px] font-mono text-slate-400 w-full mb-1">
+                      Clique nas runas abaixo para adicionar ou remover da vaga:
+                    </span>
+                    {popularStacks.map((stack) => {
+                      const isAdded = mandatorySkillsInput
+                        .toLowerCase()
+                        .split(',')
+                        .map(s => s.trim())
+                        .includes(stack.toLowerCase());
+                      return (
+                        <button
+                          key={stack}
+                          type="button"
+                          onClick={() => toggleSkill(stack)}
+                          className={`text-xs font-mono px-2.5 py-1 rounded-lg border transition-all flex items-center gap-1 ${
+                            isAdded
+                              ? 'bg-amber-400 text-black font-extrabold border-amber-300 shadow-sm scale-105'
+                              : 'bg-[#161D2B] text-slate-300 hover:text-white border-[#232D3F] hover:border-amber-400/40'
+                          }`}
+                        >
+                          {isAdded ? <Check className="w-3 h-3 stroke-[3]" /> : <Plus className="w-3 h-3" />}
+                          <span>{stack}</span>
+                        </button>
+                      );
+                    })}
+                  </div>
+
                   <input
                     type="text"
                     value={mandatorySkillsInput}
                     onChange={(e) => setMandatorySkillsInput(e.target.value)}
-                    placeholder="Ex: Go, Python, Kafka, PostgreSQL"
-                    className="w-full h-9 px-3 bg-[#0c0e12] border border-[#262F40] rounded-lg text-white"
+                    placeholder="Digite outras tecnologias separadas por vírgula (ex: Rust, RabbitMQ)..."
+                    className="w-full h-10 px-3 bg-[#0A0D14] border border-[#232D3F] rounded-xl text-white text-xs font-mono focus:outline-none focus:border-amber-400"
                   />
                 </div>
 
+                {/* Competências Comportamentais (Soft Skills) */}
                 <div>
-                  <label className="block font-semibold text-slate-200 mb-1">
+                  <label className="block font-semibold text-slate-200 text-xs mb-1.5">
                     Competências Comportamentais (Soft Skills)
                   </label>
+                  <div className="flex flex-wrap gap-1.5 mb-2">
+                    {popularSoftSkills.map(soft => {
+                      const isAdded = softSkillsInput.toLowerCase().includes(soft.toLowerCase());
+                      return (
+                        <button
+                          key={soft}
+                          type="button"
+                          onClick={() => toggleSoftSkill(soft)}
+                          className={`text-[11px] font-mono px-2.5 py-1 rounded-lg border transition-all ${
+                            isAdded
+                              ? 'bg-emerald-500/20 text-emerald-300 border-emerald-500/40 font-bold'
+                              : 'bg-[#161D2B] text-slate-400 hover:text-white border-[#232D3F]'
+                          }`}
+                        >
+                          {isAdded ? '✓ ' : '+ '} {soft}
+                        </button>
+                      );
+                    })}
+                  </div>
                   <input
                     type="text"
                     value={softSkillsInput}
                     onChange={(e) => setSoftSkillsInput(e.target.value)}
-                    placeholder="Ex: Arquitetura Limpa, Comunicação Técnica"
-                    className="w-full h-9 px-3 bg-[#0c0e12] border border-[#262F40] rounded-lg text-white"
+                    className="w-full h-9 px-3 bg-[#0A0D14] border border-[#232D3F] rounded-xl text-white text-xs font-mono focus:outline-none focus:border-amber-400"
                   />
+                </div>
+
+                {/* Radar IA em Tempo Real */}
+                <div className="p-3 rounded-xl bg-gradient-to-r from-emerald-500/10 via-emerald-500/5 to-transparent border border-emerald-500/30 flex items-center justify-between text-xs">
+                  <div className="flex items-center gap-2">
+                    <Sparkles className="w-4 h-4 text-emerald-400 animate-pulse shrink-0" />
+                    <span className="text-slate-300 font-mono text-[11px]">
+                      Radar IA em Tempo Real: <strong className="text-emerald-400 font-bold">~{estimatedMatches} talentos verificados</strong> com aderência ≥ 75%
+                    </span>
+                  </div>
+                  <span className="text-[10px] font-mono text-emerald-400 bg-emerald-400/10 px-2 py-0.5 rounded border border-emerald-400/20 shrink-0">
+                    Double Opt-In Ativo
+                  </span>
                 </div>
 
                 {formError && (
@@ -1307,7 +1632,7 @@ export const CompanyDashboardView: React.FC<CompanyDashboardViewProps> = ({
                   <button
                     type="button"
                     onClick={() => setModalStep(1)}
-                    className="px-4 py-2 border border-[#262F40] hover:bg-[#161B26] text-slate-300 rounded-lg font-semibold flex items-center gap-1"
+                    className="px-4 py-2 border border-[#262F40] hover:bg-[#161B26] text-slate-300 rounded-xl font-semibold flex items-center gap-1 text-xs transition-colors"
                   >
                     <ArrowLeft className="w-3.5 h-3.5" /> Voltar
                   </button>
@@ -1315,48 +1640,87 @@ export const CompanyDashboardView: React.FC<CompanyDashboardViewProps> = ({
                   <button
                     type="button"
                     onClick={handleStep2Next}
-                    className="px-4 py-2 bg-brand-yellow hover:bg-yellow-400 text-slate-950 font-bold rounded-lg flex items-center gap-1"
+                    className="px-5 py-2.5 bg-amber-400 hover:bg-amber-300 text-slate-950 font-bold rounded-xl flex items-center gap-2 transition-all shadow-md shadow-amber-500/20 text-xs"
                   >
-                    Revisar Vaga <ArrowRight className="w-3.5 h-3.5" />
+                    <span>Revisar Missão & Ativar Slot (+150 XP)</span>
+                    <ArrowRight className="w-3.5 h-3.5" />
                   </button>
                 </div>
               </div>
             )}
 
-            {/* Etapa 3: Revisão & Publicação */}
+            {/* ==================== FASE 3: ATIVAÇÃO DE SLOT & PUBLICAÇÃO ==================== */}
             {modalStep === 3 && (
-              <form onSubmit={handleCreateVacancy} className="space-y-3 text-xs">
-                <div className="p-3 bg-[#0c0e12] rounded-lg border border-[#262F40] space-y-2">
-                  <div className="flex justify-between border-b border-[#262F40] pb-1.5">
-                    <span className="text-slate-400">Título:</span>
-                    <strong className="text-white">{title}</strong>
+              <form onSubmit={handleCreateVacancy} className="space-y-4 text-xs">
+                
+                {/* Pergaminho / Ficha da Vaga */}
+                <div className="p-4 rounded-xl bg-[#0D111A] border-2 border-amber-400/40 space-y-3 relative overflow-hidden shadow-xl">
+                  <div className="flex items-center justify-between border-b border-[#232D3F] pb-2">
+                    <div className="flex items-center gap-2">
+                      <FileText className="w-4 h-4 text-amber-400" />
+                      <span className="font-heading font-black text-xs text-amber-400 uppercase tracking-widest">
+                        CONTRATO DE MISSÃO TÉCNICA
+                      </span>
+                    </div>
+                    <span className="text-[10px] font-mono font-bold text-slate-400 bg-[#161D2B] px-2 py-0.5 rounded">
+                      {seniority} • {modality}
+                    </span>
                   </div>
-                  <div className="flex justify-between border-b border-[#262F40] pb-1.5">
-                    <span className="text-slate-400">Faixa Salarial:</span>
-                    <strong className="text-brand-yellow">
-                      R$ {Number(salaryMin).toLocaleString('pt-BR')} a R$ {Number(salaryMax).toLocaleString('pt-BR')}
-                    </strong>
-                  </div>
-                  <div className="flex justify-between border-b border-[#262F40] pb-1.5">
-                    <span className="text-slate-400">Senioridade & Modalidade:</span>
-                    <span className="text-white font-medium">{seniority} • {modality}</span>
-                  </div>
+
                   <div>
-                    <span className="text-slate-400 block mb-1">Competências Avaliadas:</span>
-                    <span className="text-white font-semibold">{mandatorySkillsInput}</span>
+                    <h4 className="text-base font-extrabold text-white">{title}</h4>
+                    <div className="flex flex-wrap items-center gap-2 mt-1">
+                      <span className="text-xs font-mono font-bold text-amber-300">
+                        R$ {Number(salaryMin).toLocaleString('pt-BR')} a R$ {Number(salaryMax).toLocaleString('pt-BR')} ({contractTypeChoice})
+                      </span>
+                      <span className="text-slate-500">•</span>
+                      <span className="text-xs text-slate-300">{location}</span>
+                    </div>
+                  </div>
+
+                  <div>
+                    <span className="text-[10px] font-mono text-slate-400 block mb-1.5">Runas Técnicas Obrigatórias:</span>
+                    <div className="flex flex-wrap gap-1.5">
+                      {mandatorySkillsInput.split(',').map(s => s.trim()).filter(Boolean).map(sk => (
+                        <span key={sk} className="text-[11px] font-mono font-bold px-2 py-0.5 rounded bg-amber-400/10 text-amber-400 border border-amber-400/30">
+                          {sk}
+                        </span>
+                      ))}
+                    </div>
                   </div>
                 </div>
 
-                <label className="flex items-center gap-2 p-2.5 rounded-lg bg-brand-yellow/10 border border-brand-yellow/30 cursor-pointer">
+                {/* Consumo de Slot B2B */}
+                <div className="p-3.5 rounded-xl bg-[#161D2B] border border-[#232D3F] flex items-center justify-between text-xs">
+                  <div className="flex items-center gap-2.5">
+                    <Coins className="w-5 h-5 text-amber-400 shrink-0" />
+                    <div>
+                      <span className="text-slate-200 font-bold block">Consumo de Slot B2B</span>
+                      <span className="text-[10px] text-slate-400 font-mono">1 slot será ativado no pipeline corporativo</span>
+                    </div>
+                  </div>
+                  <div className="text-right font-mono text-xs">
+                    <span className="text-amber-400 font-bold block">{companyCredits} disponíveis</span>
+                    <span className="text-slate-400 block text-[10px]">→ {Math.max(0, companyCredits - 1)} restantes</span>
+                  </div>
+                </div>
+
+                {/* Card de Match Express */}
+                <label className="flex items-start gap-3 p-3.5 rounded-xl bg-amber-400/10 border border-amber-400/30 cursor-pointer hover:bg-amber-400/15 transition-all">
                   <input
                     type="checkbox"
                     checked={isUrgentMatchExpress}
                     onChange={(e) => setIsUrgentMatchExpress(e.target.checked)}
-                    className="accent-brand-yellow"
+                    className="mt-0.5 accent-amber-400 w-4 h-4 cursor-pointer"
                   />
-                  <span className="font-bold text-slate-200 text-xs">
-                    Ativar Match Express (1º candidato que aceitar é gratuito)
-                  </span>
+                  <div>
+                    <strong className="text-xs text-amber-300 font-bold block">
+                      ⚡ Ativar Match Express (Prioridade Turbo no Algoritmo de IA)
+                    </strong>
+                    <span className="text-[11px] text-slate-300 leading-relaxed block mt-0.5">
+                      A vaga é promovida com destaque no radar dos desenvolvedores mais compatíveis. O primeiro candidato que aceitar o convite Double Opt-In tem seus contatos liberados sem custo avulso adicional.
+                    </span>
+                  </div>
                 </label>
 
                 <div className="flex justify-between pt-2">
@@ -1364,7 +1728,7 @@ export const CompanyDashboardView: React.FC<CompanyDashboardViewProps> = ({
                     type="button"
                     onClick={() => setModalStep(2)}
                     disabled={isSavingVacancy}
-                    className="px-4 py-2 border border-[#262F40] hover:bg-[#161B26] text-slate-300 rounded-lg font-semibold flex items-center gap-1 disabled:opacity-50"
+                    className="px-4 py-2 border border-[#262F40] hover:bg-[#161B26] text-slate-300 rounded-xl font-semibold flex items-center gap-1 text-xs disabled:opacity-50 transition-colors"
                   >
                     <ArrowLeft className="w-3.5 h-3.5" /> Voltar
                   </button>
@@ -1372,9 +1736,19 @@ export const CompanyDashboardView: React.FC<CompanyDashboardViewProps> = ({
                   <button
                     type="submit"
                     disabled={isSavingVacancy}
-                    className="px-5 py-2.5 bg-brand-yellow hover:bg-yellow-400 text-slate-950 font-bold rounded-lg flex items-center gap-1.5 shadow-md disabled:opacity-50"
+                    className="px-6 py-3 bg-amber-400 hover:bg-amber-300 text-slate-950 font-black rounded-xl flex items-center gap-2 shadow-lg shadow-amber-500/25 disabled:opacity-50 text-xs sm:text-sm transition-all active:scale-95 border border-amber-300"
                   >
-                    {isSavingVacancy ? 'Publicando vaga...' : 'Confirmar e Publicar Vaga'}
+                    {isSavingVacancy ? (
+                      <>
+                        <div className="w-4 h-4 border-2 border-slate-950 border-t-transparent rounded-full animate-spin" />
+                        <span>Forjando e Ativando Slot...</span>
+                      </>
+                    ) : (
+                      <>
+                        <Rocket className="w-4 h-4" />
+                        <span>Confirmar e Publicar Missão (+300 XP)</span>
+                      </>
+                    )}
                   </button>
                 </div>
               </form>

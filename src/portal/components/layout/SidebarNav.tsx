@@ -23,7 +23,8 @@ import {
   Zap,
   Lock,
   Flame,
-  Award
+  Award,
+  Plus
 } from 'lucide-react';
 
 interface SidebarNavProps {
@@ -317,9 +318,18 @@ export const SidebarNav: React.FC<SidebarNavProps> = ({ currentTab, setCurrentTa
                     Ativo
                   </span>
                 </div>
-                <div className="text-[11px] font-mono text-muted-foreground dark:text-slate-400">
-                  Slots de Vagas: <span className="text-amber-700 dark:text-amber-400 font-bold">{companyCredits} disponíveis</span>
+                <div className="text-[11px] font-mono text-muted-foreground dark:text-slate-400 flex items-center justify-between">
+                  <span>Slots de Vagas:</span>
+                  <span className="text-amber-700 dark:text-amber-400 font-bold">{companyCredits} disponíveis</span>
                 </div>
+                <button
+                  type="button"
+                  onClick={() => setCurrentTab('empresa-vagas')}
+                  className="w-full mt-1.5 py-1.5 bg-amber-400/15 hover:bg-amber-400 hover:text-black border border-amber-400/30 text-amber-600 dark:text-amber-400 font-mono text-[10px] font-bold rounded-lg transition-all flex items-center justify-center gap-1.5 shadow-xs"
+                >
+                  <Plus className="w-3.5 h-3.5 stroke-[3]" />
+                  <span>Publicar Nova Vaga</span>
+                </button>
               </div>
             )}
 
