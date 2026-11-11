@@ -44,7 +44,8 @@ import {
   Search,
   Code,
   ChevronRight,
-  DollarSign
+  DollarSign,
+  GitCompare
 } from 'lucide-react';
 import { api } from '../../services/api';
 import { Job, Company as ApiCompany } from '../../types';
