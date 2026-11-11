@@ -88,6 +88,7 @@ export const CompanyDashboardView: React.FC<CompanyDashboardViewProps> = ({
     vacancies,
     selectionProcesses,
     candidates,
+    companyCredits,
     createVacancy
   } = useApp();
 
@@ -193,7 +194,7 @@ export const CompanyDashboardView: React.FC<CompanyDashboardViewProps> = ({
   // Áudio Player Simulado com Web Audio API
   const [playingAudioId, setPlayingAudioId] = useState<string | null>(null);
   const [audioProgress, setAudioProgress] = useState<number>(0);
-  const audioIntervalRef = useRef<NodeJS.Timeout | null>(null);
+  const audioIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
   const togglePlayAudio = (candidateId: string) => {
     if (playingAudioId === candidateId) {
