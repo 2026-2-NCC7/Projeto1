@@ -1,0 +1,766 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Banner Feira de Startups FECAP - Q.I. MATCH</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Space+Grotesk:wght@600;700;800&display=swap" rel="stylesheet">
+  <style>
+    @page {
+      size: 900mm 1200mm;
+      margin: 0;
+    }
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      -webkit-print-color-adjust: exact !important;
+      print-color-adjust: exact !important;
+    }
+    :root {
+      --bg-deep: #08080E;
+      --bg-mid: #0D0E16;
+      --card-glass: rgba(16, 17, 26, 0.65);
+      --card-glass-sub: rgba(22, 23, 34, 0.6);
+      --card-glass-hover: rgba(26, 28, 42, 0.75);
+      --bone: #FFFFFF;
+      --slate: #9E9EB2;
+      --slate-light: #D4D4E2;
+      --amber: #C9A227;
+      --amber-hi: #E2B93B;
+      --amber-glow: rgba(226, 185, 59, 0.22);
+      --hair-glass: rgba(255, 255, 255, 0.08);
+      --hair-glass-strong: rgba(255, 255, 255, 0.14);
+      --hair-amber: rgba(226, 185, 59, 0.35);
+    }
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+      background-color: #030306;
+      color: var(--bone);
+      line-height: 1.42;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      padding: 20px 0;
+    }
+    h1, h2, h3, h4, .font-heading {
+      font-family: 'Space Grotesk', sans-serif;
+      letter-spacing: -0.025em;
+    }
+
+    /* Proporção 3:4 Vertical do Banner (1000px x 1400px) com Fundo Atmosférico */
+    .banner {
+      width: 1000px;
+      min-height: 1400px;
+      height: 1400px;
+      background-color: var(--bg-deep);
+      /* Combinação da iluminação de palco da apresentação: aura dourada superior + aura suave inferior + gradiente profundo */
+      background-image: 
+        radial-gradient(ellipse 80% 45% at 50% 6%, rgba(226, 185, 59, 0.15) 0%, transparent 75%),
+        radial-gradient(ellipse 65% 35% at 50% 96%, rgba(201, 162, 39, 0.09) 0%, transparent 75%),
+        radial-gradient(circle at 10% 45%, rgba(255, 255, 255, 0.02) 0%, transparent 50%),
+        radial-gradient(circle at 90% 55%, rgba(255, 255, 255, 0.02) 0%, transparent 50%),
+        linear-gradient(180deg, #07070C 0%, #0D0E16 48%, #08080E 100%);
+      border: 1px solid var(--hair-glass-strong);
+      padding: 34px 40px 28px 40px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      position: relative;
+      overflow: hidden;
+      box-shadow: 0 35px 90px -20px rgba(0, 0, 0, 0.95);
+    }
+
+    /* Grade métrica sutil translúcida (Blueprint da Apresentação) */
+    .banner::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background-size: 40px 40px;
+      background-image: 
+        linear-gradient(to right, rgba(255, 255, 255, 0.018) 1px, transparent 1px),
+        linear-gradient(to bottom, rgba(255, 255, 255, 0.018) 1px, transparent 1px);
+      pointer-events: none;
+      z-index: 1;
+    }
+
+    /* Granulação fosca (Film Grain sutil) */
+    .banner::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      opacity: 0.035;
+      background-image: url("data:image/svg+xml;utf8,<svg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'><filter id='noiseFilter'><feTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='3' stitchTiles='stitch'/></filter><rect width='100%' height='100%' filter='url(%23noiseFilter)'/></svg>");
+      pointer-events: none;
+      z-index: 1;
+    }
+
+    /* Conteúdos acima das camadas de textura */
+    .header, .top-quad, .canvas-section, .footer {
+      position: relative;
+      z-index: 2;
+    }
+
+    /* 1. HEADER OFICIAL */
+    .header {
+      text-align: center;
+      border-bottom: 2px solid var(--hair-amber);
+      padding-bottom: 16px;
+    }
+    .event-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 13px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      color: var(--amber-hi);
+      background: rgba(226, 185, 59, 0.12);
+      border: 1px solid var(--hair-amber);
+      padding: 5px 20px;
+      border-radius: 999px;
+      box-shadow: 0 0 20px rgba(226, 185, 59, 0.1);
+    }
+    .event-badge .dot {
+      width: 7px;
+      height: 7px;
+      background: var(--amber-hi);
+      border-radius: 50%;
+      box-shadow: 0 0 8px var(--amber-hi);
+    }
+    .company-title {
+      font-size: 52px;
+      font-weight: 800;
+      color: var(--bone);
+      margin-top: 8px;
+      line-height: 1;
+      text-shadow: 0 2px 20px rgba(0, 0, 0, 0.7);
+    }
+    .company-title span {
+      color: var(--amber-hi);
+      text-shadow: 0 0 25px rgba(226, 185, 59, 0.35);
+    }
+    .company-subtitle {
+      font-size: 16px;
+      font-weight: 500;
+      color: var(--slate-light);
+      margin-top: 4px;
+    }
+    .authors-row {
+      margin-top: 10px;
+      font-size: 13px;
+      color: var(--slate);
+      display: flex;
+      justify-content: center;
+      gap: 16px;
+    }
+    .authors-row strong {
+      color: var(--bone);
+    }
+
+    /* 2. QUADRO SUPERIOR: 4 BLOCOS ESTRATÉGICOS (VIDRO FOSCO SUAVE) */
+    .top-quad {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 14px;
+      margin-top: 14px;
+    }
+    .info-card {
+      background: var(--card-glass);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      border: 1px solid var(--hair-glass);
+      border-radius: 9px;
+      padding: 13px 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 7px;
+      box-shadow: 0 8px 24px -6px rgba(0, 0, 0, 0.45);
+    }
+    .info-header {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      border-bottom: 1px solid var(--hair-glass);
+      padding-bottom: 6px;
+    }
+    .info-icon {
+      width: 22px;
+      height: 22px;
+      border-radius: 5px;
+      background: rgba(226, 185, 59, 0.16);
+      border: 1px solid var(--hair-amber);
+      color: var(--amber-hi);
+      font-size: 11px;
+      font-weight: 800;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .info-title {
+      font-size: 14px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      color: var(--bone);
+    }
+    .mini-list {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+    .mini-item {
+      display: flex;
+      align-items: flex-start;
+      gap: 7px;
+      font-size: 12.5px;
+      line-height: 1.4;
+      color: var(--slate-light);
+    }
+    .mini-item strong {
+      color: var(--bone);
+      font-weight: 600;
+    }
+    .mini-dot {
+      width: 5px;
+      height: 5px;
+      background-color: var(--amber-hi);
+      border-radius: 50%;
+      margin-top: 6px;
+      flex-shrink: 0;
+      box-shadow: 0 0 6px rgba(226, 185, 59, 0.5);
+    }
+
+    /* 3. CANVAS DE MODELO DE NEGÓCIO COM CUSTOS E RECEITAS */
+    .canvas-section {
+      margin-top: 14px;
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+    .canvas-title-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border-bottom: 1.5px solid var(--hair-amber);
+      padding-bottom: 5px;
+    }
+    .canvas-title {
+      font-size: 19px;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: var(--bone);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .canvas-title span {
+      color: var(--amber-hi);
+    }
+    .canvas-tag {
+      font-size: 10.5px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--amber-hi);
+      background: rgba(226, 185, 59, 0.1);
+      border: 1px solid var(--hair-amber);
+      padding: 3px 10px;
+      border-radius: 4px;
+    }
+
+    /* Grid do Business Model Canvas - 5 Colunas Superiores */
+    .bmc-grid-top {
+      display: grid;
+      grid-template-columns: 1.05fr 1.05fr 1.35fr 1.05fr 1.05fr;
+      gap: 9px;
+      flex: 1;
+      min-height: 390px;
+    }
+    .bmc-cell {
+      background: var(--card-glass);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      border: 1px solid var(--hair-glass);
+      border-radius: 7px;
+      padding: 13px 13px;
+      display: flex;
+      flex-direction: column;
+      justify-content: flex-start;
+      gap: 8px;
+      box-shadow: 0 6px 20px -5px rgba(0, 0, 0, 0.4);
+    }
+    .bmc-cell.split-parent {
+      background: transparent;
+      border: none;
+      padding: 0;
+      display: flex;
+      flex-direction: column;
+      gap: 9px;
+      box-shadow: none;
+    }
+    .bmc-subcell {
+      background: var(--card-glass);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      border: 1px solid var(--hair-glass);
+      border-radius: 7px;
+      padding: 11px 13px;
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      box-shadow: 0 6px 20px -5px rgba(0, 0, 0, 0.4);
+    }
+    .bmc-cell-header {
+      font-size: 12px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: var(--amber-hi);
+      border-bottom: 1px solid var(--hair-glass);
+      padding-bottom: 4px;
+    }
+    .bmc-list {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 7px;
+    }
+    .bmc-item {
+      display: flex;
+      align-items: flex-start;
+      gap: 6px;
+      font-size: 12px;
+      line-height: 1.38;
+      color: var(--slate-light);
+    }
+    .bmc-item strong {
+      color: var(--bone);
+      font-weight: 600;
+    }
+    .bmc-dot {
+      width: 4px;
+      height: 4px;
+      background-color: var(--amber-hi);
+      border-radius: 50%;
+      margin-top: 6px;
+      flex-shrink: 0;
+      box-shadow: 0 0 5px rgba(226, 185, 59, 0.5);
+    }
+
+    /* Destaque para a Coluna Central (Proposta de Valor) */
+    .bmc-cell.highlight-vp {
+      background: linear-gradient(180deg, rgba(226, 185, 59, 0.12) 0%, rgba(18, 19, 30, 0.8) 45%);
+      border-color: var(--hair-amber);
+      box-shadow: 0 0 30px -5px rgba(226, 185, 59, 0.15);
+    }
+    .bmc-cell.highlight-vp .bmc-cell-header {
+      color: #FFFFFF;
+      border-color: var(--hair-amber);
+      text-shadow: 0 0 10px rgba(226, 185, 59, 0.4);
+    }
+
+    /* Linha Inferior do Canvas: Custos & Receitas */
+    .bmc-grid-bottom {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 9px;
+      margin-top: 9px;
+    }
+    .bmc-bottom-cell {
+      background: var(--card-glass);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      border: 1px solid var(--hair-glass);
+      border-radius: 7px;
+      padding: 12px 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      box-shadow: 0 6px 20px -5px rgba(0, 0, 0, 0.4);
+    }
+    .bmc-bottom-cell .bmc-cell-header {
+      font-size: 12.5px;
+      font-weight: 700;
+      color: var(--amber-hi);
+      border-bottom: 1px solid var(--hair-glass);
+      padding-bottom: 4px;
+    }
+
+    /* 4. FOOTER INSTITUCIONAL */
+    .footer {
+      border-top: 1px solid var(--hair-glass-strong);
+      padding-top: 12px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 11.5px;
+      color: var(--slate);
+    }
+    .footer strong {
+      color: var(--bone);
+    }
+    .footer-badges {
+      display: flex;
+      gap: 8px;
+    }
+    .footer-pill {
+      font-size: 10.5px;
+      font-weight: 700;
+      padding: 3px 12px;
+      border-radius: 4px;
+      background: rgba(226, 185, 59, 0.1);
+      border: 1px solid var(--hair-amber);
+      color: var(--amber-hi);
+    }
+
+    /* BOTÃO INTERATIVO NA TELA */
+    .screen-actions {
+      position: fixed;
+      top: 16px;
+      right: 16px;
+      display: flex;
+      gap: 10px;
+      z-index: 9999;
+    }
+    .btn {
+      background: var(--amber-hi);
+      color: #000000;
+      font-family: 'Space Grotesk', sans-serif;
+      font-weight: 700;
+      font-size: 14px;
+      padding: 10px 22px;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      box-shadow: 0 4px 16px rgba(226, 185, 59, 0.4);
+      transition: all 0.2s ease;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .btn:hover {
+      background: #D4AC31;
+      transform: translateY(-1px);
+    }
+    @media print {
+      body {
+        background: transparent !important;
+        padding: 0 !important;
+      }
+      .banner {
+        box-shadow: none !important;
+        border: none !important;
+        width: 1000px !important;
+        height: 1400px !important;
+        page-break-after: avoid;
+        page-break-inside: avoid;
+      }
+      .screen-actions {
+        display: none !important;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Botão de Ação -->
+  <div class="screen-actions">
+    <button class="btn" onclick="window.print()">
+      <svg width="16" height="16" fill="currentColor" viewBox="0 0 16 16"><path d="M2.5 8a.5.5 0 1 0 0-1 .5.5 0 0 0 0 1z"/><path d="M5 1a2 2 0 0 0-2 2v2H2a2 2 0 0 0-2 2v3a2 2 0 0 0 2 2h1v1a2 2 0 0 0 2 2h6a2 2 0 0 0 2-2v-1h1a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-1V3a2 2 0 0 0-2-2H5zM4 3a1 1 0 0 1 1-1h6a1 1 0 0 1 1 1v2H4V3zm1 5a2 2 0 0 0-2 2v1H2a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1h12a1 1 0 0 1 1 1v3a1 1 0 0 1-1 1h-1v-1a2 2 0 0 0-2-2H5zm7 2v3a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1v-3a1 1 0 0 1 1-1h6a1 1 0 0 1 1 1z"/></svg>
+      Salvar Banner em PDF
+    </button>
+  </div>
+
+  <div class="banner">
+
+    <!-- 1. CABEÇALHO OFICIAL DO BANNER (Nomes em Ordem Alfabética) -->
+    <header class="header">
+      <div class="event-badge font-heading">
+        <span class="dot"></span>
+        Feira de Startups FECAP 2026 · Ciência da Computação
+      </div>
+      <h1 class="company-title font-heading">
+        Q.I. <span>MATCH</span>
+      </h1>
+      <p class="company-subtitle font-heading">
+        Plataforma Inteligente de Recrutamento Tech com IA Explicável & Verificável
+      </p>
+      <div class="authors-row">
+        <span><strong>Alunos:</strong> Felipe Carvalho Paleari</span>
+        <span>•</span>
+        <span>Flávio José dos Santos</span>
+        <span>•</span>
+        <span>Jenifer Jacino Barreto</span>
+        <span>•</span>
+        <span>Maria Eduarda de Freitas Lopes</span>
+      </div>
+    </header>
+
+    <!-- 2. QUADRO SUPERIOR: 4 BLOCOS ESTRATÉGICOS -->
+    <section class="top-quad">
+
+      <!-- Bloco 1: Apresentação da Startup -->
+      <article class="info-card">
+        <div class="info-header">
+          <span class="info-icon font-heading">1</span>
+          <h2 class="info-title font-heading">Apresentação da Startup</h2>
+        </div>
+        <ul class="mini-list">
+          <li class="mini-item">
+            <span class="mini-dot"></span>
+            <div><strong>Recrutamento Reverso:</strong> Empresas buscam talentos pré-validados e enviam propostas diretas.</div>
+          </li>
+          <li class="mini-item">
+            <span class="mini-dot"></span>
+            <div><strong>IA Explicável (XAI):</strong> Avaliações técnicas por voz fundamentadas em evidências literais auditáveis.</div>
+          </li>
+        </ul>
+      </article>
+
+      <!-- Bloco 2: Cliente e Mercado-Alvo -->
+      <article class="info-card">
+        <div class="info-header">
+          <span class="info-icon font-heading">2</span>
+          <h2 class="info-title font-heading">Cliente e Mercado-Alvo</h2>
+        </div>
+        <ul class="mini-list">
+          <li class="mini-item">
+            <span class="mini-dot"></span>
+            <div><strong>Empresas Tech (B2B):</strong> Startups, scale-ups e consultorias com alta demanda de contratação técnica.</div>
+          </li>
+          <li class="mini-item">
+            <span class="mini-dot"></span>
+            <div><strong>Talentos Tech (B2C):</strong> Desenvolvedores e engenheiros em busca de oportunidades com privacidade e respeito.</div>
+          </li>
+        </ul>
+      </article>
+
+      <!-- Bloco 3: Problema Enfrentado -->
+      <article class="info-card">
+        <div class="info-header">
+          <span class="info-icon font-heading">3</span>
+          <h2 class="info-title font-heading">Problema Enfrentado</h2>
+        </div>
+        <ul class="mini-list">
+          <li class="mini-item">
+            <span class="mini-dot"></span>
+            <div><strong>Triagem Inflada:</strong> Currículos saturados de palavras-chave geradas por IA sem domínio prático real.</div>
+          </li>
+          <li class="mini-item">
+            <span class="mini-dot"></span>
+            <div><strong>Custo de Erro Elevado:</strong> Prejuízo de até 5x o salário nominal em retrabalho, perda de ritmo e turnover.</div>
+          </li>
+        </ul>
+      </article>
+
+      <!-- Bloco 4: Diferenciais e Solução -->
+      <article class="info-card">
+        <div class="info-header">
+          <span class="info-icon font-heading">4</span>
+          <h2 class="info-title font-heading">Diferenciais e Solução</h2>
+        </div>
+        <ul class="mini-list">
+          <li class="mini-item">
+            <span class="mini-dot"></span>
+            <div><strong>Zero Alucinação:</strong> Validador <em>EvidenceVerifier</em> exige a citação literal (verbatim) da entrevista.</div>
+          </li>
+          <li class="mini-item">
+            <span class="mini-dot"></span>
+            <div><strong>Governança LGPD (Art. 20):</strong> Direito integral à réplica, contestação e auditoria humana de relatórios.</div>
+          </li>
+        </ul>
+      </article>
+
+    </section>
+
+    <!-- 3. MODELO DE NEGÓCIO (BUSINESS MODEL CANVAS COMPLETO) -->
+    <section class="canvas-section">
+      <div class="canvas-title-row">
+        <h2 class="canvas-title font-heading">
+          Modelo de <span>Negócio</span>
+        </h2>
+        <span class="canvas-tag font-heading">Business Model Canvas Oficial</span>
+      </div>
+
+      <!-- Grid 5 Colunas Superiores -->
+      <div class="bmc-grid-top">
+
+        <!-- Coluna 1: Parcerias-Chave -->
+        <div class="bmc-cell">
+          <div class="bmc-cell-header font-heading">Parcerias-Chave</div>
+          <ul class="bmc-list">
+            <li class="bmc-item">
+              <span class="bmc-dot"></span>
+              <div>Comunidades técnicas e hubs tech (GitHub, Meetups, Discord).</div>
+            </li>
+            <li class="bmc-item">
+              <span class="bmc-dot"></span>
+              <div>Instituições de ensino superior e bootcamps de TI.</div>
+            </li>
+            <li class="bmc-item">
+              <span class="bmc-dot"></span>
+              <div>Plataformas de ATS e consultorias parceiras de RH.</div>
+            </li>
+          </ul>
+        </div>
+
+        <!-- Coluna 2: Atividades e Recursos (Dividida) -->
+        <div class="bmc-cell split-parent">
+          <div class="bmc-subcell">
+            <div class="bmc-cell-header font-heading">Atividades-Chave</div>
+            <ul class="bmc-list">
+              <li class="bmc-item">
+                <span class="bmc-dot"></span>
+                <div>Transcrição e validação literal de entrevistas por voz.</div>
+              </li>
+              <li class="bmc-item">
+                <span class="bmc-dot"></span>
+                <div>Matching determinístico em 5 dimensões reais.</div>
+              </li>
+            </ul>
+          </div>
+          <div class="bmc-subcell">
+            <div class="bmc-cell-header font-heading">Recursos-Chave</div>
+            <ul class="bmc-list">
+              <li class="bmc-item">
+                <span class="bmc-dot"></span>
+                <div>Pipeline local de IA (Faster-Whisper + Qwen3).</div>
+              </li>
+              <li class="bmc-item">
+                <span class="bmc-dot"></span>
+                <div>Motor anti-alucinação <em>EvidenceVerifier</em>.</div>
+              </li>
+            </ul>
+          </div>
+        </div>
+
+        <!-- Coluna 3: Proposta de Valor (Destaque Central) -->
+        <div class="bmc-cell highlight-vp">
+          <div class="bmc-cell-header font-heading">Proposta de Valor</div>
+          <ul class="bmc-list">
+            <li class="bmc-item">
+              <span class="bmc-dot"></span>
+              <div><strong>Para Empresas:</strong> Redução de 70% no tempo de triagem com contratações precisas e 100% auditáveis.</div>
+            </li>
+            <li class="bmc-item">
+              <span class="bmc-dot"></span>
+              <div><strong>Para Candidatos:</strong> Recrutamento Reverso, fim dos testes genéricos e privacidade via <em>Double Opt-In</em>.</div>
+            </li>
+            <li class="bmc-item">
+              <span class="bmc-dot"></span>
+              <div><strong>Transparência Radical:</strong> Score sem caixa-preta; cada competência possui evidência literal.</div>
+            </li>
+          </ul>
+        </div>
+
+        <!-- Coluna 4: Relacionamento e Canais (Dividida) -->
+        <div class="bmc-cell split-parent">
+          <div class="bmc-subcell">
+            <div class="bmc-cell-header font-heading">Relacionamento</div>
+            <ul class="bmc-list">
+              <li class="bmc-item">
+                <span class="bmc-dot"></span>
+                <div>Relatórios abertos e transparentes para ambas as pontas.</div>
+              </li>
+              <li class="bmc-item">
+                <span class="bmc-dot"></span>
+                <div>Canal humanizado para mediação e réplicas LGPD.</div>
+              </li>
+            </ul>
+          </div>
+          <div class="bmc-subcell">
+            <div class="bmc-cell-header font-heading">Canais</div>
+            <ul class="bmc-list">
+              <li class="bmc-item">
+                <span class="bmc-dot"></span>
+                <div>Portal Web Q.I. Match (Empresas e Talentos).</div>
+              </li>
+              <li class="bmc-item">
+                <span class="bmc-dot"></span>
+                <div>Integrações com sistemas ATS e redes profissionais.</div>
+              </li>
+            </ul>
+          </div>
+        </div>
+
+        <!-- Coluna 5: Segmentação de Clientes -->
+        <div class="bmc-cell">
+          <div class="bmc-cell-header font-heading">Segmentação</div>
+          <ul class="bmc-list">
+            <li class="bmc-item">
+              <span class="bmc-dot"></span>
+              <div>Startups e scale-ups de tecnologia em expansão.</div>
+            </li>
+            <li class="bmc-item">
+              <span class="bmc-dot"></span>
+              <div>Consultorias de software e software houses alocadoras.</div>
+            </li>
+            <li class="bmc-item">
+              <span class="bmc-dot"></span>
+              <div>Profissionais e especialistas técnicos de TI.</div>
+            </li>
+          </ul>
+        </div>
+
+      </div>
+
+      <!-- Linha Inferior do Canvas: Custos & Receitas -->
+      <div class="bmc-grid-bottom">
+
+        <div class="bmc-bottom-cell">
+          <div class="bmc-cell-header font-heading">Estrutura de Custos</div>
+          <ul class="bmc-list">
+            <li class="bmc-item">
+              <span class="bmc-dot"></span>
+              <div>Infraestrutura de servidores para inferência local de IA (sem custo por token de APIs externas).</div>
+            </li>
+            <li class="bmc-item">
+              <span class="bmc-dot"></span>
+              <div>Engenharia contínua, governança de dados (LGPD) e custos de operação.</div>
+            </li>
+          </ul>
+        </div>
+
+        <div class="bmc-bottom-cell">
+          <div class="bmc-cell-header font-heading">Fontes de Receita</div>
+          <ul class="bmc-list">
+            <li class="bmc-item">
+              <span class="bmc-dot"></span>
+              <div><strong>Assinatura Mensal SaaS (B2B):</strong> Planos corporativos baseados no volume de vagas ativas.</div>
+            </li>
+            <li class="bmc-item">
+              <span class="bmc-dot"></span>
+              <div><strong>Success Fee Opcional:</strong> Taxa de sucesso no fechamento ágil de vagas seniores.</div>
+            </li>
+          </ul>
+        </div>
+
+      </div>
+
+    </section>
+
+    <!-- 4. FOOTER INSTITUCIONAL LIMPO E ELEGANTE -->
+    <footer class="footer">
+      <div>
+        <strong>FECAP — Fundação Escola de Comércio Álvares Penteado</strong> · Bacharelado em Ciência da Computação · 2026
+      </div>
+      <div class="footer-badges">
+        <span class="footer-pill">Projeto Startup Q.I. Match</span>
+        <span class="footer-pill">Conformidade LGPD Art. 20</span>
+        <span class="footer-pill">Banner Oficial</span>
+      </div>
+    </footer>
+
+  </div>
+
+</body>
+</html>

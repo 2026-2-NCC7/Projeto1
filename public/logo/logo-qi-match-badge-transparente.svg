@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024" width="1024" height="1024">
+  <!-- Box Arredondado Amarelo (#FACC15) como no site sem fundo -->
+  <rect x="180" y="180" width="664" height="664" rx="120" fill="#FACC15" />
+
+  <!-- Letra Q em Preto (#0A0C10) Centralizada -->
+  <text 
+    x="50%" 
+    y="51%" 
+    text-anchor="middle" 
+    dominant-baseline="central" 
+    font-family="'Space Grotesk', 'Segoe UI', -apple-system, sans-serif" 
+    font-size="470" 
+    font-weight="900" 
+    fill="#0A0C10"
+  >Q</text>
+</svg>

@@ -4,6 +4,7 @@ import { Header } from './components/layout/Header';
 import { SidebarNav } from './components/layout/SidebarNav';
 
 // Views
+import { LandingPageView } from './views/LandingPageView';
 import { PersonaSelectorView } from './views/PersonaSelectorView';
 import { CandidateOnboardingView } from './views/CandidateOnboardingView';
 import { CandidateProfileView } from './views/CandidateProfileView';
@@ -39,12 +40,22 @@ const ADMIN_ALLOWED_TABS = [
   'admin-dashboard'
 ];
 
+const isProtectedInternalRoute = (cleanHash: string): boolean =>
+  CANDIDATE_ALLOWED_TABS.includes(cleanHash) ||
+  COMPANY_ALLOWED_TABS.includes(cleanHash) ||
+  ADMIN_ALLOWED_TABS.includes(cleanHash) ||
+  cleanHash === 'onboarding';
+
 const MainLayout: React.FC = () => {
   const { activePersona, isAuthenticated, session, currentUser, needsOnboarding } = useApp();
-  
+
   const [currentTab, setCurrentTabState] = useState<string>('candidato-perfil');
   const [selectedVacancyId, setSelectedVacancyId] = useState<string>('vac-frontend-pleno');
   const [routeNotice, setRouteNotice] = useState<string>('');
+  const [showLoginPortal, setShowLoginPortal] = useState<boolean>(() => {
+    const cleanHash = window.location.hash.replace(/^#\/?/, '').trim();
+    return cleanHash === 'login' || isProtectedInternalRoute(cleanHash);
+  });
 
   const getDefaultTabForCurrentUser = (): string => {
     const role = session?.role || currentUser?.role;
@@ -78,6 +89,8 @@ const MainLayout: React.FC = () => {
   const setCurrentTab = (nextTab: string) => {
     if (!isAuthenticated) {
       setRouteNotice('Faça login para acessar as áreas internas da plataforma.');
+      setShowLoginPortal(true);
+      window.location.hash = '#/login';
       return;
     }
     if (!isTabAllowedForRole(nextTab)) {
@@ -93,20 +106,21 @@ const MainLayout: React.FC = () => {
   // Redirecionamento automático ao autenticar ou trocar de sessão/papel
   useEffect(() => {
     if (!isAuthenticated) {
-      const hash = window.location.hash.replace('#/', '').trim();
-      const isInternalHash =
-        CANDIDATE_ALLOWED_TABS.includes(hash) ||
-        COMPANY_ALLOWED_TABS.includes(hash) ||
-        ADMIN_ALLOWED_TABS.includes(hash) ||
-        hash === 'onboarding';
-      if (isInternalHash) {
+      const cleanHash = window.location.hash.replace(/^#\/?/, '').trim();
+      if (isProtectedInternalRoute(cleanHash)) {
         setRouteNotice('Acesso restrito: autentique-se para acessar esta rota interna.');
+        setShowLoginPortal(true);
         window.location.hash = '#/login';
+      } else if (cleanHash === 'login') {
+        setShowLoginPortal(true);
+      } else {
+        setShowLoginPortal(false);
       }
       return;
     }
 
     setRouteNotice('');
+    setShowLoginPortal(false);
     if (needsOnboarding) {
       window.location.hash = '#/onboarding';
       return;
@@ -125,26 +139,44 @@ const MainLayout: React.FC = () => {
   // Monitora alterações manuais na URL (hash) para proteger rotas em tempo real
   useEffect(() => {
     const handleHashChange = () => {
-      const hash = window.location.hash.replace('#/', '').trim();
-      if (!hash || hash === 'login') return;
+      const cleanHash = window.location.hash.replace(/^#\/?/, '').trim();
 
-      if (!isAuthenticated) {
-        setRouteNotice('Você precisa estar autenticado para acessar páginas internas.');
-        window.location.hash = '#/login';
+      if (!cleanHash) {
+        if (!isAuthenticated) {
+          setShowLoginPortal(false);
+        }
         return;
       }
 
-      if (needsOnboarding && hash !== 'onboarding') {
+      if (cleanHash === 'login') {
+        if (!isAuthenticated) {
+          setShowLoginPortal(true);
+        }
+        return;
+      }
+
+      if (!isAuthenticated) {
+        if (isProtectedInternalRoute(cleanHash)) {
+          setRouteNotice('Você precisa estar autenticado para acessar páginas internas.');
+          setShowLoginPortal(true);
+          window.location.hash = '#/login';
+        } else {
+          setShowLoginPortal(false);
+        }
+        return;
+      }
+
+      if (needsOnboarding && cleanHash !== 'onboarding') {
         window.location.hash = '#/onboarding';
         return;
       }
 
-      if (!isTabAllowedForRole(hash)) {
+      if (!isTabAllowedForRole(cleanHash)) {
         const fallback = getDefaultTabForCurrentUser();
         setCurrentTabState(fallback);
         window.location.hash = `#/${fallback}`;
       } else {
-        setCurrentTabState(hash);
+        setCurrentTabState(cleanHash);
       }
     };
 
@@ -153,9 +185,28 @@ const MainLayout: React.FC = () => {
   }, [isAuthenticated, session?.role, needsOnboarding, activePersona]);
 
   if (!isAuthenticated) {
+    if (!showLoginPortal) {
+      return (
+        <LandingPageView
+          onOpenPrototype={() => {
+            setRouteNotice('');
+            setShowLoginPortal(true);
+            window.location.hash = '#/login';
+            window.scrollTo({ top: 0, behavior: 'auto' });
+          }}
+        />
+      );
+    }
+
     return (
       <PersonaSelectorView
         initialAuthNotice={routeNotice}
+        onBackToLanding={() => {
+          setRouteNotice('');
+          setShowLoginPortal(false);
+          window.history.replaceState(null, '', window.location.pathname + window.location.search);
+          window.scrollTo({ top: 0, behavior: 'auto' });
+        }}
         onEnterApp={() => {
           setRouteNotice('');
         }}
@@ -178,7 +229,7 @@ const MainLayout: React.FC = () => {
         </main>
         <footer className="bg-white border-t border-border py-4 text-center text-xs text-muted-foreground">
           <div className="max-w-[1440px] mx-auto px-4 flex flex-col sm:flex-row items-center justify-between gap-2">
-            <span>© 2026 Q.I. Tech — Plataforma de Recrutamento Invertido & Comunidade Técnica</span>
+            <span>© 2026 Q.I. Match — Conectando Talentos e Oportunidades em Tecnologia</span>
             <span className="text-[11px]">Proteção de Dados e Double Opt-In em conformidade com a LGPD</span>
           </div>
         </footer>
@@ -202,7 +253,7 @@ const MainLayout: React.FC = () => {
       case 'comunidade-rede': return 'Minha Rede & Afinidade';
       case 'comunidade-ajuda': return 'Mentoria & Ajuda Técnica';
       case 'admin-dashboard': return 'Backoffice & Governança';
-      default: return 'Q.I. Tech';
+      default: return 'Q.I. Match';
     }
   };
 
@@ -262,7 +313,7 @@ const MainLayout: React.FC = () => {
       {/* Rodapé Comercial */}
       <footer className="bg-white border-t border-border py-4 text-center text-xs text-muted-foreground">
         <div className="max-w-[1440px] mx-auto px-4 flex flex-col sm:flex-row items-center justify-between gap-2">
-          <span>© 2026 Q.I. Tech — Plataforma de Recrutamento Invertido & Comunidade Técnica</span>
+          <span>© 2026 Q.I. Match — Conectando Talentos e Oportunidades em Tecnologia</span>
           <span className="text-[11px]">Proteção de Dados e Double Opt-In em conformidade com a LGPD</span>
         </div>
       </footer>

@@ -411,7 +411,7 @@ export const CandidateProfileView: React.FC = () => {
       {showCommunityModal && (
         <div className="fixed inset-0 z-50 bg-black/40 flex items-center justify-center p-4">
           <div className="bg-white rounded-base border border-border p-5 max-w-md w-full shadow-lg space-y-4">
-            <h4 className="font-heading font-bold text-sm text-foreground">Entrar na Comunidade Q.I. Tech</h4>
+            <h4 className="font-heading font-bold text-sm text-foreground">Entrar na Comunidade Q.I. Match</h4>
             <p className="text-xs text-muted-foreground leading-relaxed">
               Confirmando sua adesão, criaremos seu perfil social como <strong>pessoa física</strong> aproveitando suas hard skills públicas, foto e biografia.
             </p>

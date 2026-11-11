@@ -62,7 +62,7 @@ export const AdminDashboardView: React.FC = () => {
           <div className="flex items-center gap-2">
             <ShieldCheck className="w-5 h-5 text-primary" />
             <h2 className="font-heading font-bold text-base text-foreground">
-              Backoffice Q.I. Tech — Governança, Precificação & LGPD
+              Backoffice Q.I. Match — Governança, Precificação & LGPD
             </h2>
           </div>
           <p className="text-xs text-muted-foreground mt-0.5">

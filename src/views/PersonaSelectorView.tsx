@@ -46,8 +46,13 @@ const TECHNICAL_AREAS = [
   'Segurança da Informação'
 ];
 
-export const PersonaSelectorView: React.FC<{ onEnterApp: () => void; initialAuthNotice?: string }> = ({
+export const PersonaSelectorView: React.FC<{
+  onEnterApp: () => void;
+  onBackToLanding?: () => void;
+  initialAuthNotice?: string;
+}> = ({
   onEnterApp,
+  onBackToLanding,
   initialAuthNotice
 }) => {
   const {
@@ -89,7 +94,7 @@ export const PersonaSelectorView: React.FC<{ onEnterApp: () => void; initialAuth
     },
     {
       id: 'admin-qitech',
-      name: 'Governança Q.I. Tech',
+      name: 'Governança Q.I. Match',
       roleLabel: 'Backoffice & Operações',
       badge: 'Admin',
       email: 'admin@qitech.com.br',
@@ -175,7 +180,7 @@ export const PersonaSelectorView: React.FC<{ onEnterApp: () => void; initialAuth
     setSignupError('');
 
     if (signupRole === 'admin') {
-      setSignupError('O perfil Admin não permite auto-cadastro. Utilize o Acesso de Demonstração para entrar como Governança Q.I. Tech.');
+      setSignupError('O perfil Admin não permite auto-cadastro. Utilize o Acesso de Demonstração para entrar como Governança Q.I. Match.');
       return;
     }
 
@@ -229,15 +234,25 @@ export const PersonaSelectorView: React.FC<{ onEnterApp: () => void; initialAuth
           
           {/* Logo Comercial */}
           <div className="flex items-center gap-3">
+            {onBackToLanding && (
+              <button
+                type="button"
+                onClick={onBackToLanding}
+                className="px-2.5 py-1.5 rounded-base bg-white/10 hover:bg-white/15 border border-white/15 text-[11px] font-bold text-[#DCB434] transition-all"
+                title="Voltar para a Apresentação da Q.I. Match"
+              >
+                ← Apresentação
+              </button>
+            )}
             <div className="w-9 h-9 rounded-base bg-primary flex items-center justify-center font-heading font-bold text-white text-lg shadow-xs">
               Q
             </div>
             <div>
               <span className="font-heading font-bold text-white text-lg tracking-tight block leading-none">
-                Q.I. Tech
+                Q.I. Match
               </span>
               <span className="text-[10px] text-brandNavySub block mt-0.5">
-                Talent & Community Cloud
+                Protótipo em Demonstração
               </span>
             </div>
           </div>
@@ -398,7 +413,7 @@ export const PersonaSelectorView: React.FC<{ onEnterApp: () => void; initialAuth
       <section id="solucoes" className="py-14 max-w-[1320px] mx-auto px-4 sm:px-8 space-y-8">
         <div className="text-center max-w-2xl mx-auto space-y-2">
           <h2 className="text-xl sm:text-2xl font-heading font-bold text-foreground">
-            Como funciona o ecossistema Q.I. Tech
+            Como funciona o ecossistema Q.I. Match
           </h2>
           <p className="text-xs sm:text-sm text-muted-foreground">
             Três motores integrados para acelerar contratações e recompensar a comunidade técnica.
@@ -583,7 +598,7 @@ export const PersonaSelectorView: React.FC<{ onEnterApp: () => void; initialAuth
             <div className="w-6 h-6 rounded bg-primary text-white font-heading font-bold text-xs flex items-center justify-center">
               Q
             </div>
-            <span className="font-bold text-foreground">Q.I. Tech</span>
+            <span className="font-bold text-foreground">Q.I. Match</span>
             <span>© 2026 Todos os direitos reservados.</span>
           </div>
           <div className="flex items-center gap-4 text-[11px]">
@@ -613,7 +628,7 @@ export const PersonaSelectorView: React.FC<{ onEnterApp: () => void; initialAuth
                   Q
                 </div>
                 <div>
-                  <h3 className="font-heading font-bold text-sm text-foreground">Entrar na Q.I. Tech</h3>
+                  <h3 className="font-heading font-bold text-sm text-foreground">Entrar na Q.I. Match</h3>
                   <span className="text-[11px] text-muted-foreground block">
                     Acesse sua conta de Profissional, Empresa ou Governança
                   </span>
@@ -718,7 +733,7 @@ export const PersonaSelectorView: React.FC<{ onEnterApp: () => void; initialAuth
                   Q
                 </div>
                 <div>
-                  <h3 className="font-heading font-bold text-sm text-foreground">Criar Conta na Q.I. Tech</h3>
+                  <h3 className="font-heading font-bold text-sm text-foreground">Criar Conta na Q.I. Match</h3>
                   <span className="text-[11px] text-muted-foreground block">
                     Selecione seu perfil para iniciar
                   </span>
@@ -776,7 +791,7 @@ export const PersonaSelectorView: React.FC<{ onEnterApp: () => void; initialAuth
             {signupRole === 'admin' ? (
               <div className="p-4 rounded-base bg-secondary/50 border border-border space-y-3 text-xs">
                 <div className="flex items-center gap-2 text-foreground font-heading font-bold">
-                  <Lock className="w-4 h-4 text-primary" /> Cadastro Restrito — Governança Q.I. Tech
+                  <Lock className="w-4 h-4 text-primary" /> Cadastro Restrito — Governança Q.I. Match
                 </div>
                 <p className="text-muted-foreground leading-relaxed">
                   Contas de <strong>Admin</strong> são exclusivas para a operação de governança e não permitem auto-cadastro público. Para inspecionar o painel administrativo no MVP, utilize a conta seedada de demonstração.

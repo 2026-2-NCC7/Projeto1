@@ -10,7 +10,7 @@ export const PresentationBanner: React.FC = () => {
     { id: 'candidato-marina', label: 'Marina Costa (Candidato 2)', roleDesc: 'Eng. Dados Sênior' },
     { id: 'empresa-orion', label: 'Orion Tech (Empresa)', roleDesc: 'Recrutador / Gestor' },
     { id: 'comunidade-rafael', label: 'Rafael Mendes (Comunidade)', roleDesc: 'Membro Externo (Não Candidato)' },
-    { id: 'admin-qitech', label: 'Admin Q.I. Tech', roleDesc: 'Governança & Auditoria' }
+    { id: 'admin-qitech', label: 'Admin Q.I. Match', roleDesc: 'Governança & Auditoria' }
   ];
 
   return (

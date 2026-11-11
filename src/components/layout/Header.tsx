@@ -29,7 +29,7 @@ export const Header: React.FC<HeaderProps> = ({ currentViewTitle }) => {
     { id: 'candidato-marina', name: 'Marina Costa', badge: 'Profissional Sênior (Demo)' },
     { id: 'comunidade-rafael', name: 'Rafael Mendes', badge: 'Comunidade (Demo)' },
     { id: 'empresa-orion', name: 'Orion Tech Solutions', badge: 'Empresa B2B (Demo)' },
-    { id: 'admin-qitech', name: 'Governança Q.I. Tech', badge: 'Admin (Demo)' }
+    { id: 'admin-qitech', name: 'Governança Q.I. Match', badge: 'Admin (Demo)' }
   ];
 
   let userDisplayName = currentUser?.name || 'Lucas Almeida';
@@ -45,7 +45,7 @@ export const Header: React.FC<HeaderProps> = ({ currentViewTitle }) => {
     userBadge = 'Empresa B2B';
     currentUserId = currentUser?.id || 'user-orion';
   } else if (session?.role === 'admin' || activePersona === 'admin-qitech') {
-    userDisplayName = currentUser?.name || 'Governança Q.I. Tech';
+    userDisplayName = currentUser?.name || 'Governança Q.I. Match';
     userAvatar = '';
     userBadge = 'Admin';
     currentUserId = currentUser?.id || 'user-admin';
@@ -78,7 +78,7 @@ export const Header: React.FC<HeaderProps> = ({ currentViewTitle }) => {
           </div>
           <div>
             <span className="font-heading font-bold text-foreground text-base leading-tight block">
-              Q.I. Tech
+              Q.I. Match
             </span>
             <span className="text-[11px] text-muted-foreground font-medium">
               {currentViewTitle}

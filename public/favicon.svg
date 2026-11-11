@@ -1,0 +1,38 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64" fill="none">
+  <defs>
+    <linearGradient id="favGold" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#FDE047" />
+      <stop offset="60%" stop-color="#FACC15" />
+      <stop offset="100%" stop-color="#CA8A04" />
+    </linearGradient>
+  </defs>
+  
+  <!-- Base Squircle Dark -->
+  <rect width="64" height="64" rx="16" fill="#090C14" />
+  <rect x="1" y="1" width="62" height="62" rx="15" fill="none" stroke="#FACC15" stroke-opacity="0.25" stroke-width="1.5" />
+
+  <!-- Anel do 'Q' -->
+  <path 
+    d="M 32 14 
+       A 17 17 0 1 0 46 41" 
+    stroke="url(#favGold)" 
+    stroke-width="5.5" 
+    stroke-linecap="round"
+    fill="none" 
+  />
+
+  <!-- Núcleo Central de Inteligência -->
+  <circle cx="32" cy="31" r="5" fill="#090C14" stroke="url(#favGold)" stroke-width="2" />
+  <circle cx="32" cy="31" r="2" fill="#FDE047" />
+
+  <!-- Feixe da Cauda 45° -->
+  <path 
+    d="M 31 31 L 50 50" 
+    stroke="url(#favGold)" 
+    stroke-width="5.5" 
+    stroke-linecap="round" 
+  />
+
+  <!-- Ponto Terminal de Match -->
+  <circle cx="51.5" cy="51.5" r="2.8" fill="#FACC15" />
+</svg>

@@ -66,7 +66,7 @@ export const SEED_DEMO_USERS: RegisteredUser[] = [
   {
     id: 'user-admin',
     role: 'admin',
-    name: 'Governança Q.I. Tech',
+    name: 'Governança Q.I. Match',
     email: 'admin@qitech.com.br',
     password: '123456',
     createdAt: '2026-09-01T10:00:00Z',

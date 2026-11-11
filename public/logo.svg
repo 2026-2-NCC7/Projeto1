@@ -1,0 +1,91 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 620 140" width="100%" height="100%" fill="none">
+  <defs>
+    <linearGradient id="logoGoldGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#FDE047" />
+      <stop offset="50%" stop-color="#FACC15" />
+      <stop offset="100%" stop-color="#CA8A04" />
+    </linearGradient>
+
+    <linearGradient id="logoAccentGrad" x1="100%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#FEF08A" />
+      <stop offset="60%" stop-color="#FACC15" />
+      <stop offset="100%" stop-color="#B45309" />
+    </linearGradient>
+
+    <radialGradient id="logoBgGlow" cx="50%" cy="50%" r="55%">
+      <stop offset="0%" stop-color="#1E2333" />
+      <stop offset="70%" stop-color="#0E121B" />
+      <stop offset="100%" stop-color="#07090E" />
+    </radialGradient>
+
+    <filter id="logoGlow" x="-20%" y="-20%" width="140%" height="140%">
+      <feGaussianBlur stdDeviation="4" result="blur" />
+      <feComposite in="SourceGraphic" in2="blur" operator="over" />
+    </filter>
+  </defs>
+
+  <!-- ==================== SÍMBOLO DO LOGO (ESQUERDA) ==================== -->
+  <g transform="translate(14, 14)">
+    <!-- Container Squircle Dark Tech -->
+    <rect x="0" y="0" width="112" height="112" rx="28" fill="url(#logoBgGlow)" stroke="#262F40" stroke-width="1.5" />
+    <rect x="0" y="0" width="112" height="112" rx="28" fill="none" stroke="url(#logoGoldGrad)" stroke-width="1.2" stroke-opacity="0.35" />
+
+    <!-- Grade / Órbita de Fundo -->
+    <circle cx="56" cy="52" r="32" stroke="#FACC15" stroke-width="0.8" stroke-opacity="0.15" stroke-dasharray="2 3" />
+
+    <!-- Arco do Q -->
+    <path 
+      d="M 56 24 
+         A 28 28 0 1 0 79 70" 
+      stroke="url(#logoGoldGrad)" 
+      stroke-width="8.5" 
+      stroke-linecap="round"
+      fill="none" 
+      filter="url(#logoGlow)"
+    />
+
+    <!-- Núcleo de IA Central -->
+    <circle cx="56" cy="52" r="10" fill="#0D111A" stroke="url(#logoAccentGrad)" stroke-width="3" />
+    <circle cx="56" cy="52" r="3.8" fill="#FDE047" />
+
+    <!-- Cauda de Match 45° -->
+    <path 
+      d="M 55 52 L 85 82" 
+      stroke="url(#logoAccentGrad)" 
+      stroke-width="8.5" 
+      stroke-linecap="round"
+    />
+
+    <!-- Nó Terminal do Match -->
+    <circle cx="88" cy="85" r="5" fill="#FACC15" stroke="#08080E" stroke-width="2" />
+    <circle cx="88" cy="85" r="1.8" fill="#FFFFFF" />
+
+    <!-- Ponto de Verificação Opt-In Verde -->
+    <circle cx="77" cy="33" r="3" fill="#10B981" stroke="#08080E" stroke-width="1" />
+  </g>
+
+  <!-- ==================== TIPOGRAFIA DA MARCA (DIREITA) ==================== -->
+  <!-- Título Principal: Q.I. MATCH -->
+  <g transform="translate(150, 72)">
+    <text font-family="'Space Grotesk', 'Inter', -apple-system, sans-serif" font-weight="800" font-size="44" letter-spacing="-1">
+      <tspan fill="#FFFFFF">Q.I.</tspan>
+      <tspan dx="10" fill="url(#logoGoldGrad)">MATCH</tspan>
+    </text>
+  </g>
+
+  <!-- Tagline / Subtítulo Corporativo -->
+  <g transform="translate(152, 98)">
+    <text font-family="'JetBrains Mono', 'Fira Code', monospace" font-weight="700" font-size="11.5" fill="#E2B93B" letter-spacing="2.2" opacity="0.9">
+      PROTOCOLO SOBERANO DE REPUTAÇÃO
+    </text>
+  </g>
+
+  <!-- Pílula de Status / Verificação Tech -->
+  <g transform="translate(485, 36)">
+    <rect x="0" y="0" width="105" height="24" rx="12" fill="#16221D" stroke="#10B981" stroke-width="1" stroke-opacity="0.5" />
+    <circle cx="14" cy="12" r="3.5" fill="#10B981" />
+    <text x="24" y="15.5" font-family="'JetBrains Mono', monospace" font-size="9" font-weight="700" fill="#34D399" letter-spacing="0.5">
+      VERIFICADO
+    </text>
+  </g>
+</svg>

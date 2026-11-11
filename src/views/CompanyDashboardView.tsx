@@ -124,7 +124,7 @@ export const CompanyDashboardView: React.FC<{ onSelectVacancy: (vacancyId: strin
               <Zap className="w-3.5 h-3.5" /> Conta Corporativa Criada com Sucesso
             </span>
             <h3 className="font-heading font-bold text-base text-white">
-              Comece agora: publique sua primeira vaga na Q.I. Tech
+              Comece agora: publique sua primeira vaga na Q.I. Match
             </h3>
             <p className="text-xs text-brandNavySub max-w-2xl leading-relaxed">
               Publique sua primeira vaga com transparência salarial e ative o <strong>Match Express</strong> para receber a shortlist automática e desbloquear o <strong>1º candidato confirmado gratuitamente</strong>.

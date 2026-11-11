@@ -1,0 +1,74 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200" width="100%" height="100%" fill="none">
+  <defs>
+    <!-- Gradiente Dourado Tecnológico Principal -->
+    <linearGradient id="qiGoldGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#FDE047" />
+      <stop offset="45%" stop-color="#FACC15" />
+      <stop offset="85%" stop-color="#E2B93B" />
+      <stop offset="100%" stop-color="#CA8A04" />
+    </linearGradient>
+
+    <!-- Gradiente de Brilho Dinâmico -->
+    <linearGradient id="qiAccentGrad" x1="100%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#FEF08A" />
+      <stop offset="60%" stop-color="#FACC15" />
+      <stop offset="100%" stop-color="#B45309" />
+    </linearGradient>
+
+    <!-- Gradiente de Fundo Profundo Obsidian -->
+    <radialGradient id="qiBgGlow" cx="50%" cy="50%" r="55%">
+      <stop offset="0%" stop-color="#1E2333" />
+      <stop offset="70%" stop-color="#0E121B" />
+      <stop offset="100%" stop-color="#07090E" />
+    </radialGradient>
+
+    <!-- Filtro de Glow Sutil -->
+    <filter id="qiGlow" x="-20%" y="-20%" width="140%" height="140%">
+      <feGaussianBlur stdDeviation="5" result="blur" />
+      <feComposite in="SourceGraphic" in2="blur" operator="over" />
+    </filter>
+  </defs>
+
+  <!-- Fundo Arredondado Dark Tech (Squircle com Borda de Alta Precisão) -->
+  <rect x="8" y="8" width="184" height="184" rx="46" fill="url(#qiBgGlow)" stroke="#262F40" stroke-width="2" />
+  <rect x="8" y="8" width="184" height="184" rx="46" fill="none" stroke="url(#qiGoldGrad)" stroke-width="1.5" stroke-opacity="0.3" />
+
+  <!-- Detalhe de Grade / Nós de IA (Fundo) -->
+  <circle cx="100" cy="94" r="54" stroke="#FACC15" stroke-width="1" stroke-opacity="0.12" stroke-dasharray="3 4" />
+  <circle cx="100" cy="94" r="70" stroke="#FACC15" stroke-width="1" stroke-opacity="0.06" />
+
+  <!-- Ponto de Conexão Superior / Matchmaker -->
+  <circle cx="100" cy="40" r="3.5" fill="#FDE047" opacity="0.8" />
+  <line x1="100" y1="44" x2="100" y2="52" stroke="#FACC15" stroke-width="1.5" opacity="0.4" />
+
+  <!-- ANEL DO 'Q' (Órbita e Geometria de Precisão) -->
+  <!-- Anel externo com corte no quadrante inferior direito para passagem da cauda de Match -->
+  <path 
+    d="M 100 48 
+       A 46 46 0 1 0 138 124" 
+    stroke="url(#qiGoldGrad)" 
+    stroke-width="13" 
+    stroke-linecap="round"
+    fill="none" 
+    filter="url(#qiGlow)"
+  />
+
+  <!-- Núcleo de Match / Inteligência Neural -->
+  <circle cx="100" cy="94" r="16" fill="#0D111A" stroke="url(#qiAccentGrad)" stroke-width="4.5" />
+  <circle cx="100" cy="94" r="6" fill="#FDE047" />
+
+  <!-- CAUDA DINÂMICA DO 'Q' (Feixe de Conexão / Raio Matchmaker 45°) -->
+  <path 
+    d="M 98 94 L 148 144" 
+    stroke="url(#qiAccentGrad)" 
+    stroke-width="13" 
+    stroke-linecap="round"
+  />
+
+  <!-- Ponto Terminal do Match (Nó Verificado / Double Opt-In) -->
+  <circle cx="152" cy="148" r="8" fill="#FACC15" stroke="#08080E" stroke-width="3" />
+  <circle cx="152" cy="148" r="3" fill="#FFFFFF" />
+
+  <!-- Partícula de Conexão em Órbita -->
+  <circle cx="134" cy="62" r="4.5" fill="#10B981" stroke="#08080E" stroke-width="1.5" />
+</svg>

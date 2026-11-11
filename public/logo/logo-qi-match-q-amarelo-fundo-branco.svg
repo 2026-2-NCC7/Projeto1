@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024" width="1024" height="1024">
+  <!-- Fundo Branco -->
+  <rect width="1024" height="1024" fill="#FFFFFF" />
+
+  <!-- Letra Q Amarela da Marca Q.I. Match (#FACC15) -->
+  <text 
+    x="50%" 
+    y="52%" 
+    text-anchor="middle" 
+    dominant-baseline="central" 
+    font-family="'Space Grotesk', 'Segoe UI', -apple-system, sans-serif" 
+    font-size="720" 
+    font-weight="900" 
+    fill="#FACC15"
+  >Q</text>
+</svg>
