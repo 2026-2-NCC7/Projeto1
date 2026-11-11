@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useApp } from '../context/AppContext';
-import { Seniority, WorkContractType, WorkModality } from '../types';
+import { Vacancy, Seniority, WorkContractType, WorkModality } from '../types';
 import {
   Building2,
   Sparkles,
@@ -39,7 +39,12 @@ import {
   Flame,
   Layers,
   Gamepad2,
-  Sliders
+  Sliders,
+  Users,
+  Search,
+  Code,
+  ChevronRight,
+  DollarSign
 } from 'lucide-react';
 import { api } from '../../services/api';
 import { Job, Company as ApiCompany } from '../../types';
@@ -91,6 +96,12 @@ export const CompanyDashboardView: React.FC<CompanyDashboardViewProps> = ({
     companyCredits,
     createVacancy
   } = useApp();
+
+  // Estados para Gestão de Vagas Criadas e Detalhes
+  const [selectedVacancy, setSelectedVacancy] = useState<Vacancy | null>(null);
+  const [detailActiveTab, setDetailActiveTab] = useState<'processo' | 'requisitos' | 'matching'>('processo');
+  const [vacancySearch, setVacancySearch] = useState('');
+  const [vacancyAreaFilter, setVacancyAreaFilter] = useState('Todas');
 
   // Estados dos Filtros (Alinhados com a captura oficial do Painel Corporativo B2B)
   const [selectedVertical, setSelectedVertical] = useState<string>('Todos (12)');
@@ -411,6 +422,26 @@ export const CompanyDashboardView: React.FC<CompanyDashboardViewProps> = ({
     }
   };
 
+  // Lista de vagas criadas da empresa
+  const myVacancies = vacancies.filter(
+    (v) => v.companyId === currentCompany?.id || v.companyId === 'comp-orion' || !v.companyId
+  );
+  const displayVacancies = myVacancies.length > 0 ? myVacancies : vacancies;
+  const activeVacanciesCount = displayVacancies.length;
+  const totalSlotsCount = companyCredits || 3;
+  const freeSlotsCount = Math.max(0, totalSlotsCount - activeVacanciesCount);
+
+  const filteredVacancies = displayVacancies.filter((v) => {
+    const matchSearch =
+      !vacancySearch.trim() ||
+      v.title.toLowerCase().includes(vacancySearch.toLowerCase()) ||
+      v.mandatorySkills.some((s) => s.toLowerCase().includes(vacancySearch.toLowerCase())) ||
+      v.area.toLowerCase().includes(vacancySearch.toLowerCase());
+    const matchArea =
+      vacancyAreaFilter === 'Todas' || v.area.toLowerCase().includes(vacancyAreaFilter.toLowerCase());
+    return matchSearch && matchArea;
+  });
+
   // Filtragem dinâmica dos candidatos
   const filteredCandidates = candidatesList.filter((c) => {
     const isAllVerticals = selectedVertical.startsWith('Todo') || selectedVertical === 'Todas (28)';
@@ -472,15 +503,15 @@ export const CompanyDashboardView: React.FC<CompanyDashboardViewProps> = ({
           
           {/* Círculo indicador de Slots */}
           <div className="flex items-center gap-3">
-            <div className="relative w-12 h-12 flex items-center justify-center rounded-full bg-[#161B26] border-2 border-brand-yellow font-heading font-black text-xs text-brand-yellow shadow-inner">
-              2/3
+            <div className="relative w-12 h-12 flex items-center justify-center rounded-full bg-[#161B26] border-2 border-amber-400 font-heading font-black text-xs text-amber-400 shadow-inner">
+              {activeVacanciesCount}/{totalSlotsCount}
             </div>
             <div className="text-left space-y-0.5">
               <span className="text-xs font-bold text-slate-200 block">
-                Slots Ativos: 2 de 3 • <span className="text-emerald-400">1 slot livre</span>
+                Slots Ativos: {activeVacanciesCount} de {totalSlotsCount} • <span className="text-emerald-400">{freeSlotsCount} slot(s) livre(s)</span>
               </span>
               <span className="text-[10px] text-slate-400 uppercase font-mono tracking-wider block">
-                RENOVAÇÃO MENSAL: 18 DE OUTUBRO, 2025
+                RENOVAÇÃO AUTOMÁTICA PROTEGIDA (RN04)
               </span>
             </div>
           </div>
@@ -500,7 +531,409 @@ export const CompanyDashboardView: React.FC<CompanyDashboardViewProps> = ({
 
       </div>
 
-      {/* =========================================================================
+{/* =========================================================================
+          VISÃO 1: LISTA / CARDS DE VAGAS CRIADAS (QUANDO NENHUMA VAGA ESTÁ SELECIONADA)
+      ========================================================================= */}
+      {!selectedVacancy ? (
+        <div className="space-y-6">
+
+          {/* Cards de Métricas Rápidas das Vagas */}
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3.5">
+            <div className="p-4 rounded-xl bg-[#111318] border border-[#262F40] space-y-1">
+              <span className="text-[10px] font-mono text-slate-400 block uppercase">Vagas Publicadas</span>
+              <div className="flex items-baseline gap-2">
+                <span className="text-2xl font-black font-heading text-white">{displayVacancies.length}</span>
+                <span className="text-[11px] text-amber-400 font-bold">posições</span>
+              </div>
+              <span className="text-[10px] text-slate-500 block truncate">No pipeline corporativo</span>
+            </div>
+
+            <div className="p-4 rounded-xl bg-[#111318] border border-[#262F40] space-y-1">
+              <span className="text-[10px] font-mono text-slate-400 block uppercase">Slots Corporativos</span>
+              <div className="flex items-baseline gap-2">
+                <span className="text-2xl font-black font-heading text-emerald-400">{freeSlotsCount}</span>
+                <span className="text-[11px] text-slate-400">livres de {totalSlotsCount}</span>
+              </div>
+              <span className="text-[10px] text-emerald-400/80 block truncate">Disponíveis p/ publicação</span>
+            </div>
+
+            <div className="p-4 rounded-xl bg-[#111318] border border-[#262F40] space-y-1">
+              <span className="text-[10px] font-mono text-slate-400 block uppercase">Talentos no Funil</span>
+              <div className="flex items-baseline gap-2">
+                <span className="text-2xl font-black font-heading text-white">{candidatesList.length}</span>
+                <span className="text-[11px] text-amber-400 font-bold">avaliados</span>
+              </div>
+              <span className="text-[10px] text-slate-500 block truncate">Corte anti-spam ≥ 75%</span>
+            </div>
+
+            <div className="p-4 rounded-xl bg-[#111318] border border-[#262F40] space-y-1">
+              <span className="text-[10px] font-mono text-slate-400 block uppercase">SLA & Garantia</span>
+              <div className="flex items-baseline gap-2">
+                <span className="text-2xl font-black font-heading text-amber-400">48h</span>
+                <span className="text-[11px] text-slate-400">RN04</span>
+              </div>
+              <span className="text-[10px] text-slate-500 block truncate">Reposição sem custo</span>
+            </div>
+          </div>
+
+          {/* Barra de Filtros e Busca de Vagas */}
+          <div className="bg-[#111318] border border-[#262F40] rounded-2xl p-4 space-y-3.5 shadow-xl">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+              <div>
+                <h2 className="text-base font-bold font-heading text-white flex items-center gap-2">
+                  <Briefcase className="w-4 h-4 text-amber-400" />
+                  <span>Vagas Técnicas Criadas ({filteredVacancies.length})</span>
+                </h2>
+                <p className="text-xs text-slate-400">
+                  Gerencie as oportunidades da sua empresa, visualize candidatos no funil e acerte contratações.
+                </p>
+              </div>
+
+              {/* Campo de Pesquisa */}
+              <div className="relative w-full sm:w-72">
+                <Search className="w-3.5 h-3.5 absolute left-3 top-3 text-slate-400" />
+                <input
+                  type="text"
+                  placeholder="Buscar por cargo ou tecnologia..."
+                  value={vacancySearch}
+                  onChange={(e) => setVacancySearch(e.target.value)}
+                  className="w-full h-9 pl-9 pr-3 text-xs bg-[#161B26] border border-[#262F40] rounded-xl text-white placeholder:text-slate-500 focus:outline-none focus:border-amber-400/50"
+                />
+              </div>
+            </div>
+
+            {/* Filtros por Área */}
+            <div className="flex items-center gap-2 overflow-x-auto pb-1 text-xs no-scrollbar pt-2 border-t border-[#262F40]/60">
+              <span className="text-[10px] font-mono uppercase tracking-wider text-slate-400 font-bold shrink-0 flex items-center gap-1.5 mr-1">
+                <Filter className="w-3 h-3 text-amber-400" /> ÁREAS:
+              </span>
+              {[
+                'Todas',
+                'Backend',
+                'Frontend',
+                'Dados/IA',
+                'DevOps / Cloud',
+                'Full-Stack',
+                'Mobile'
+              ].map((area) => {
+                const isActive = vacancyAreaFilter === area;
+                return (
+                  <button
+                    key={area}
+                    onClick={() => setVacancyAreaFilter(area)}
+                    className={`px-3 py-1 rounded-lg text-xs font-medium transition-all whitespace-nowrap ${
+                      isActive
+                        ? 'bg-amber-400 text-slate-950 font-bold shadow-sm'
+                        : 'bg-[#161B26] text-slate-300 hover:text-white hover:bg-[#1f2636] border border-[#262F40]'
+                    }`}
+                  >
+                    {area}
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+
+          {/* Grid de Cards de Vagas Criadas */}
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+            {filteredVacancies.map((vac) => {
+              return (
+                <div
+                  key={vac.id}
+                  className="bg-[#111318] hover:bg-[#131722] border border-[#262F40] hover:border-amber-400/50 rounded-2xl p-5 shadow-xl transition-all duration-200 flex flex-col justify-between gap-4 group"
+                >
+                  <div className="space-y-3.5">
+                    {/* Topo do Card */}
+                    <div className="flex items-start justify-between gap-3">
+                      <div className="flex items-start gap-3">
+                        <div className="w-10 h-10 rounded-xl bg-amber-400/10 border border-amber-400/25 flex items-center justify-center text-amber-400 shrink-0 group-hover:scale-105 transition-transform">
+                          <Briefcase className="w-5 h-5" />
+                        </div>
+                        <div>
+                          <div className="flex items-center gap-2 flex-wrap">
+                            <span className="text-[10px] font-mono font-bold uppercase tracking-wider px-2 py-0.5 rounded bg-amber-400/10 text-amber-400 border border-amber-400/20">
+                              {vac.seniority}
+                            </span>
+                            <span className="text-[10px] font-mono text-slate-300 px-2 py-0.5 rounded bg-[#161B26] border border-[#262F40]">
+                              {vac.modality}
+                            </span>
+                            {vac.urgentMatchExpress && (
+                              <span className="text-[10px] font-mono text-amber-300 px-2 py-0.5 rounded bg-amber-500/15 border border-amber-500/30 flex items-center gap-1 font-bold">
+                                <Zap className="w-2.5 h-2.5" /> Match Express
+                              </span>
+                            )}
+                          </div>
+                          <h3 className="text-base font-bold font-heading text-white group-hover:text-amber-400 transition-colors mt-1">
+                            {vac.title}
+                          </h3>
+                        </div>
+                      </div>
+
+                      <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/25 text-emerald-400 text-[10px] font-mono font-bold shrink-0">
+                        <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
+                        Ativa
+                      </span>
+                    </div>
+
+                    {/* Meta-dados: Salário, Local, Contrato */}
+                    <div className="p-3 rounded-xl bg-[#0c0e12] border border-[#262F40] grid grid-cols-2 sm:grid-cols-3 gap-2 text-xs">
+                      <div>
+                        <span className="text-[10px] font-mono text-slate-400 block">Faixa Salarial</span>
+                        <span className="font-bold text-amber-400 font-mono text-xs">
+                          R$ {vac.salaryMin.toLocaleString('pt-BR')} - {vac.salaryMax.toLocaleString('pt-BR')}
+                        </span>
+                      </div>
+                      <div>
+                        <span className="text-[10px] font-mono text-slate-400 block">Localização</span>
+                        <span className="text-slate-200 text-xs truncate block">{vac.location}</span>
+                      </div>
+                      <div>
+                        <span className="text-[10px] font-mono text-slate-400 block">Regime</span>
+                        <span className="text-slate-200 text-xs font-mono">{vac.contractTypes?.join(' / ') || 'PJ'}</span>
+                      </div>
+                    </div>
+
+                    {/* Descrição resumida */}
+                    <p className="text-xs text-slate-300 line-clamp-2 leading-relaxed">
+                      {vac.description}
+                    </p>
+
+                    {/* Stacks Obrigatórias */}
+                    <div className="space-y-1.5">
+                      <span className="text-[10px] font-mono uppercase tracking-wider text-slate-400 block font-bold">
+                        Skills Obrigatórias:
+                      </span>
+                      <div className="flex flex-wrap gap-1.5">
+                        {vac.mandatorySkills?.slice(0, 5).map((sk) => (
+                          <span
+                            key={sk}
+                            className="px-2 py-0.5 rounded-md bg-[#161B26] border border-[#262F40] text-[11px] font-mono text-slate-300"
+                          >
+                            {sk}
+                          </span>
+                        ))}
+                        {(vac.mandatorySkills?.length || 0) > 5 && (
+                          <span className="px-1.5 py-0.5 rounded-md bg-[#161B26] border border-[#262F40] text-[10px] font-mono text-slate-400">
+                            +{(vac.mandatorySkills?.length || 0) - 5}
+                          </span>
+                        )}
+                      </div>
+                    </div>
+
+                    {/* Resumo do Funil de Talentos para Esta Vaga */}
+                    <div className="p-2.5 rounded-xl bg-amber-500/5 border border-amber-500/15 flex items-center justify-between gap-2 text-xs">
+                      <div className="flex items-center gap-3 text-[11px] font-mono">
+                        <span className="text-amber-400 flex items-center gap-1 font-bold">
+                          <Users className="w-3.5 h-3.5" /> 02 Matchs
+                        </span>
+                        <span className="text-emerald-400 flex items-center gap-1 font-bold">
+                          <Calendar className="w-3.5 h-3.5" /> 01 Agendada
+                        </span>
+                      </div>
+                      <span className="text-[10px] font-mono text-slate-400">
+                        Corte IA: <strong className="text-white">≥ 75%</strong>
+                      </span>
+                    </div>
+                  </div>
+
+                  {/* Ações do Card */}
+                  <div className="flex items-center gap-2 pt-3 border-t border-[#262F40]">
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setSelectedVacancy(vac);
+                        setDetailActiveTab('processo');
+                        if (onSelectVacancy) onSelectVacancy(vac.id);
+                      }}
+                      className="flex-1 py-2.5 px-4 bg-amber-400 hover:bg-amber-300 text-slate-950 font-black text-xs rounded-xl flex items-center justify-center gap-2 transition-all shadow-md shadow-amber-500/20"
+                    >
+                      <span>Ver Mais Informações & Candidatos</span>
+                      <ArrowRight className="w-4 h-4 text-slate-950" />
+                    </button>
+
+                    {onOpenMatchingIa && (
+                      <button
+                        type="button"
+                        onClick={() => onOpenMatchingIa(vac.id)}
+                        className="py-2.5 px-3 bg-[#161B26] hover:bg-[#1e2535] border border-[#262F40] hover:border-amber-400/40 text-slate-200 text-xs font-bold rounded-xl transition-all"
+                        title="Abrir Análise de Matching IA da Vaga"
+                      >
+                        <Target className="w-4 h-4 text-amber-400" />
+                      </button>
+                    )}
+                  </div>
+                </div>
+              );
+            })}
+
+            {/* Card para Slot Livre Disponível */}
+            {freeSlotsCount > 0 && (
+              <div className="p-6 rounded-2xl border-2 border-dashed border-amber-400/30 bg-amber-500/5 flex flex-col items-center justify-center text-center space-y-3 min-h-[300px]">
+                <div className="w-12 h-12 rounded-2xl bg-amber-400/10 border border-amber-400/25 flex items-center justify-center text-amber-400">
+                  <Plus className="w-6 h-6 stroke-[3]" />
+                </div>
+                <div>
+                  <h4 className="text-base font-bold font-heading text-white">
+                    {freeSlotsCount} Slot(s) Corporativo(s) Disponível(is)
+                  </h4>
+                  <p className="text-xs text-slate-400 max-w-sm mt-1 leading-relaxed">
+                    Você possui capacidade no seu plano para publicar mais uma oportunidade técnica sem cobranças adicionais.
+                  </p>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setModalStep(1);
+                    setShowNewVacancyModal(true);
+                  }}
+                  className="px-5 py-2.5 bg-amber-400 hover:bg-amber-300 text-slate-950 font-black text-xs rounded-xl flex items-center gap-2 transition-all shadow-md shadow-amber-500/20"
+                >
+                  <Plus className="w-4 h-4 stroke-[3]" />
+                  <span>Publicar Nova Vaga Agora</span>
+                </button>
+              </div>
+            )}
+          </div>
+
+        </div>
+      ) : (
+        /* =========================================================================
+            VISÃO 2: DETALHES DA VAGA SELECIONADA + ABAS (PROCESSO DOS CANDIDATOS / REQUISITOS)
+        ========================================================================= */
+        <div className="space-y-6">
+
+          {/* Barra Superior da Vaga Selecionada */}
+          <div className="bg-[#111318] border border-[#262F40] rounded-2xl p-5 shadow-xl flex flex-col md:flex-row md:items-center justify-between gap-4">
+            <div className="space-y-2">
+              <button
+                type="button"
+                onClick={() => setSelectedVacancy(null)}
+                className="text-xs text-amber-400 hover:text-amber-300 font-bold flex items-center gap-1.5 transition-colors group mb-1"
+              >
+                <ArrowLeft className="w-4 h-4 text-amber-400 group-hover:-translate-x-0.5 transition-transform" />
+                <span>Voltar para Lista de Vagas Criadas</span>
+              </button>
+              <div className="flex items-center gap-3 flex-wrap">
+                <h1 className="text-xl sm:text-2xl font-bold font-heading text-white">
+                  {selectedVacancy.title}
+                </h1>
+                <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-emerald-500/10 border border-emerald-500/25 text-emerald-400 text-xs font-mono font-bold">
+                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
+                  Vaga Ativa
+                </span>
+              </div>
+              <div className="flex items-center gap-3 text-xs text-slate-300 flex-wrap font-mono">
+                <span className="text-amber-400 font-bold">
+                  R$ {selectedVacancy.salaryMin.toLocaleString('pt-BR')} - {selectedVacancy.salaryMax.toLocaleString('pt-BR')}
+                </span>
+                <span>•</span>
+                <span>{selectedVacancy.seniority}</span>
+                <span>•</span>
+                <span>{selectedVacancy.modality}</span>
+                <span>•</span>
+                <span>{selectedVacancy.location}</span>
+              </div>
+            </div>
+
+            <div className="flex items-center gap-2.5 shrink-0">
+              {onOpenMatchingIa && (
+                <button
+                  type="button"
+                  onClick={() => onOpenMatchingIa(selectedVacancy.id)}
+                  className="px-3.5 py-2 bg-[#161B26] hover:bg-[#1e2535] border border-[#262F40] text-slate-200 text-xs font-bold rounded-xl flex items-center gap-2 transition-all"
+                >
+                  <Target className="w-3.5 h-3.5 text-amber-400" />
+                  <span>Matching 5D</span>
+                </button>
+              )}
+
+              {onOpenComparison && (
+                <button
+                  type="button"
+                  onClick={() => onOpenComparison(selectedVacancy.id)}
+                  className="px-3.5 py-2 bg-[#161B26] hover:bg-[#1e2535] border border-[#262F40] text-slate-200 text-xs font-bold rounded-xl flex items-center gap-2 transition-all"
+                >
+                  <GitCompare className="w-3.5 h-3.5 text-amber-400" />
+                  <span>Comparar Perfis</span>
+                </button>
+              )}
+
+              <button
+                type="button"
+                onClick={() => {
+                  setModalStep(1);
+                  setShowNewVacancyModal(true);
+                }}
+                className="px-4 py-2 bg-amber-400 hover:bg-amber-300 text-slate-950 text-xs font-black rounded-xl flex items-center gap-2 transition-all shadow-md shadow-amber-500/20"
+              >
+                <Plus className="w-4 h-4 stroke-[3]" />
+                <span>Nova Vaga</span>
+              </button>
+            </div>
+          </div>
+
+          {/* Abas de Navegação no Detalhe da Vaga */}
+          <div className="bg-[#111318] border border-[#262F40] rounded-xl p-1.5 flex items-center gap-1.5 overflow-x-auto no-scrollbar">
+            <button
+              type="button"
+              onClick={() => setDetailActiveTab('processo')}
+              className={`flex items-center gap-2 px-4 py-2 rounded-lg text-xs font-bold transition-all ${
+                detailActiveTab === 'processo'
+                  ? 'bg-amber-400 text-slate-950 shadow-md shadow-amber-500/20'
+                  : 'text-slate-300 hover:text-white hover:bg-[#161B26]'
+              }`}
+            >
+              <Users className="w-4 h-4" />
+              <span>Processo dos Candidatos (Kanban IA)</span>
+              <span className={`text-[10px] font-mono px-1.5 py-0.2 rounded ${
+                detailActiveTab === 'processo' ? 'bg-black/20 text-slate-950' : 'bg-[#161B26] text-amber-400'
+              }`}>
+                {candidatesList.length}
+              </span>
+            </button>
+
+            <button
+              type="button"
+              onClick={() => setDetailActiveTab('requisitos')}
+              className={`flex items-center gap-2 px-4 py-2 rounded-lg text-xs font-bold transition-all ${
+                detailActiveTab === 'requisitos'
+                  ? 'bg-amber-400 text-slate-950 shadow-md shadow-amber-500/20'
+                  : 'text-slate-300 hover:text-white hover:bg-[#161B26]'
+              }`}
+            >
+              <FileText className="w-4 h-4" />
+              <span>Detalhes & Requisitos da Vaga</span>
+            </button>
+
+            <button
+              type="button"
+              onClick={() => setDetailActiveTab('matching')}
+              className={`flex items-center gap-2 px-4 py-2 rounded-lg text-xs font-bold transition-all ${
+                detailActiveTab === 'matching'
+                  ? 'bg-amber-400 text-slate-950 shadow-md shadow-amber-500/20'
+                  : 'text-slate-300 hover:text-white hover:bg-[#161B26]'
+              }`}
+            >
+              <Target className="w-4 h-4" />
+              <span>Matching & Inteligência da IA</span>
+            </button>
+          </div>
+
+          {/* CONTEÚDO DA ABA 1: PROCESSO DOS CANDIDATOS (KANBAN DE 4 COLUNAS DA IMAGEM) */}
+          {detailActiveTab === 'processo' && (
+            <div className="space-y-6 animate-in fade-in duration-200">
+              {/* Notificação da vaga contextualizada */}
+              <div className="p-3.5 rounded-xl bg-amber-500/5 border border-amber-500/20 flex items-center justify-between gap-3 text-xs">
+                <div className="flex items-center gap-2 text-slate-300">
+                  <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
+                  <span>Pipeline filtrado para a vaga ativa: <strong className="text-white">{selectedVacancy.title}</strong></span>
+                </div>
+                <span className="text-[11px] font-mono text-amber-400 font-bold hidden sm:inline">
+                  Corte Mínimo Antispam ≥ 75%
+                </span>
+              </div>
+
+              {/* =========================================================================
           2. BARRA DE FILTROS: VERTICAIS, SENIORIDADE & CORTE ANTI-SPAM (≥ 75%)
       ========================================================================= */}
       <div className="bg-[#111318] border border-[#262F40] rounded-2xl p-4 space-y-3.5 shadow-xl">
@@ -993,7 +1426,188 @@ export const CompanyDashboardView: React.FC<CompanyDashboardViewProps> = ({
         </div>
 
       </div>
+            </div>
+          )}
 
+          {/* CONTEÚDO DA ABA 2: DETALHES & REQUISITOS DA VAGA */}
+          {detailActiveTab === 'requisitos' && (
+            <div className="bg-[#111318] border border-[#262F40] rounded-2xl p-6 space-y-6 shadow-xl animate-in fade-in duration-200">
+              <div className="border-b border-[#262F40] pb-4">
+                <span className="text-[10px] font-mono text-amber-400 uppercase tracking-wider font-bold block mb-1">
+                  FICHA TÉCNICA DA MISSÃO
+                </span>
+                <h3 className="text-xl font-bold font-heading text-white">
+                  {selectedVacancy.title}
+                </h3>
+                <p className="text-xs text-slate-400 mt-1">
+                  Publicado pela empresa {currentCompany?.name || 'Orion Tech Solutions'} • ID da Vaga: {selectedVacancy.id}
+                </p>
+              </div>
+
+              <div className="space-y-3">
+                <h4 className="text-sm font-bold font-heading text-white flex items-center gap-2">
+                  <Briefcase className="w-4 h-4 text-amber-400" />
+                  <span>Escopo & Missão da Posição</span>
+                </h4>
+                <p className="text-xs text-slate-300 leading-relaxed bg-[#0c0e12] p-4 rounded-xl border border-[#262F40]">
+                  {selectedVacancy.description}
+                </p>
+              </div>
+
+              {/* Grade de Requisitos */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="p-4 rounded-xl bg-[#0c0e12] border border-[#262F40] space-y-2.5">
+                  <span className="text-xs font-bold text-amber-400 flex items-center gap-2">
+                    <CheckCircle2 className="w-4 h-4 text-amber-400" />
+                    <span>Skills Técnicas Obrigatórias</span>
+                  </span>
+                  <div className="flex flex-wrap gap-2 pt-1">
+                    {selectedVacancy.mandatorySkills.map((sk) => (
+                      <span
+                        key={sk}
+                        className="px-2.5 py-1 rounded-lg bg-[#161B26] border border-amber-400/30 text-xs font-mono font-bold text-amber-300"
+                      >
+                        {sk}
+                      </span>
+                    ))}
+                  </div>
+                </div>
+
+                <div className="p-4 rounded-xl bg-[#0c0e12] border border-[#262F40] space-y-2.5">
+                  <span className="text-xs font-bold text-slate-200 flex items-center gap-2">
+                    <Sparkles className="w-4 h-4 text-emerald-400" />
+                    <span>Skills Desejáveis & Diferenciais</span>
+                  </span>
+                  <div className="flex flex-wrap gap-2 pt-1">
+                    {(selectedVacancy.desirableSkills?.length ? selectedVacancy.desirableSkills : ['Docker', 'AWS', 'Clean Architecture', 'CI/CD']).map((sk) => (
+                      <span
+                        key={sk}
+                        className="px-2.5 py-1 rounded-lg bg-[#161B26] border border-[#262F40] text-xs font-mono text-slate-300"
+                      >
+                        {sk}
+                      </span>
+                    ))}
+                  </div>
+                </div>
+              </div>
+
+              {/* Soft Skills & Cultura */}
+              <div className="p-4 rounded-xl bg-[#0c0e12] border border-[#262F40] space-y-2.5">
+                <span className="text-xs font-bold text-slate-200 flex items-center gap-2">
+                  <Award className="w-4 h-4 text-purple-400" />
+                  <span>Competências Comportamentais & Cultura Técnica</span>
+                </span>
+                <div className="flex flex-wrap gap-2 pt-1">
+                  {(selectedVacancy.softSkills?.length ? selectedVacancy.softSkills : ['Comunicação Clara', 'Resolução de Problemas', 'Colaboração em Squad']).map((sk) => (
+                    <span
+                      key={sk}
+                      className="px-2.5 py-1 rounded-lg bg-[#161B26] border border-purple-500/30 text-xs font-mono text-purple-300"
+                    >
+                      {sk}
+                    </span>
+                  ))}
+                </div>
+              </div>
+
+              {/* Remuneração & Transparência Salarial */}
+              <div className="p-4 rounded-xl bg-[#0c0e12] border border-[#262F40] grid grid-cols-1 sm:grid-cols-3 gap-4 text-xs">
+                <div>
+                  <span className="text-[10px] font-mono text-slate-400 uppercase block">Faixa Salarial Transparente</span>
+                  <strong className="text-sm font-bold text-amber-400 font-mono mt-0.5 block">
+                    R$ {selectedVacancy.salaryMin.toLocaleString('pt-BR')} a R$ {selectedVacancy.salaryMax.toLocaleString('pt-BR')}
+                  </strong>
+                </div>
+                <div>
+                  <span className="text-[10px] font-mono text-slate-400 uppercase block">Modalidade de Trabalho</span>
+                  <strong className="text-sm font-bold text-white mt-0.5 block">
+                    {selectedVacancy.modality} ({selectedVacancy.location})
+                  </strong>
+                </div>
+                <div>
+                  <span className="text-[10px] font-mono text-slate-400 uppercase block">Regime de Contratação</span>
+                  <strong className="text-sm font-bold text-white mt-0.5 block font-mono">
+                    {selectedVacancy.contractTypes?.join(' / ') || 'PJ'}
+                  </strong>
+                </div>
+              </div>
+
+              {/* Parâmetros LGPD */}
+              <div className="p-4 rounded-xl bg-amber-500/5 border border-amber-500/20 text-xs text-slate-300 space-y-1">
+                <span className="font-bold text-white flex items-center gap-1.5">
+                  <ShieldCheck className="w-4 h-4 text-amber-400" /> Governança Algorítmica & LGPD Art. 20
+                </span>
+                <p className="text-[11px] text-slate-400 leading-relaxed">
+                  Os critérios de avaliação do modelo de matching são auditáveis. O candidato tem direito a explicações e a réplicas estruturadas sem ônus ou prejuízo técnico.
+                </p>
+              </div>
+            </div>
+          )}
+
+          {/* CONTEÚDO DA ABA 3: MATCHING & INTELIGÊNCIA */}
+          {detailActiveTab === 'matching' && (
+            <div className="bg-[#111318] border border-[#262F40] rounded-2xl p-6 space-y-6 shadow-xl animate-in fade-in duration-200">
+              <div className="border-b border-[#262F40] pb-4">
+                <span className="text-[10px] font-mono text-amber-400 uppercase tracking-wider font-bold block mb-1">
+                  MOTOR DE IA & RANKING MULTIDIMENSIONAL
+                </span>
+                <h3 className="text-xl font-bold font-heading text-white">
+                  Inteligência de Matching para {selectedVacancy.title}
+                </h3>
+                <p className="text-xs text-slate-400 mt-1">
+                  Avaliação em 5 dimensões com embeddings Multilingual-E5, Qwen e verificação formal de evidências.
+                </p>
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div className="p-5 rounded-xl bg-[#0c0e12] border border-[#262F40] space-y-3">
+                  <div className="w-10 h-10 rounded-lg bg-amber-400/10 border border-amber-400/25 flex items-center justify-center text-amber-400">
+                    <Target className="w-5 h-5" />
+                  </div>
+                  <div>
+                    <h4 className="text-sm font-bold text-white">Análise de Matching 5D</h4>
+                    <p className="text-xs text-slate-400 mt-1 leading-relaxed">
+                      Visualize a matriz de afinidade calculada pelo motor: Hard Skills, Experiência, Cultura, Pretensão e Disponibilidade.
+                    </p>
+                  </div>
+                  {onOpenMatchingIa && (
+                    <button
+                      type="button"
+                      onClick={() => onOpenMatchingIa(selectedVacancy.id)}
+                      className="px-4 py-2 bg-amber-400 hover:bg-amber-300 text-slate-950 font-bold text-xs rounded-xl flex items-center gap-1.5 transition-all shadow-md shadow-amber-500/20"
+                    >
+                      <Target className="w-4 h-4 text-slate-950" />
+                      <span>Abrir Análise de Matching</span>
+                    </button>
+                  )}
+                </div>
+
+                <div className="p-5 rounded-xl bg-[#0c0e12] border border-[#262F40] space-y-3">
+                  <div className="w-10 h-10 rounded-lg bg-emerald-400/10 border border-emerald-400/25 flex items-center justify-center text-emerald-400">
+                    <GitCompare className="w-5 h-5" />
+                  </div>
+                  <div>
+                    <h4 className="text-sm font-bold text-white">Comparador de Perfis Lado a Lado</h4>
+                    <p className="text-xs text-slate-400 mt-1 leading-relaxed">
+                      Compare as transcrições Whisper e laudos de proficiência de múltiplos candidatos lado a lado.
+                    </p>
+                  </div>
+                  {onOpenComparison && (
+                    <button
+                      type="button"
+                      onClick={() => onOpenComparison(selectedVacancy.id)}
+                      className="px-4 py-2 bg-[#161B26] hover:bg-[#1e2535] border border-[#262F40] text-slate-200 font-bold text-xs rounded-xl flex items-center gap-1.5 transition-all"
+                    >
+                      <GitCompare className="w-4 h-4 text-amber-400" />
+                      <span>Comparar Talentos</span>
+                    </button>
+                  )}
+                </div>
+              </div>
+            </div>
+          )}
+
+        </div>
+      )}
       {/* =========================================================================
           4. RODAPÉ DE GOVERNANÇA RF15 & LGPD ARTIGO 20 - RECIPROCIDADE
       ========================================================================= */}

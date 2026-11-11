@@ -311,7 +311,6 @@ export const MainLayout: React.FC = () => {
               <CompanyDashboardView
                 onSelectVacancy={(id) => {
                   setSelectedVacancyId(id);
-                  setCurrentTab('empresa-vaga-detalhe');
                 }}
                 onOpenMatchingIa={(jobId) => {
                   if (jobId) setTargetJobId(jobId);
