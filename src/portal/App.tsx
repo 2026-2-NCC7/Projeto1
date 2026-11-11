@@ -19,6 +19,7 @@ import { CommunityHelperView } from './views/CommunityHelperView';
 import { AdminDashboardView } from './views/AdminDashboardView';
 import { VitrinePlanosView } from './views/VitrinePlanosView';
 import { CookieConsentModal } from './components/common/CookieConsentModal';
+import { Mail } from 'lucide-react';
 
 // Páginas Integradas do Motor de IA & Auditoria TCC
 import { DashboardPage } from '../pages/DashboardPage';
@@ -210,7 +211,17 @@ export const MainLayout: React.FC = () => {
         <footer className="bg-card border-t border-border py-4 text-center text-xs text-muted-foreground">
           <div className="max-w-[1440px] mx-auto px-4 flex flex-col sm:flex-row items-center justify-between gap-2">
             <span>© 2026 Q.I. Match — Ecossistema Unificado de Recrutamento Invertido, Comunidade & Motor IA</span>
-            <span className="text-[11px]">Proteção de Dados, Double Opt-In e Direito de Réplica (Art. 20 LGPD)</span>
+            <div className="flex items-center gap-3 text-[11px]">
+              <a
+                href="mailto:qimatch.suporte@gmail.com?subject=Suporte%20Plataforma%20Q.I.%20Match"
+                className="hover:text-amber-500 font-semibold transition-colors flex items-center gap-1"
+              >
+                <Mail className="w-3 h-3 text-amber-500" />
+                <span>Suporte: qimatch.suporte@gmail.com</span>
+              </a>
+              <span>•</span>
+              <span>LGPD Art. 20</span>
+            </div>
           </div>
         </footer>
       </div>
@@ -488,7 +499,17 @@ export const MainLayout: React.FC = () => {
       <footer className="bg-card border-t border-border py-4 text-center text-xs text-muted-foreground">
         <div className="max-w-[1440px] mx-auto px-4 flex flex-col sm:flex-row items-center justify-between gap-2">
           <span>© 2026 Q.I. Match — Ecossistema Unificado: Recrutamento Invertido, Comunidade & Motor de IA Local (TCC FECAP)</span>
-          <span className="text-[11px]">Faster-Whisper (int8) • Qwen3 + EvidenceVerifier • Multilingual-E5 • LGPD Double Opt-In & Art. 20</span>
+          <div className="flex flex-wrap items-center gap-3 text-[11px]">
+            <a
+              href="mailto:qimatch.suporte@gmail.com?subject=Suporte%20Plataforma%20Q.I.%20Match"
+              className="hover:text-amber-500 font-semibold transition-colors flex items-center gap-1"
+            >
+              <Mail className="w-3 h-3 text-amber-500" />
+              <span>Suporte: qimatch.suporte@gmail.com</span>
+            </a>
+            <span>•</span>
+            <span>Faster-Whisper • Qwen3 + EvidenceVerifier • Art. 20</span>
+          </div>
         </div>
       </footer>
       <CookieConsentModal />

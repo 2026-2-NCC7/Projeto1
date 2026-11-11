@@ -379,6 +379,15 @@ export const PersonaSelectorView: React.FC<{ onEnterApp: () => void; initialAuth
               <span>Motor IA Ativo (Whisper + Qwen)</span>
             </div>
 
+            <a
+              href="mailto:qimatch.suporte@gmail.com?subject=Contato%20Q.I.%20Match%20-%20Apresenta%C3%A7%C3%A3o%20e%20Parcerias"
+              className="hidden md:flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-[#262F40] text-xs font-semibold text-slate-300 hover:text-white hover:bg-white/5 transition-colors"
+              title="Fale com nossa equipe: qimatch.suporte@gmail.com"
+            >
+              <Mail className="w-3.5 h-3.5 text-yellow-400" />
+              <span>Fale Conosco</span>
+            </a>
+
             <button
               type="button"
               onClick={openLoginModal}
@@ -863,6 +872,26 @@ export const PersonaSelectorView: React.FC<{ onEnterApp: () => void; initialAuth
             </span>
           </div>
 
+          {/* Box de Contato Direto para Empresas / Dúvidas */}
+          <div className="mt-3.5 p-4 rounded-xl bg-[#161B26] border border-yellow-400/30 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs max-w-4xl mx-auto shadow-lg">
+            <div className="flex items-center gap-3 text-left">
+              <div className="w-10 h-10 rounded-lg bg-yellow-400/10 border border-yellow-400/25 flex items-center justify-center text-yellow-400 shrink-0">
+                <Mail className="w-5 h-5" />
+              </div>
+              <div>
+                <strong className="text-white block text-xs sm:text-sm">Quer saber mais sobre a plataforma ou contratar um plano sob medida?</strong>
+                <span className="text-slate-400 text-[11px]">Nossa equipe responde rapidamente pelo canal oficial de suporte corporativo.</span>
+              </div>
+            </div>
+            <a
+              href="mailto:qimatch.suporte@gmail.com?subject=Apresenta%C3%A7%C3%A3o%20e%20D%C3%BAvidas%20-%20Plataforma%20Q.I.%20Match&body=Ol%C3%A1%20equipe%20Q.I.%20Match%2C%20gostaria%20de%20conversar%20sobre%20a%20utiliza%C3%A7%C3%A3o%20da%20plataforma%20na%20nossa%20empresa."
+              className="px-4 py-2.5 rounded-lg bg-yellow-400 hover:bg-yellow-300 text-black font-extrabold text-xs flex items-center gap-2 shrink-0 transition-all shadow-md shadow-yellow-500/20"
+            >
+              <Mail className="w-3.5 h-3.5 text-black" />
+              <span>Falar com Nossa Empresa</span>
+            </a>
+          </div>
+
         </div>
       </section>
 
@@ -950,13 +979,13 @@ export const PersonaSelectorView: React.FC<{ onEnterApp: () => void; initialAuth
             >
               Iniciar Avaliação Técnica Gratuita
             </button>
-            <button
-              type="button"
-              onClick={() => openSignupModal('empresa')}
-              className="px-5 py-3 rounded-lg bg-[#161B26] hover:bg-[#1e2433] border border-[#262F40] text-slate-200 text-xs font-bold transition-all"
+            <a
+              href="mailto:qimatch.suporte@gmail.com?subject=Contato%20Empresas%20-%20Apresenta%C3%A7%C3%A3o%20da%20Plataforma%20Q.I.%20Match&body=Ol%C3%A1%20equipe%20Q.I.%20Match%2C%20gostaria%20de%20saber%20mais%20sobre%20como%20usar%20a%20plataforma%20na%20nossa%20empresa."
+              className="px-5 py-3 rounded-lg bg-[#161B26] hover:bg-[#1e2433] border border-[#262F40] text-slate-200 text-xs font-bold transition-all flex items-center gap-2"
             >
-              Falar com Especialista B2B
-            </button>
+              <Mail className="w-4 h-4 text-yellow-400" />
+              <span>Falar com Nossa Empresa (B2B)</span>
+            </a>
           </div>
         </div>
       </section>
@@ -972,8 +1001,17 @@ export const PersonaSelectorView: React.FC<{ onEnterApp: () => void; initialAuth
             <span className="text-[#9a9078] hidden md:inline">• Conformidade LGPD & ISO 27001</span>
           </div>
 
-          <div className="flex items-center gap-4 text-[11px] text-[#9a9078]">
-            <span>© 2025 Q.I. Match Engine. Inverse Technical Talent Protocol.</span>
+          <div className="flex flex-wrap items-center gap-4 text-[11px] text-[#9a9078]">
+            <a
+              href="mailto:qimatch.suporte@gmail.com?subject=Suporte%20e%20D%C3%BAvidas%20-%20Q.I.%20Match"
+              className="hover:text-yellow-400 text-slate-300 font-semibold transition-colors flex items-center gap-1.5"
+            >
+              <Mail className="w-3.5 h-3.5 text-yellow-400" />
+              <span>Suporte: qimatch.suporte@gmail.com</span>
+            </a>
+            <span>•</span>
+            <span>© 2025 Q.I. Match Engine.</span>
+            <span>•</span>
             <button
               type="button"
               onClick={() => openDemoModal('admin-qitech')}

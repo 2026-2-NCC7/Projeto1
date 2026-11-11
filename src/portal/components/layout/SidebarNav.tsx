@@ -24,7 +24,9 @@ import {
   Lock,
   Flame,
   Award,
-  Plus
+  Plus,
+  LifeBuoy,
+  Mail
 } from 'lucide-react';
 
 interface SidebarNavProps {
@@ -266,6 +268,13 @@ export const SidebarNav: React.FC<SidebarNavProps> = ({ currentTab, setCurrentTa
               className="w-2.5 h-2.5 rounded-full bg-emerald-500 dark:bg-emerald-400 animate-pulse" 
               title={`Motor IA Ativo • ${tier}`} 
             />
+            <a
+              href="mailto:qimatch.suporte@gmail.com?subject=Suporte%20Plataforma%20Q.I.%20Match"
+              className="w-8 h-8 rounded-lg border border-border dark:border-[#1E2638] flex items-center justify-center text-muted-foreground hover:text-amber-500 hover:bg-muted transition-colors mt-1"
+              title="Suporte: qimatch.suporte@gmail.com"
+            >
+              <LifeBuoy className="w-4 h-4" />
+            </a>
           </div>
         ) : (
           <div className="pt-2.5 border-t border-border dark:border-[#1E2638] space-y-3">
@@ -362,6 +371,24 @@ export const SidebarNav: React.FC<SidebarNavProps> = ({ currentTab, setCurrentTa
                 <span className="truncate">Criptografia & Double Opt-In</span>
               </div>
             </div>
+
+            {/* Canal de Suporte Oficial */}
+            <a
+              href="mailto:qimatch.suporte@gmail.com?subject=Suporte%20Plataforma%20Q.I.%20Match"
+              className="p-2.5 rounded-xl bg-slate-50 dark:bg-[#121722] hover:bg-amber-500/5 dark:hover:bg-amber-500/10 border border-border dark:border-[#1E2638] hover:border-amber-500/30 flex items-center justify-between gap-2 text-foreground transition-all group"
+              title="Suporte Técnico e Comercial: qimatch.suporte@gmail.com"
+            >
+              <div className="flex items-center gap-2 min-w-0 text-left">
+                <div className="w-6 h-6 rounded-md bg-amber-400/20 text-amber-500 flex items-center justify-center shrink-0">
+                  <LifeBuoy className="w-3.5 h-3.5" />
+                </div>
+                <div className="min-w-0">
+                  <span className="text-[11px] font-bold block truncate group-hover:text-amber-500 transition-colors">Suporte Técnico</span>
+                  <span className="text-[10px] text-muted-foreground block truncate">qimatch.suporte@gmail.com</span>
+                </div>
+              </div>
+              <Mail className="w-3.5 h-3.5 text-muted-foreground group-hover:text-amber-500 shrink-0" />
+            </a>
           </div>
         )}
 

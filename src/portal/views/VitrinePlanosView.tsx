@@ -17,7 +17,8 @@ import {
   Download,
   AlertCircle,
   PlusCircle,
-  BadgeCheck
+  BadgeCheck,
+  Mail
 } from 'lucide-react';
 
 interface VitrinePlanosViewProps {
@@ -522,6 +523,30 @@ export const VitrinePlanosView: React.FC<VitrinePlanosViewProps> = ({
             </p>
           </div>
         </div>
+      </div>
+
+      {/* 7. CANAL DE SUPORTE CORPORATIVO & PLANOS CUSTOMIZADOS */}
+      <div className="p-5 rounded-2xl bg-[#161B26] border border-amber-400/30 flex flex-col sm:flex-row items-center justify-between gap-4 shadow-xl">
+        <div className="flex items-center gap-3.5">
+          <div className="w-11 h-11 rounded-xl bg-amber-400/10 border border-amber-400/30 flex items-center justify-center text-amber-400 shrink-0">
+            <Mail className="w-5 h-5" />
+          </div>
+          <div>
+            <span className="font-heading font-bold text-white text-sm block">
+              Dúvidas Comerciais ou Planos Sob Medida para Grandes Volumes?
+            </span>
+            <p className="text-slate-400 text-xs mt-0.5">
+              Entre em contato direto com nossos consultores técnicos através do suporte oficial da plataforma.
+            </p>
+          </div>
+        </div>
+        <a
+          href="mailto:qimatch.suporte@gmail.com?subject=Contato%20Comercial%20-%20Plano%20Customizado%20Q.I.%20Match&body=Ol%C3%A1%20equipe%20Q.I.%20Match%2C%20gostaria%20de%20conversar%20sobre%20planos%20e%20slots%20customizados%20para%20nossa%20empresa."
+          className="px-4 py-2.5 rounded-xl bg-amber-400 hover:bg-amber-300 text-slate-950 font-black text-xs flex items-center gap-2 shrink-0 transition-all shadow-md shadow-amber-500/20"
+        >
+          <Mail className="w-4 h-4 text-slate-950" />
+          <span>Contatar Suporte Corporativo</span>
+        </a>
       </div>
     </div>
   );

@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useApp } from '../context/AppContext';
-import { Search, UserPlus, Check, Sparkles, Award } from 'lucide-react';
+import { Search, UserPlus, Check, Sparkles, Award, Mail, LifeBuoy } from 'lucide-react';
 
 const QUICK_TOPICS = ['React', 'TypeScript', 'Python', 'AWS', 'Docker', 'Spark', 'SQL'];
 
@@ -183,6 +183,26 @@ export const CommunityHelperView: React.FC = () => {
             );
           })
         )}
+      </div>
+
+      {/* Suporte Oficial da Comunidade e Plataforma */}
+      <div className="p-4 rounded-xl bg-card border border-border flex flex-col sm:flex-row items-center justify-between gap-3 shadow-xs">
+        <div className="flex items-center gap-3">
+          <div className="w-10 h-10 rounded-lg bg-amber-500/10 border border-amber-500/20 flex items-center justify-center text-amber-500 shrink-0">
+            <LifeBuoy className="w-5 h-5" />
+          </div>
+          <div>
+            <strong className="text-xs sm:text-sm text-foreground block">Precisa de Suporte Oficial da Plataforma?</strong>
+            <span className="text-muted-foreground text-xs">Dúvidas sobre mentoria, badges, dados LGPD ou funcionamento do ecossistema.</span>
+          </div>
+        </div>
+        <a
+          href="mailto:qimatch.suporte@gmail.com?subject=Suporte%20Comunidade%20-%20Q.I.%20Match"
+          className="px-3.5 py-2 rounded-lg bg-amber-400 hover:bg-amber-300 text-slate-950 font-bold text-xs flex items-center gap-2 shrink-0 transition-colors shadow-sm"
+        >
+          <Mail className="w-3.5 h-3.5 text-slate-950" />
+          <span>Falar com o Suporte</span>
+        </a>
       </div>
 
     </div>

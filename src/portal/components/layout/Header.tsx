@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useApp, ActivePersona } from '../../context/AppContext';
 import { getCandidateLevelInfo } from '../../utils/candidateRanking';
-import { Bell, Search, User, LogOut, ChevronDown, Check, Sun, Moon, PlayCircle, Brain, ShieldCheck, Lock } from 'lucide-react';
+import { Bell, Search, User, LogOut, ChevronDown, Check, Sun, Moon, PlayCircle, Brain, ShieldCheck, Lock, LifeBuoy, Mail } from 'lucide-react';
 import { AnimatedIcon } from '../common/AnimatedIcon';
 
 interface HeaderProps {
@@ -122,6 +122,16 @@ export const Header: React.FC<HeaderProps> = ({ currentViewTitle }) => {
               <Moon className="w-4 h-4 text-slate-700" />
             )}
           </button>
+
+          {/* Botão de Suporte Oficial */}
+          <a
+            href="mailto:qimatch.suporte@gmail.com?subject=Suporte%20Q.I.%20Match"
+            className="w-9 h-9 rounded-base border border-border flex items-center justify-center hover:bg-muted text-foreground transition-colors group"
+            title="Suporte da Plataforma (qimatch.suporte@gmail.com)"
+            aria-label="Contatar suporte oficial"
+          >
+            <LifeBuoy className="w-4 h-4 text-muted-foreground group-hover:text-amber-500 transition-colors" />
+          </a>
 
           {/* Sino de Notificações */}
           <div className="relative">
@@ -251,6 +261,13 @@ export const Header: React.FC<HeaderProps> = ({ currentViewTitle }) => {
                 })}
 
                 <div className="border-t border-border mt-1 pt-1">
+                  <a
+                    href="mailto:qimatch.suporte@gmail.com?subject=Suporte%20ao%20Usu%C3%A1rio%20Q.I.%20Match"
+                    className="w-full px-3.5 py-2 text-left text-xs font-semibold text-foreground hover:bg-secondary/60 flex items-center gap-2 transition-colors"
+                  >
+                    <Mail className="w-3.5 h-3.5 text-amber-500 shrink-0" />
+                    <span className="truncate">Suporte: qimatch.suporte@gmail.com</span>
+                  </a>
                   <button
                     type="button"
                     onClick={() => {
