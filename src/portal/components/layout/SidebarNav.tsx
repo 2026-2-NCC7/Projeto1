@@ -69,9 +69,9 @@ export const SidebarNav: React.FC<SidebarNavProps> = ({ currentTab, setCurrentTa
   const isCommunityExternal = activePersona === 'comunidade-rafael';
   const isCandidate = !isCompany && !isAdmin && !isCommunityExternal;
 
-  const currentProfile = candidates[currentCandidateId];
+  const currentProfile = candidates?.[currentCandidateId];
   const levelInfo = getCandidateLevelInfo(currentProfile, currentUser?.seniority);
-  const { lvl, seniority, tier, xpPercentage } = levelInfo;
+  const { lvl = 2, seniority = 'Pleno', tier = 'Rank B', xpPercentage = 80 } = levelInfo || {};
 
   // Itens Minimalistas e Mais Encorpados com Ícones Lucide 20px (w-5 h-5)
   const candidateItems: NavItem[] = [

@@ -57,16 +57,16 @@ export const Header: React.FC<HeaderProps> = ({ currentViewTitle }) => {
     userBadge = 'Perfil Comunidade PF';
     currentUserId = 'user-rafael-externo';
   } else {
-    const cand = candidates[currentCandidateId];
+    const cand = candidates?.[currentCandidateId];
     const levelInfo = getCandidateLevelInfo(cand, currentUser?.seniority);
     userDisplayName = cand?.name || currentUser?.name || 'Profissional';
     userAvatar = cand?.avatar || '';
-    userBadge = `Candidato ${levelInfo.seniority} • ${levelInfo.tier}`;
+    userBadge = `Candidato ${levelInfo?.seniority || 'Pleno'} • ${levelInfo?.tier || 'Rank B'}`;
     currentUserId = currentUser?.id || 'user-lucas';
   }
 
-  const myNotifications = notifications.filter(
-    n => n.recipientUserId === currentUserId || (session?.role === 'empresa' && n.recipientUserId === 'user-orion')
+  const myNotifications = (notifications || []).filter(
+    n => n && (n.recipientUserId === currentUserId || (session?.role === 'empresa' && n.recipientUserId === 'user-orion'))
   );
   const unreadCount = myNotifications.filter(n => !n.read).length;
 

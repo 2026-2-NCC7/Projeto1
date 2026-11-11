@@ -315,9 +315,12 @@ export const CompanyDashboardView: React.FC<CompanyDashboardViewProps> = ({
   };
 
   // Estimador ao vivo de alcance de candidatos com base nas skills selecionadas
-  const estimatedMatches = Object.values(candidates).filter(c => {
-    if (c.visibility === 'Pausado') return false;
-    const candSkills = c.skills.map(s => s.name.toLowerCase());
+  const estimatedMatches = Object.values(candidates || {}).filter(c => {
+    if (!c || c.visibility === 'Pausado') return false;
+    const candSkills = (c.skills || []).map(s => {
+      if (typeof s === 'string') return (s as string).toLowerCase();
+      return (s?.name || '').toLowerCase();
+    }).filter(Boolean);
     const inputSkills = mandatorySkillsInput.toLowerCase().split(',').map(s => s.trim()).filter(Boolean);
     if (inputSkills.length === 0) return true;
     return inputSkills.some(is => candSkills.some(cs => cs.includes(is) || is.includes(cs)));
