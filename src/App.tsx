@@ -217,10 +217,7 @@ const MainLayout: React.FC = () => {
             window.scrollTo({ top: 0, behavior: 'auto' });
           }}
           onOpenPrototype={() => {
-            setShowTechnicalBanca(false);
-            setShowLoginPortal(true);
-            window.location.hash = '#/login';
-            window.scrollTo({ top: 0, behavior: 'auto' });
+            window.open('https://qi-match.vercel.app/', '_blank', 'noopener,noreferrer');
           }}
         />
       );
@@ -230,7 +227,7 @@ const MainLayout: React.FC = () => {
       return (
         <LandingPageView
           onOpenPrototype={() => {
-            window.open('https://qi-match.vercel.app', '_blank', 'noopener,noreferrer');
+            window.open('https://qi-match.vercel.app/', '_blank', 'noopener,noreferrer');
           }}
           onOpenTechnicalBanca={() => {
             setShowTechnicalBanca(true);

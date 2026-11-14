@@ -123,6 +123,7 @@ export const LandingHeroAndCore: React.FC<LandingHeroAndCoreProps> = ({
   const [activeScenarioId, setActiveScenarioId] = useState<string>('som10');
   const [showScenarioDetails, setShowScenarioDetails] = useState<boolean>(false);
   const [openPersona, setOpenPersona] = useState<PersonaVolume | null>(null);
+  const [showMarketDetails, setShowMarketDetails] = useState<boolean>(false);
 
   // Scroll listener for masthead
   useEffect(() => {
@@ -526,9 +527,9 @@ export const LandingHeroAndCore: React.FC<LandingHeroAndCoreProps> = ({
                     background: 'rgba(201, 162, 39, 0.1)',
                     fontWeight: 600,
                   }}
-                  title="Abrir tela exclusiva de Arquitetura e Defesa Técnica"
+                  title="Abrir tela exclusiva de Arquitetura e Engenharia de Software"
                 >
-                  ⚡ Banca Técnica
+                  ⚡ Técnica & Arquitetura
                 </button>
               )}
               <button type="button" className="qi-btn qi-btn--brass" onClick={onOpenPrototype}>
@@ -957,7 +958,7 @@ export const LandingHeroAndCore: React.FC<LandingHeroAndCoreProps> = ({
       {/* =================================================================== */}
       <section id="sec-mercado" className="qi-band">
         <div className="qi-shell">
-          <div className="qi-sect-head">
+          <div className="qi-sect-head" style={{ marginBottom: showMarketDetails ? 32 : 16 }}>
             <div className="qi-mark">
               <span>MODELO ANTECIPADO TRANSPARENTE • ZERO TAXA OCULTA</span>
             </div>
@@ -965,13 +966,33 @@ export const LandingHeroAndCore: React.FC<LandingHeroAndCoreProps> = ({
               Planos Transparentes e Pré-pagos{' '}
               <span style={{ color: 'var(--slate)' }}>para Empresas</span>
             </h2>
-            <p className="qi-lede">
+            <p className="qi-lede" style={{ marginBottom: 16 }}>
               Contrate slots de vagas ativas com suporte a múltiplos perfis técnicos sem mensalidade abusiva.
               Pague pelo slot em aberto, substitua ou pause conforme sua demanda de engenharia.
             </p>
+
+            {/* Toggle Estratégico para manter a apresentação enxuta no pitch */}
+            <div style={{ display: 'flex', justifyContent: 'center' }}>
+              <button
+                type="button"
+                className="qi-btn"
+                onClick={() => setShowMarketDetails((v) => !v)}
+                style={{
+                  border: showMarketDetails ? '1px solid var(--hair)' : '1px solid var(--amber-hi)',
+                  color: showMarketDetails ? 'var(--slate)' : 'var(--amber-hi)',
+                  background: showMarketDetails ? 'rgba(255,255,255,0.02)' : 'rgba(201,162,39,0.1)',
+                  fontWeight: 600,
+                  fontSize: 13,
+                }}
+              >
+                {showMarketDetails ? '▲ Recolher detalhes de mercado & slots' : '▼ Saiba mais: Ver planos de slots, funil TAM/SAM e personas'}
+              </button>
+            </div>
           </div>
 
-          <div className="qi-market-grid">
+          {showMarketDetails && (
+            <>
+              <div className="qi-market-grid">
             {/* Fichário de Planos Propostos */}
             <div className="qi-surface" style={{ padding: 28, display: 'flex', flexDirection: 'column', justifyContent: 'space-between', gap: 18 }}>
               <div>
@@ -1367,8 +1388,10 @@ export const LandingHeroAndCore: React.FC<LandingHeroAndCoreProps> = ({
               ))}
             </div>
           </div>
-        </div>
-      </section>
+        </>
+      )}
+    </div>
+  </section>
 
       {/* MODAL DE LEITURA EM PÁGINA DUPLA DAS PERSONAS */}
       {openPersona && (

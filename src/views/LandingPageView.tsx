@@ -3,6 +3,7 @@ import '../styles/umbra-landing.css';
 import {
   COST_SPECIALTIES,
   DEEP_DIVE_DRAWERS,
+  FULL_PITCH_SCRIPT,
   GOVERNANCE_FOLDERS,
   OPENING_SPEECH,
   PITCH_GUIDE_STEPS,
@@ -54,6 +55,8 @@ export const LandingPageView: React.FC<LandingPageViewProps> = ({
   // Section 07 state: Effort & Cost Simulator (base = 1000h => R$ 103.600 direct, +15% => R$ 119.140)
   const [simHours, setSimHours] = useState<number>(1000);
   const [selectedSpecId, setSelectedSpecId] = useState<string | null>(null);
+  const [showViabilidadeDetails, setShowViabilidadeDetails] = useState<boolean>(false);
+  const [showDemoScreensDetails, setShowDemoScreensDetails] = useState<boolean>(false);
 
   const scrollToSection = useCallback((sectionId: string) => {
     const el = document.getElementById(sectionId);
@@ -158,7 +161,7 @@ export const LandingPageView: React.FC<LandingPageViewProps> = ({
       {/* =================================================================== */}
       <section id="sec-demonstracao" className="qi-band">
         <div className="qi-shell qi-shell--wide">
-          <div className="qi-sect-head">
+          <div className="qi-sect-head" style={{ marginBottom: showDemoScreensDetails ? 32 : 16 }}>
             <div className="qi-mark">
               <span>A Experiência na Plataforma</span>
             </div>
@@ -166,25 +169,41 @@ export const LandingPageView: React.FC<LandingPageViewProps> = ({
               Da identificação de talentos ao interesse mútuo:{' '}
               <span style={{ color: 'var(--amber-hi)' }}>conheça a experiência Q.I. Match.</span>
             </h2>
-            <p className="qi-lede">
+            <p className="qi-lede" style={{ marginBottom: 16 }}>
               Explore as telas previstas para a plataforma e descubra como empresas poderão apresentar suas
               oportunidades, avaliar profissionais e estabelecer conexões com mais informações e transparência.
             </p>
-            <div style={{ display: 'flex', flexWrap: 'wrap', gap: 10, justifyContent: 'center', marginTop: 4 }}>
+            <div style={{ display: 'flex', flexWrap: 'wrap', gap: 12, justifyContent: 'center', marginTop: 4 }}>
               <button type="button" className="qi-btn qi-btn--brass" onClick={onOpenPrototype}>
                 <span className="qi-roll">
                   <span>Testar protótipo interativo →</span>
                   <span aria-hidden="true">Experimentar fluxos ao vivo →</span>
                 </span>
               </button>
+              <button
+                type="button"
+                className="qi-btn"
+                onClick={() => setShowDemoScreensDetails((v) => !v)}
+                style={{
+                  border: showDemoScreensDetails ? '1px solid var(--hair)' : '1px solid var(--amber-hi)',
+                  color: showDemoScreensDetails ? 'var(--slate)' : 'var(--amber-hi)',
+                  background: showDemoScreensDetails ? 'rgba(255,255,255,0.02)' : 'rgba(201,162,39,0.1)',
+                  fontWeight: 600,
+                  fontSize: 13,
+                }}
+              >
+                {showDemoScreensDetails ? '▲ Recolher telas 3D' : '▼ Saiba mais: Ver as 9 telas no livro 3D'}
+              </button>
             </div>
           </div>
 
           {/* Palco do Livro 3D com as 9 Telas Abertas Diretamente no Próprio Palco */}
-          <ThreeBookStage
-            onExploreScreens={() => {}}
-            onSelectScreen={(idx) => setZoomScreenIdx(idx)}
-          />
+          {showDemoScreensDetails && (
+            <ThreeBookStage
+              onExploreScreens={() => {}}
+              onSelectScreen={(idx) => setZoomScreenIdx(idx)}
+            />
+          )}
         </div>
       </section>
 
@@ -369,7 +388,7 @@ export const LandingPageView: React.FC<LandingPageViewProps> = ({
       {/* =================================================================== */}
       <section id="sec-viabilidade" className="qi-band">
         <div className="qi-shell">
-          <div className="qi-sect-head">
+          <div className="qi-sect-head" style={{ marginBottom: showViabilidadeDetails ? 32 : 16 }}>
             <div className="qi-mark">
               <span>Planejamento & Viabilidade</span>
             </div>
@@ -377,14 +396,33 @@ export const LandingPageView: React.FC<LandingPageViewProps> = ({
               Quanto é necessário para transformar a proposta{' '}
               <span style={{ color: 'var(--slate)' }}>em uma plataforma funcional?</span>
             </h2>
-            <p className="qi-lede">
+            <p className="qi-lede" style={{ marginBottom: 16 }}>
               O desenvolvimento foi dividido em atividades técnicas, com estimativas de horas, custos profissionais e
               uma reserva para imprevistos. O simulador permite visualizar como mudanças no esforço de desenvolvimento
               afetam o orçamento previsto.
             </p>
+
+            {/* Toggle Estratégico para manter a apresentação enxuta no pitch */}
+            <div style={{ display: 'flex', justifyContent: 'center' }}>
+              <button
+                type="button"
+                className="qi-btn"
+                onClick={() => setShowViabilidadeDetails((v) => !v)}
+                style={{
+                  border: showViabilidadeDetails ? '1px solid var(--hair)' : '1px solid var(--amber-hi)',
+                  color: showViabilidadeDetails ? 'var(--slate)' : 'var(--amber-hi)',
+                  background: showViabilidadeDetails ? 'rgba(255,255,255,0.02)' : 'rgba(201,162,39,0.1)',
+                  fontWeight: 600,
+                  fontSize: 13,
+                }}
+              >
+                {showViabilidadeDetails ? '▲ Recolher simulador de viabilidade' : '▼ Saiba mais: Ver simulador de horas, especialidades e contingência'}
+              </button>
+            </div>
           </div>
 
-          <div className="qi-surface" style={{ padding: 'clamp(22px, 3vw, 34px)' }}>
+          {showViabilidadeDetails && (
+            <div className="qi-surface" style={{ padding: 'clamp(22px, 3vw, 34px)' }}>
             {/* Controles do Simulador */}
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 18, marginBottom: 22 }}>
               <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
@@ -554,6 +592,7 @@ export const LandingPageView: React.FC<LandingPageViewProps> = ({
               </button>
             </div>
           </div>
+          )}
 
           {/* Fechamento & Convite para Demonstração */}
           <div
@@ -569,19 +608,13 @@ export const LandingPageView: React.FC<LandingPageViewProps> = ({
               Quer experimentar na prática os fluxos demonstrados?
             </h3>
             <p style={{ margin: '10px auto 20px', fontSize: 15, color: 'var(--slate)', maxWidth: 620 }}>
-              Acesse o protótipo em demonstração com contas de Profissional, Empresa e Governança, ou consulte o roteiro das 7 etapas de apresentação.
+              Acesse o protótipo ao vivo com contas de Profissional, Empresa e Governança Técnica.
             </p>
             <div style={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'center', gap: 12 }}>
               <button type="button" className="qi-btn qi-btn--brass" onClick={onOpenPrototype}>
                 <span className="qi-roll">
                   <span>Abrir protótipo em demonstração</span>
-                  <span aria-hidden="true">Testar perfis agora →</span>
-                </span>
-              </button>
-              <button type="button" className="qi-btn" onClick={() => setShowPitchModal(true)}>
-                <span className="qi-roll">
-                  <span>Roteiro de Apresentação</span>
-                  <span aria-hidden="true">7 etapas + fala inicial</span>
+                  <span aria-hidden="true">Testar perfis ao vivo →</span>
                 </span>
               </button>
             </div>
@@ -602,14 +635,6 @@ export const LandingPageView: React.FC<LandingPageViewProps> = ({
               <p style={{ margin: 0, fontSize: 14, color: 'var(--slate)', lineHeight: 1.6 }}>
                 O talento certo. A oportunidade certa. Uma conexão mais inteligente. Plataforma especializada em recrutamento tech com critérios explicáveis e Double Opt-In.
               </p>
-              <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8, marginTop: 4 }}>
-                <button type="button" className="qi-btn" style={{ minHeight: 32, padding: '0 12px', fontSize: 12 }} onClick={() => setShowPitchModal(true)}>
-                  Roteiro de Apresentação
-                </button>
-                <button type="button" className="qi-btn qi-btn--brass" style={{ minHeight: 32, padding: '0 12px', fontSize: 12 }} onClick={onOpenPrototype}>
-                  Testar Protótipo
-                </button>
-              </div>
             </div>
 
             {/* Coluna 2: 4 Co-fundadores */}
@@ -871,19 +896,22 @@ export const LandingPageView: React.FC<LandingPageViewProps> = ({
       )}
 
       {/* =================================================================== */}
-      {/* MODAL DO ROTEIRO DE PITCH DA FEIRA & FALA SUGERIDA                  */}
+      {/* MODAL DO ROTEIRO DE PITCH DA FEIRA & FALA DA EQUIPE                 */}
       {/* =================================================================== */}
       {showPitchModal && (
         <div
           className="qi-backdrop"
           role="dialog"
           aria-modal="true"
-          aria-label="Roteiro de apresentação para a feira"
+          aria-label="Roteiro de apresentação da banca"
           onClick={() => setShowPitchModal(false)}
         >
-          <div className="qi-zoom-modal" style={{ maxWidth: 920 }} onClick={(e) => e.stopPropagation()}>
+          <div className="qi-zoom-modal" style={{ maxWidth: 960, maxHeight: '90vh', overflowY: 'auto' }} onClick={(e) => e.stopPropagation()}>
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12, marginBottom: 18 }}>
-              <span className="qi-mark">Guia de Apresentação · Roteiro em 7 Perguntas</span>
+              <div>
+                <span className="qi-mark">Roteiro Oficial de Apresentação · 10 Minutos</span>
+                <h3 className="qi-d3" style={{ margin: '6px 0 0' }}>Pitch e Roteiro de Demonstração</h3>
+              </div>
               <button
                 type="button"
                 className="qi-btn qi-btn--brass"
@@ -894,34 +922,71 @@ export const LandingPageView: React.FC<LandingPageViewProps> = ({
               </button>
             </div>
 
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: 22 }}>
-              {/* Coluna 1: Exemplo de Fala de Abertura */}
-              <div
-                style={{
-                  padding: 22,
-                  borderRadius: 14,
-                  background: 'rgba(201,162,39,0.08)',
-                  border: '1px solid rgba(201,162,39,0.35)',
-                  display: 'flex',
-                  flexDirection: 'column',
-                  gap: 12,
-                }}
-              >
-                <strong style={{ fontSize: 13, textTransform: 'uppercase', letterSpacing: '0.08em', color: 'var(--amber-hi)' }}>
-                  Sugestão de fala para iniciar a apresentação
-                </strong>
-                {OPENING_SPEECH.map((para, i) => (
-                  <p key={i} style={{ margin: 0, fontSize: 14.5, color: 'var(--bone)', lineHeight: 1.6 }}>
-                    “{para}”
-                  </p>
-                ))}
-              </div>
+            {/* Grid dos 4 Blocos de Apresentação */}
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 18 }}>
+              {FULL_PITCH_SCRIPT.map((block) => (
+                <div
+                  key={block.part}
+                  style={{
+                    padding: 20,
+                    borderRadius: 14,
+                    background: 'rgba(201,162,39,0.05)',
+                    border: '1px solid rgba(201,162,39,0.25)',
+                    display: 'flex',
+                    flexDirection: 'column',
+                    gap: 10,
+                  }}
+                >
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 8 }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                      <span className="qi-badge" style={{ background: 'var(--amber-hi)', color: '#05070a', fontWeight: 700 }}>
+                        Bloco {block.part}
+                      </span>
+                      <strong style={{ fontSize: 16, color: 'var(--bone)' }}>{block.title}</strong>
+                    </div>
+                    <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
+                      <span style={{ fontSize: 12, color: 'var(--amber-hi)', background: 'rgba(201,162,39,0.1)', padding: '3px 10px', borderRadius: 999 }}>
+                        ⏱ {block.timing}
+                      </span>
+                      <span style={{ fontSize: 12, color: 'var(--slate)', background: 'rgba(255,255,255,0.04)', padding: '3px 10px', borderRadius: 999 }}>
+                        🗣 {block.speaker}
+                      </span>
+                    </div>
+                  </div>
 
-              {/* Coluna 2: As 7 Etapas */}
-              <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-                <strong style={{ fontSize: 13, textTransform: 'uppercase', letterSpacing: '0.08em', color: 'var(--amber-hi)', marginBottom: 4 }}>
-                  Pergunta central de cada seção (clique para ir até ela)
-                </strong>
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: 8, marginTop: 4 }}>
+                    {block.bullets.map((bullet, idx) => {
+                      const isCue = bullet.startsWith('[MOSTRAR NO SITE');
+                      return (
+                        <p
+                          key={idx}
+                          style={{
+                            margin: 0,
+                            fontSize: isCue ? 13.5 : 14.5,
+                            color: isCue ? 'var(--amber-hi)' : 'var(--bone)',
+                            lineHeight: 1.6,
+                            fontWeight: isCue ? 700 : 400,
+                            padding: isCue ? '8px 12px' : '0',
+                            background: isCue ? 'rgba(201,162,39,0.12)' : 'transparent',
+                            borderRadius: isCue ? 8 : 0,
+                            borderLeft: isCue ? '3px solid var(--amber-hi)' : 'none',
+                          }}
+                        >
+                          {isCue ? `👉 ${bullet}` : bullet}
+                        </p>
+                      );
+                    })}
+                  </div>
+                </div>
+              ))}
+            </div>
+
+            {/* Acesso rápido às seções da página */}
+            <div style={{ marginTop: 22, paddingTop: 18, borderTop: '1px solid var(--hair)' }}>
+              <strong style={{ fontSize: 13, textTransform: 'uppercase', letterSpacing: '0.08em', color: 'var(--slate)', display: 'block', marginBottom: 10 }}>
+                Navegação Rápida para o Site
+              </strong>
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: 10 }}>
                 {PITCH_GUIDE_STEPS.map((st) => (
                   <button
                     key={st.step}
@@ -939,8 +1004,8 @@ export const LandingPageView: React.FC<LandingPageViewProps> = ({
                       cursor: 'pointer',
                     }}
                   >
-                    <strong style={{ display: 'block', fontSize: 14, color: 'var(--bone)' }}>{st.question}</strong>
-                    <span style={{ fontSize: 12.5, color: 'var(--slate)' }}>{st.goal}</span>
+                    <strong style={{ display: 'block', fontSize: 13, color: 'var(--bone)' }}>{st.question}</strong>
+                    <span style={{ fontSize: 11.5, color: 'var(--slate)' }}>{st.goal}</span>
                   </button>
                 ))}
               </div>

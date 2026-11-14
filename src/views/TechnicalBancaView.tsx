@@ -47,21 +47,6 @@ export const TechnicalBancaView: React.FC<TechnicalBancaViewProps> = ({
                 <span className="qi-brand-emblem">Q</span>
                 <span className="qi-wordmark">Q.I. Match</span>
               </button>
-              <span
-                style={{
-                  fontSize: 11,
-                  fontWeight: 700,
-                  textTransform: 'uppercase',
-                  letterSpacing: '0.08em',
-                  padding: '4px 10px',
-                  borderRadius: 999,
-                  background: 'rgba(226, 185, 59, 0.16)',
-                  color: 'var(--amber-hi)',
-                  border: '1px solid rgba(226, 185, 59, 0.35)',
-                }}
-              >
-                ⚡ Defesa Técnica & Arquitetura
-              </span>
             </div>
 
             <nav className="qi-nav-links" aria-label="Seções técnicas">
@@ -69,9 +54,9 @@ export const TechnicalBancaView: React.FC<TechnicalBancaViewProps> = ({
                 { id: 'tech-arquitetura', label: 'Arquitetura & C4' },
                 { id: 'tech-pipeline', label: 'Pipeline IA & Voz' },
                 { id: 'tech-matching', label: 'Motor 50/30/20' },
-                { id: 'tech-escala', label: 'Escala (R$ 1,64 → R$ 0,63)' },
+                { id: 'tech-escala', label: 'Escala' },
                 { id: 'tech-lgpd', label: 'LGPD & Double Opt-In' },
-                { id: 'tech-faq', label: 'Perguntas da Banca' },
+                { id: 'tech-faq', label: 'Respostas Técnicas' },
               ].map((item) => (
                 <button
                   key={item.id}
@@ -120,9 +105,8 @@ export const TechnicalBancaView: React.FC<TechnicalBancaViewProps> = ({
               <span style={{ color: 'var(--amber-hi)' }}>Q.I. Match</span>
             </h1>
             <p className="qi-lede">
-              Documentação executiva de engenharia para avaliação de banca: arquitetura em 4 camadas, pipeline de
-              transcrição sem viés biométrico, verificação determinística anti-alucinação e memória de cálculo de
-              infraestrutura em nuvem.
+              Arquitetura em 4 camadas, pipeline de transcrição sem viés biométrico, verificação determinística
+              anti-alucinação e memória de cálculo de infraestrutura em nuvem.
             </p>
           </div>
 
@@ -192,7 +176,7 @@ export const TechnicalBancaView: React.FC<TechnicalBancaViewProps> = ({
         <div className="qi-shell">
           <div className="qi-sect-head">
             <div className="qi-mark">
-              <span>01 · Arquitetura de Sistema & Fluxo Operacional</span>
+              <span>Arquitetura de Sistema & Fluxo Operacional</span>
             </div>
             <h2 className="qi-d2">
               Fluxo Fim a Fim e Isolamento em{' '}
@@ -359,7 +343,7 @@ export const TechnicalBancaView: React.FC<TechnicalBancaViewProps> = ({
         <div className="qi-shell">
           <div className="qi-sect-head">
             <div className="qi-mark">
-              <span>02 · Processamento de Linguagem Natural & Ética</span>
+              <span>Processamento de Linguagem Natural & Ética</span>
             </div>
             <h2 className="qi-d2">
               Pipeline de Áudio e IA Explicável{' '}
@@ -442,7 +426,7 @@ export const TechnicalBancaView: React.FC<TechnicalBancaViewProps> = ({
         <div className="qi-shell">
           <div className="qi-sect-head">
             <div className="qi-mark">
-              <span>03 · Algoritmo de Recomendação & Determinismo</span>
+              <span>Algoritmo de Recomendação & Determinismo</span>
             </div>
             <h2 className="qi-d2">
               Função de Score Ponderado{' '}
@@ -495,7 +479,7 @@ export const TechnicalBancaView: React.FC<TechnicalBancaViewProps> = ({
         <div className="qi-shell">
           <div className="qi-sect-head">
             <div className="qi-mark">
-              <span>04 · FinOps & Economia de Escala de Engenharia</span>
+              <span>FinOps & Economia de Escala de Engenharia</span>
             </div>
             <h2 className="qi-d2">
               Memória de Cálculo: de{' '}
@@ -620,7 +604,7 @@ export const TechnicalBancaView: React.FC<TechnicalBancaViewProps> = ({
         <div className="qi-shell">
           <div className="qi-sect-head">
             <div className="qi-mark">
-              <span>05 · Segurança da Informação & Privacy by Design</span>
+              <span>Segurança da Informação & Privacy by Design</span>
             </div>
             <h2 className="qi-d2">
               Isolamento Criptográfico de Dados{' '}
@@ -661,22 +645,17 @@ export const TechnicalBancaView: React.FC<TechnicalBancaViewProps> = ({
       </section>
 
       {/* =================================================================== */}
-      {/* 6. FAQ ANTECIPADO DA BANCA AVALIADORA                               */}
+      {/* 6. RESPOSTAS TÉCNICAS                                               */}
       {/* =================================================================== */}
       <section id="tech-faq" className="qi-band" style={{ background: 'rgba(255,255,255,0.01)' }}>
         <div className="qi-shell">
           <div className="qi-sect-head">
             <div className="qi-mark">
-              <span>06 · Guia de Defesa Oral · Ciência da Computação</span>
+              <span>Perguntas Frequentes de Arquitetura</span>
             </div>
             <h2 className="qi-d2">
-              Respostas Técnicas para a{' '}
-              <span style={{ color: 'var(--amber-hi)' }}>Banca Avaliadora</span>
+              Respostas Técnicas
             </h2>
-            <p className="qi-lede">
-              Clique nas perguntas abaixo para expandir a fundamentação de engenharia pronta para responder aos
-              professores durante a arguição.
-            </p>
           </div>
 
           <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
@@ -744,15 +723,9 @@ export const TechnicalBancaView: React.FC<TechnicalBancaViewProps> = ({
           </div>
 
           {/* Rodapé de Retorno Rápido */}
-          <div style={{ marginTop: 40, textAlign: 'center', display: 'flex', justifyContent: 'center', gap: 14, flexWrap: 'wrap' }}>
+          <div style={{ marginTop: 40, textAlign: 'center', display: 'flex', justifyContent: 'center' }}>
             <button type="button" className="qi-btn" onClick={onBackToMarketLanding}>
-              ← Voltar para Apresentação de Mercado & Vídeo
-            </button>
-            <button type="button" className="qi-btn qi-btn--brass" onClick={onOpenPrototype}>
-              <span className="qi-roll">
-                <span>Abrir Protótipo Interativo</span>
-                <span aria-hidden="true">Testar Fluxo Completo</span>
-              </span>
+              ← Voltar para Apresentação de Mercado
             </button>
           </div>
         </div>
