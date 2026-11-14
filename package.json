@@ -6,7 +6,8 @@
   "scripts": {
     "dev": "vite",
     "build": "tsc && vite build",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "deploy:vercel": "npm run build && npx vercel deploy dist --prod --yes"
   },
   "dependencies": {
     "clsx": "^2.1.1",

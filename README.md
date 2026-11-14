@@ -22,3 +22,29 @@ npm install
 
 # 3. Inicie o servidor de desenvolvimento
 npm run dev
+```
+
+---
+
+## 2. Como Atualizar o Deploy na Vercel (Instrução Permanente)
+
+> **IMPORTANTE (Para o Usuário e Agentes de IA):**
+> Como este repositório pertence à Organização do GitHub da faculdade (`2026-2-NCC7/Projeto1`), a publicação na Vercel é feita **diretamente a partir da pasta `dist`** na conta pessoal (`jenifermarques42s-projects/qi-match-fecap`), contornando a trava de permissão da Organização do GitHub e sem nenhum custo.
+
+Sempre que quiser atualizar o endereço oficial (**https://qi-match-fecap.vercel.app**), basta rodar:
+
+```bash
+npm run deploy:vercel
+```
+
+Ou os dois comandos equivalentes:
+
+```bash
+npm run build
+npx vercel deploy dist --prod --yes
+```
+
+### Links Publicados
+- **Apresentação Principal (Mercado & Vídeo):** `https://qi-match-fecap.vercel.app`
+- **Defesa Técnica & Arquitetura (Banca FECAP):** `https://qi-match-fecap.vercel.app/#/banca-tecnica`
+

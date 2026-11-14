@@ -115,34 +115,39 @@ export const ThreeBookStage: React.FC<ThreeBookStageProps> = ({ onExploreScreens
 
   // Real Three.js 3D Hardcover Book + Volumetric Spotlight + Golden Dust Motes + Floating Modules
   useEffect(() => {
-    const THREE = window.THREE;
-    const host = hostRef.current;
-    const canvas = canvasRef.current;
-    const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    let unmounted = false;
+    let cleanupFn: (() => void) | null = null;
 
-    if (!THREE || !host || !canvas || reduced) {
-      setWebglReady(false);
-      return;
-    }
+    const initBook = () => {
+      if (unmounted) return;
+      const THREE = window.THREE;
+      const host = hostRef.current;
+      const canvas = canvasRef.current;
+      const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    let renderer: any;
-    try {
-      renderer = new THREE.WebGLRenderer({
-        canvas,
-        antialias: true,
-        alpha: true,
-        powerPreference: 'high-performance',
-      });
-    } catch {
-      setWebglReady(false);
-      return;
-    }
+      if (!THREE || !host || !canvas || reduced) {
+        setWebglReady(false);
+        return;
+      }
 
-    if (!renderer.getContext()) {
-      setWebglReady(false);
-      return;
-    }
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      let renderer: any;
+      try {
+        renderer = new THREE.WebGLRenderer({
+          canvas,
+          antialias: true,
+          alpha: true,
+          powerPreference: 'high-performance',
+        });
+      } catch {
+        setWebglReady(false);
+        return;
+      }
+
+      if (!renderer.getContext()) {
+        setWebglReady(false);
+        return;
+      }
 
     setWebglReady(true);
 
@@ -699,21 +704,62 @@ export const ThreeBookStage: React.FC<ThreeBookStageProps> = ({ onExploreScreens
     );
     io.observe(host);
 
-    rafId = requestAnimationFrame(renderFrame);
+      rafId = requestAnimationFrame(renderFrame);
+
+      cleanupFn = () => {
+        if (rafId) cancelAnimationFrame(rafId);
+        ro.disconnect();
+        io.disconnect();
+        host.removeEventListener('pointermove', onPointerMove);
+        disposables.forEach((d) => {
+          try {
+            d.dispose();
+          } catch {
+            // ignore
+          }
+        });
+        renderer.dispose();
+      };
+    };
+
+    // Lazy load the 3D book when within 300px of viewport to prevent blocking initial load
+    const hostEl = hostRef.current;
+    if (!hostEl) return;
+
+    let initObserver: IntersectionObserver | null = null;
+    const startIfReady = () => {
+      if (window.THREE) {
+        initBook();
+      } else {
+        const checkInterval = setInterval(() => {
+          if (window.THREE) {
+            clearInterval(checkInterval);
+            initBook();
+          }
+        }, 100);
+        setTimeout(() => clearInterval(checkInterval), 5000);
+      }
+    };
+
+    if ('IntersectionObserver' in window) {
+      initObserver = new IntersectionObserver(
+        ([entry]) => {
+          if (entry.isIntersecting) {
+            initObserver?.disconnect();
+            startIfReady();
+          }
+        },
+        { rootMargin: '300px' }
+      );
+      initObserver.observe(hostEl);
+    } else {
+      startIfReady();
+    }
 
     return () => {
-      if (rafId) cancelAnimationFrame(rafId);
-      ro.disconnect();
-      io.disconnect();
-      host.removeEventListener('pointermove', onPointerMove);
-      disposables.forEach((d) => {
-        try {
-          d.dispose();
-        } catch {
-          // ignore
-        }
-      });
-      renderer.dispose();
+      unmounted = true;
+      initObserver?.disconnect();
+      if (cleanupFn) cleanupFn();
     };
   }, []);
 
