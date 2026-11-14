@@ -1,0 +1,717 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Q.I. Match - One Page Executivo (Banca FECAP)</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Space+Grotesk:wght@600;700;800&display=swap" rel="stylesheet">
+  <style>
+    @page {
+      size: A4 portrait;
+      margin: 0;
+    }
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      -webkit-print-color-adjust: exact !important;
+      print-color-adjust: exact !important;
+    }
+    :root {
+      --ink: #040407;
+      --ink-card: rgba(14, 15, 23, 0.74);
+      --ink-card-sub: rgba(18, 19, 29, 0.68);
+      --bone: #FFFFFF;
+      --slate: #9494A3;
+      --slate-light: #D2D2DE;
+      --amber: #C9A227;
+      --amber-hi: #DCB434;
+      --hair: rgba(255, 255, 255, 0.08);
+      --hair-strong: rgba(255, 255, 255, 0.14);
+      --hair-amber: rgba(220, 180, 52, 0.38);
+    }
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+      background: radial-gradient(circle at 50% 18%, rgba(201, 162, 39, 0.08) 0%, transparent 55%), #020204;
+      color: var(--bone);
+      line-height: 1.45;
+      font-size: 13px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      padding: 24px 0;
+    }
+    h1, h2, h3, h4, .font-heading {
+      font-family: 'Space Grotesk', sans-serif;
+      letter-spacing: -0.025em;
+    }
+    .sheet {
+      width: 210mm;
+      height: 297mm;
+      max-height: 297mm;
+      background: radial-gradient(ellipse 70% 50% at 85% 10%, rgba(220, 180, 52, 0.20) 0%, rgba(201, 162, 39, 0.06) 42%, transparent 75%),
+                  radial-gradient(ellipse 55% 42% at 12% 88%, rgba(201, 162, 39, 0.13) 0%, transparent 65%),
+                  radial-gradient(circle at 50% 50%, rgba(201, 162, 39, 0.035) 0%, transparent 60%),
+                  linear-gradient(180deg, #050508 0%, #090910 50%, #040407 100%);
+      padding: 13mm 16mm 11mm 16mm;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      position: relative;
+      overflow: hidden;
+      box-shadow: 0 32px 85px -20px rgba(0, 0, 0, 0.96), 0 0 0 1px rgba(255, 255, 255, 0.08);
+      border-radius: 6px;
+    }
+
+    /* Ambient Lighting & Honeycomb Mesh */
+    .sheet-ambient {
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+      z-index: 0;
+      overflow: hidden;
+    }
+    .sheet-glow {
+      position: absolute;
+      border-radius: 50%;
+      pointer-events: none;
+    }
+    .sheet-glow--tr {
+      top: -60px;
+      right: -60px;
+      width: 340px;
+      height: 340px;
+      background: radial-gradient(circle, rgba(220, 180, 52, 0.24) 0%, rgba(201, 162, 39, 0.08) 45%, transparent 72%);
+      filter: blur(36px);
+    }
+    .sheet-glow--bl {
+      bottom: -40px;
+      left: -40px;
+      width: 290px;
+      height: 290px;
+      background: radial-gradient(circle, rgba(201, 162, 39, 0.16) 0%, rgba(220, 180, 52, 0.05) 50%, transparent 72%);
+      filter: blur(36px);
+    }
+    .sheet-honeycomb-mesh {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+    }
+    .sheet > *:not(.sheet-ambient) {
+      position: relative;
+      z-index: 2;
+    }
+
+    /* Top Brand & Title */
+    .top-bar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: 1px solid var(--hair);
+      padding-bottom: 12px;
+    }
+    .badge-fecap {
+      font-size: 10px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.09em;
+      padding: 4px 10px;
+      border-radius: 4px;
+      background: rgba(226, 185, 59, 0.12);
+      border: 1px solid var(--hair-amber);
+      color: var(--amber-hi);
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .badge-fecap .dot {
+      width: 6px;
+      height: 6px;
+      background: var(--amber-hi);
+      border-radius: 50%;
+    }
+    .top-meta-right {
+      font-size: 10.5px;
+      color: var(--slate);
+      font-weight: 500;
+      text-align: right;
+    }
+    .top-meta-right strong {
+      color: var(--bone);
+    }
+
+    /* Hero / Title */
+    .hero {
+      margin-top: 14px;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+    h1 {
+      font-size: 38px;
+      font-weight: 800;
+      line-height: 1;
+      color: var(--bone);
+    }
+    h1 span {
+      color: var(--amber-hi);
+    }
+    .hero-tagline {
+      font-size: 15px;
+      font-weight: 500;
+      color: var(--slate-light);
+      line-height: 1.35;
+    }
+
+    /* Authors Banner */
+    .team-strip {
+      margin-top: 11px;
+      background: var(--ink-card-sub);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      border: 1px solid var(--hair);
+      border-left: 3px solid var(--amber-hi);
+      border-radius: 6px;
+      padding: 8px 14px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .team-label {
+      font-size: 10.5px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      color: var(--amber-hi);
+    }
+    .team-members {
+      font-size: 11.5px;
+      font-weight: 600;
+      color: var(--bone);
+      display: flex;
+      gap: 14px;
+    }
+
+    /* Main 2-Column Content */
+    .two-cols {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 14px;
+      margin-top: 13px;
+    }
+    .block-card {
+      background: var(--ink-card);
+      backdrop-filter: blur(14px);
+      -webkit-backdrop-filter: blur(14px);
+      border: 1px solid var(--hair);
+      border-radius: 10px;
+      padding: 13px 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 9px;
+      box-shadow: 0 12px 28px -10px rgba(0, 0, 0, 0.75);
+    }
+    .block-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border-bottom: 1px solid var(--hair);
+      padding-bottom: 8px;
+    }
+    .block-title {
+      font-size: 13.5px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      color: var(--bone);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .block-title .icon-pill {
+      font-size: 11px;
+      font-weight: 800;
+      color: var(--amber-hi);
+      background: rgba(220, 180, 52, 0.16);
+      border: 1px solid var(--hair-amber);
+      width: 22px;
+      height: 22px;
+      border-radius: 5px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .clean-list {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 9px;
+    }
+    .clean-item {
+      display: flex;
+      align-items: flex-start;
+      gap: 8px;
+      font-size: 12.5px;
+      line-height: 1.4;
+      color: var(--slate-light);
+    }
+    .clean-item strong {
+      color: var(--bone);
+      font-weight: 600;
+    }
+    .gold-dot {
+      width: 5px;
+      height: 5px;
+      background-color: var(--amber-hi);
+      border-radius: 50%;
+      margin-top: 6px;
+      flex-shrink: 0;
+      box-shadow: 0 0 6px rgba(220, 180, 52, 0.6);
+    }
+
+    /* 3 Pillars / Metric Row */
+    .pillars-strip {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 10px;
+      margin-top: 11px;
+    }
+    .pillar-box {
+      background: var(--ink-card-sub);
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+      border: 1px solid var(--hair);
+      border-top: 1px solid rgba(220, 180, 52, 0.45);
+      border-radius: 8px;
+      padding: 10px 13px;
+      display: flex;
+      flex-direction: column;
+      gap: 3px;
+      box-shadow: 0 8px 20px -8px rgba(0, 0, 0, 0.55);
+    }
+    .pillar-highlight {
+      font-size: 15px;
+      font-weight: 800;
+      color: var(--amber-hi);
+    }
+    .pillar-title {
+      font-size: 11.5px;
+      font-weight: 700;
+      color: var(--bone);
+    }
+    .pillar-desc {
+      font-size: 10.5px;
+      color: var(--slate);
+      line-height: 1.35;
+    }
+
+    /* What will be presented in the pitch & QR Code */
+    .pitch-highlight-box {
+      margin-top: 10px;
+      background: linear-gradient(135deg, rgba(220, 180, 52, 0.18) 0%, rgba(14, 15, 23, 0.92) 55%);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      border: 1px solid var(--hair-amber);
+      border-radius: 11px;
+      padding: 11px 16px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      box-shadow: 0 10px 26px -8px rgba(0, 0, 0, 0.65), inset 0 1px 0 rgba(255, 255, 255, 0.1);
+    }
+    .pitch-left {
+      display: flex;
+      flex-direction: column;
+      gap: 3px;
+      flex: 1;
+    }
+    .pitch-badge {
+      font-size: 9.5px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      color: var(--amber-hi);
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .pitch-title {
+      font-size: 14px;
+      font-weight: 800;
+      color: var(--bone);
+      line-height: 1.25;
+    }
+    .pitch-steps {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px 12px;
+      font-size: 11px;
+      color: var(--slate-light);
+      margin-top: 2px;
+    }
+    .pitch-steps span {
+      display: flex;
+      align-items: center;
+      gap: 5px;
+    }
+    .pitch-steps strong {
+      color: var(--amber-hi);
+    }
+    .pitch-cta-line {
+      font-size: 10.5px;
+      color: var(--slate);
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      margin-top: 3px;
+    }
+    .pitch-url-pill {
+      background: #000000;
+      color: var(--amber-hi);
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 10px;
+      font-weight: 700;
+      padding: 1.5px 7px;
+      border-radius: 4px;
+      border: 1px solid rgba(220, 180, 52, 0.35);
+      letter-spacing: 0.02em;
+    }
+    .pitch-qr-box {
+      width: 70px;
+      height: 70px;
+      border-radius: 9px;
+      background: #05060A;
+      border: 1px solid rgba(220, 180, 52, 0.5);
+      padding: 4px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      box-shadow: 0 4px 14px rgba(0, 0, 0, 0.5), 0 0 12px rgba(220, 180, 52, 0.15);
+    }
+    .pitch-qr-img {
+      width: 100%;
+      height: 100%;
+      border-radius: 5px;
+      display: block;
+      object-fit: contain;
+      background-color: #E2B93B;
+    }
+
+    /* Tech Minimal Footer Bar */
+    .tech-bar {
+      margin-top: 9px;
+      background: var(--ink-card);
+      backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);
+      border: 1px solid var(--hair);
+      border-radius: 8px;
+      padding: 7px 14px;
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 10px;
+      font-size: 10.5px;
+    }
+    .tech-item {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .tech-tag {
+      font-size: 9px;
+      font-weight: 700;
+      text-transform: uppercase;
+      color: var(--amber-hi);
+      letter-spacing: 0.05em;
+    }
+    .tech-val {
+      color: var(--bone);
+      font-weight: 600;
+    }
+
+    /* Footer */
+    .footer {
+      border-top: 1px solid var(--hair);
+      padding-top: 10px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 10px;
+      color: var(--slate);
+    }
+    .footer strong {
+      color: var(--bone);
+    }
+    .footer-pill {
+      font-size: 9px;
+      font-weight: 700;
+      padding: 3px 9px;
+      border-radius: 4px;
+      background: rgba(220, 180, 52, 0.12);
+      border: 1px solid var(--hair-amber);
+      color: var(--amber-hi);
+    }
+
+    /* Interactive button on screen */
+    .screen-actions {
+      position: fixed;
+      top: 16px;
+      right: 16px;
+      display: flex;
+      gap: 10px;
+      z-index: 9999;
+    }
+    .btn {
+      background: linear-gradient(135deg, #DCB434, #C9A227);
+      color: #000000;
+      font-family: 'Space Grotesk', sans-serif;
+      font-weight: 700;
+      font-size: 13px;
+      padding: 10px 20px;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      box-shadow: 0 6px 22px rgba(220, 180, 52, 0.4);
+      transition: all 0.25s ease;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 28px rgba(220, 180, 52, 0.55);
+    }
+    @media print {
+      body {
+        background: transparent !important;
+        padding: 0 !important;
+      }
+      .sheet {
+        box-shadow: none !important;
+        border: none !important;
+        border-radius: 0 !important;
+        width: 210mm !important;
+        height: 297mm !important;
+        max-height: 297mm !important;
+        page-break-after: avoid;
+        page-break-inside: avoid;
+      }
+      .screen-actions {
+        display: none !important;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Botão de Ação na Tela -->
+  <div class="screen-actions">
+    <button class="btn" onclick="window.print()">
+      <svg width="16" height="16" fill="currentColor" viewBox="0 0 16 16"><path d="M2.5 8a.5.5 0 1 0 0-1 .5.5 0 0 0 0 1z"/><path d="M5 1a2 2 0 0 0-2 2v2H2a2 2 0 0 0-2 2v3a2 2 0 0 0 2 2h1v1a2 2 0 0 0 2 2h6a2 2 0 0 0 2-2v-1h1a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-1V3a2 2 0 0 0-2-2H5zM4 3a1 1 0 0 1 1-1h6a1 1 0 0 1 1 1v2H4V3zm1 5a2 2 0 0 0-2 2v1H2a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1h12a1 1 0 0 1 1 1v3a1 1 0 0 1-1 1h-1v-1a2 2 0 0 0-2-2H5zm7 2v3a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1v-3a1 1 0 0 1 1-1h6a1 1 0 0 1 1 1z"/></svg>
+      Salvar em PDF
+    </button>
+  </div>
+
+  <div class="sheet">
+
+    <!-- Ambient Ethereal Glows & Honeycomb Mesh -->
+    <div class="sheet-ambient" aria-hidden="true">
+      <div class="sheet-glow sheet-glow--tr"></div>
+      <div class="sheet-glow sheet-glow--bl"></div>
+      <svg class="sheet-honeycomb-mesh" viewBox="0 0 794 1123" preserveAspectRatio="none" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <defs>
+          <pattern id="hex-grid" width="56" height="97" patternUnits="userSpaceOnUse">
+            <path d="M28 0 L56 16.17 L56 48.5 L28 64.67 L0 48.5 L0 16.17 Z M28 48.5 L56 64.67 L56 97 L28 113.17 L0 97 L0 64.67 Z" fill="none" stroke="rgba(220, 180, 52, 0.11)" stroke-width="0.85" />
+          </pattern>
+          <radialGradient id="hex-fade-tr" cx="82%" cy="10%" r="50%">
+            <stop offset="0%" stop-color="#fff" stop-opacity="0.95" />
+            <stop offset="55%" stop-color="#fff" stop-opacity="0.35" />
+            <stop offset="100%" stop-color="#fff" stop-opacity="0" />
+          </radialGradient>
+          <radialGradient id="hex-fade-bl" cx="14%" cy="86%" r="44%">
+            <stop offset="0%" stop-color="#fff" stop-opacity="0.85" />
+            <stop offset="55%" stop-color="#fff" stop-opacity="0.25" />
+            <stop offset="100%" stop-color="#fff" stop-opacity="0" />
+          </radialGradient>
+          <mask id="mask-tr">
+            <rect width="100%" height="100%" fill="url(#hex-fade-tr)" />
+          </mask>
+          <mask id="mask-bl">
+            <rect width="100%" height="100%" fill="url(#hex-fade-bl)" />
+          </mask>
+        </defs>
+        <rect width="100%" height="100%" fill="url(#hex-grid)" mask="url(#mask-tr)" />
+        <rect width="100%" height="100%" fill="url(#hex-grid)" mask="url(#mask-bl)" />
+      </svg>
+    </div>
+
+    <!-- TOP BAR -->
+    <header class="top-bar">
+      <div class="badge-fecap">
+        <span class="dot"></span>
+        FECAP · Ciência da Computação · 2026
+      </div>
+      <div class="top-meta-right">
+        Projeto Startup · <strong>One Page Oficial</strong>
+      </div>
+    </header>
+
+    <!-- HERO TITLE -->
+    <section class="hero">
+      <h1>Q.I. <span>MATCH</span></h1>
+      <p class="hero-tagline">
+        A plataforma de recrutamento tech que inverte o processo com <strong>IA Explicável</strong>, <strong>evidências auditáveis</strong> e <strong>Recrutamento Reverso</strong>.
+      </p>
+    </section>
+
+    <!-- EQUIPE FUNDADORA -->
+    <section class="team-strip">
+      <span class="team-label font-heading">Equipe Fundadora</span>
+      <div class="team-members">
+        <span>Jenifer Jacino Barreto</span>
+        <span>•</span>
+        <span>Flávio José dos Santos</span>
+        <span>•</span>
+        <span>Felipe Carvalho Paleari</span>
+        <span>•</span>
+        <span>Maria Eduarda de Freitas Lopes</span>
+      </div>
+    </section>
+
+    <!-- 2 BLOCOS PRINCIPAIS: PROBLEMA & SOLUÇÃO -->
+    <main class="two-cols">
+
+      <!-- O Problema -->
+      <article class="block-card">
+        <div class="block-header">
+          <h2 class="block-title font-heading">
+            <span class="icon-pill">1</span>
+            O Problema no Mercado Tech
+          </h2>
+        </div>
+        <ul class="clean-list">
+          <li class="clean-item">
+            <span class="gold-dot"></span>
+            <div><strong>Triagem Ineficiente:</strong> RHs recebem centenas de currículos inflados por IA sem validação técnica real.</div>
+          </li>
+          <li class="clean-item">
+            <span class="gold-dot"></span>
+            <div><strong>Custo de Erro Elevado:</strong> Contratar errado custa até 5x o salário nominal em retrabalho e turnover.</div>
+          </li>
+          <li class="clean-item">
+            <span class="gold-dot"></span>
+            <div><strong>Processos Opacos:</strong> Desenvolvedores sêniores fogem de testes genéricos e da falta de clareza nas propostas.</div>
+          </li>
+        </ul>
+      </article>
+
+      <!-- A Solução -->
+      <article class="block-card">
+        <div class="block-header">
+          <h2 class="block-title font-heading">
+            <span class="icon-pill">2</span>
+            A Solução: Q.I. Match
+          </h2>
+        </div>
+        <ul class="clean-list">
+          <li class="clean-item">
+            <span class="gold-dot"></span>
+            <div><strong>Recrutamento Reverso:</strong> Empresas encontram o talento pré-qualificado e enviam convites via <em>Double Opt-In</em>.</div>
+          </li>
+          <li class="clean-item">
+            <span class="gold-dot"></span>
+            <div><strong>IA Explicável (XAI):</strong> Score aberto e auditável em 5 dimensões reais (Hard, Soft, Fit e Experiência).</div>
+          </li>
+          <li class="clean-item">
+            <span class="gold-dot"></span>
+            <div><strong>Conformidade LGPD:</strong> Relatórios com direito a contestação, réplica e reavaliação humana (Art. 20).</div>
+          </li>
+        </ul>
+      </article>
+
+    </main>
+
+    <!-- 3 PILARES DE CONFIANÇA -->
+    <section class="pillars-strip">
+      <div class="pillar-box">
+        <div class="pillar-highlight font-heading">100% Verbatim</div>
+        <div class="pillar-title font-heading">Sem Alucinação</div>
+        <div class="pillar-desc">Cada habilidade validada exige citação exata da fala real do profissional na entrevista.</div>
+      </div>
+      <div class="pillar-box">
+        <div class="pillar-highlight font-heading">Score em 5D</div>
+        <div class="pillar-title font-heading">Fórmula Aberta</div>
+        <div class="pillar-desc">50% Hard Skills · 25% Soft Skills · 15% Experiência · 10% Fit Salarial e Modelo.</div>
+      </div>
+      <div class="pillar-box">
+        <div class="pillar-highlight font-heading">Double Opt-In</div>
+        <div class="pillar-title font-heading">Privacidade Ativa</div>
+        <div class="pillar-desc">O candidato decide se revela seu contato somente se a oportunidade fizer sentido.</div>
+      </div>
+    </section>
+
+    <!-- O QUE VAMOS APRESENTAR NA BANCA & QR CODE DE ACESSO -->
+    <section class="pitch-highlight-box">
+      <div class="pitch-left">
+        <div class="pitch-badge font-heading">
+          <span>●</span> Demonstração ao Vivo • Teste no Celular
+        </div>
+        <div class="pitch-title font-heading">Experimente a Plataforma em Tempo Real</div>
+        <div class="pitch-steps">
+          <span><strong>1.</strong> Áudio transcrito via Faster-Whisper</span>
+          <span>•</span>
+          <span><strong>2.</strong> IA auditável com EvidenceVerifier</span>
+          <span>•</span>
+          <span><strong>3.</strong> Matching e Double Opt-In</span>
+        </div>
+        <div class="pitch-cta-line">
+          <span>Aponte a câmera para o QR Code ao lado ou acesse:</span>
+          <span class="pitch-url-pill">qi-match.vercel.app</span>
+        </div>
+      </div>
+
+      <div class="pitch-qr-box" title="Acesse qi-match.vercel.app">
+        <img src="qr-vercel.png" alt="QR Code qi-match.vercel.app" class="pitch-qr-img" onerror="this.src='public/qr-vercel.png'" />
+      </div>
+    </section>
+
+    <!-- STACK TECNOLÓGICA CONCISA -->
+    <section class="tech-bar">
+      <div class="tech-item">
+        <span class="tech-tag">Frontend:</span>
+        <span class="tech-val">React 18 · TypeScript · Vite · Umbra</span>
+      </div>
+      <div class="tech-item">
+        <span class="tech-tag">Backend:</span>
+        <span class="tech-val">Python · FastAPI (Assíncrono)</span>
+      </div>
+      <div class="tech-item">
+        <span class="tech-tag">IA Local:</span>
+        <span class="tech-val">Faster-Whisper (pt-BR) · Qwen3:4b</span>
+      </div>
+      <div class="tech-item">
+        <span class="tech-tag">Semântica:</span>
+        <span class="tech-val">Multilingual-E5 · EvidenceVerifier</span>
+      </div>
+    </section>
+
+    <!-- FOOTER -->
+    <footer class="footer">
+      <div>
+        <strong>FECAP — Fundação Escola de Comércio Álvares Penteado</strong> · Ciência da Computação · 2026
+      </div>
+      <span class="footer-pill">Arquitetura Auditável & Segura</span>
+    </footer>
+
+  </div>
+
+</body>
+</html>

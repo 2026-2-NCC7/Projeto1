@@ -1,0 +1,646 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Q.I. Match - One Page Executivo (FECAP)</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Space+Grotesk:wght@600;700;800&display=swap" rel="stylesheet">
+  <style>
+    @page {
+      size: A4 portrait;
+      margin: 0;
+    }
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      -webkit-print-color-adjust: exact !important;
+      print-color-adjust: exact !important;
+    }
+    :root {
+      --ink: #040508;
+      --ink-surface: rgba(13, 15, 23, 0.72);
+      --bone: #FFFFFF;
+      --slate: #9494A3;
+      --slate-light: #D2D2DE;
+      --amber: #C9A227;
+      --amber-hi: #E2B93B;
+      --hair: rgba(255, 255, 255, 0.08);
+      --hair-strong: rgba(255, 255, 255, 0.14);
+      --hair-amber: rgba(226, 185, 59, 0.35);
+    }
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+      background: radial-gradient(circle at 50% 18%, rgba(201, 162, 39, 0.08) 0%, transparent 55%), #020204;
+      color: var(--bone);
+      line-height: 1.45;
+      font-size: 13px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      padding: 24px 0;
+    }
+    h1, h2, h3, h4, .font-heading {
+      font-family: 'Space Grotesk', sans-serif;
+      letter-spacing: -0.025em;
+    }
+
+    /* A4 Sheet Container */
+    .sheet {
+      width: 210mm;
+      height: 297mm;
+      max-height: 297mm;
+      background: radial-gradient(ellipse 70% 48% at 85% 10%, rgba(226, 185, 59, 0.16) 0%, rgba(201, 162, 39, 0.04) 42%, transparent 75%),
+                  radial-gradient(ellipse 55% 42% at 12% 90%, rgba(201, 162, 39, 0.10) 0%, transparent 65%),
+                  linear-gradient(180deg, #05060A 0%, #090B12 50%, #040508 100%);
+      padding: 13mm 16mm 12mm 16mm;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      position: relative;
+      overflow: hidden;
+      box-shadow: 0 32px 85px -20px rgba(0, 0, 0, 0.96), 0 0 0 1px rgba(255, 255, 255, 0.08);
+      border-radius: 6px;
+    }
+
+    /* Ambient Subtle Background */
+    .sheet-ambient {
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+      z-index: 0;
+      overflow: hidden;
+    }
+    .sheet-glow-tr {
+      position: absolute;
+      top: -60px;
+      right: -60px;
+      width: 320px;
+      height: 320px;
+      background: radial-gradient(circle, rgba(226, 185, 59, 0.22) 0%, rgba(201, 162, 39, 0.06) 45%, transparent 72%);
+      filter: blur(34px);
+    }
+    .sheet-mesh {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+    }
+    .sheet > *:not(.sheet-ambient) {
+      position: relative;
+      z-index: 2;
+    }
+
+    /* 1. TOP HEADER & BRAND */
+    .top-meta {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 8px;
+    }
+    .badge-fecap {
+      font-size: 10px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+      color: var(--amber-hi);
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .hero-title {
+      font-size: 38px;
+      font-weight: 800;
+      line-height: 1;
+      color: var(--bone);
+      letter-spacing: -0.03em;
+    }
+    .hero-title span {
+      color: var(--amber-hi);
+    }
+    .hero-question {
+      font-size: 19px;
+      font-weight: 700;
+      color: var(--bone);
+      margin-top: 10px;
+      line-height: 1.25;
+    }
+    .hero-tagline {
+      font-size: 13px;
+      color: var(--slate-light);
+      margin-top: 6px;
+      line-height: 1.45;
+      max-width: 95%;
+    }
+
+    /* 2. COMPARISON CARDS (HOJE VS COM Q.I. MATCH) - IDENTIDADE DA MARCA */
+    .compare-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 14px;
+      margin-top: 16px;
+    }
+    .compare-card {
+      border-radius: 12px;
+      padding: 15px 18px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+      transition: all 0.25s ease;
+    }
+    .compare-card--hoje {
+      background: rgba(20, 21, 28, 0.65);
+      border: 1px solid rgba(255, 255, 255, 0.09);
+    }
+    .compare-card--qi {
+      background: rgba(201, 162, 39, 0.09);
+      border: 1px solid rgba(220, 180, 52, 0.48);
+      box-shadow: 0 0 18px rgba(220, 180, 52, 0.12), inset 0 0 0 1px rgba(220, 180, 52, 0.18);
+    }
+    .compare-head {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 13.5px;
+      font-weight: 700;
+    }
+    .compare-head--hoje {
+      color: #9494A3;
+    }
+    .compare-head--qi {
+      color: var(--amber-hi);
+    }
+    .compare-icon {
+      width: 18px;
+      height: 18px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 10.5px;
+      font-weight: 800;
+      flex-shrink: 0;
+    }
+    .compare-icon--hoje {
+      background: rgba(255, 255, 255, 0.08);
+      border: 1px solid rgba(255, 255, 255, 0.16);
+      color: #9494A3;
+    }
+    .compare-icon--qi {
+      background: rgba(220, 180, 52, 0.22);
+      border: 1px solid var(--amber-hi);
+      color: #FFF0B8;
+      box-shadow: 0 0 8px rgba(220, 180, 52, 0.35);
+    }
+    .compare-card--hoje .compare-body {
+      font-size: 12.5px;
+      line-height: 1.45;
+      color: #8E8E9C;
+    }
+    .compare-card--qi .compare-body {
+      font-size: 12.5px;
+      line-height: 1.45;
+      color: #FFFFFF;
+      font-weight: 500;
+    }
+
+    /* 3. DO TALENTO À CONEXÃO (FLOW + PILLARS) */
+    .flow-section {
+      margin-top: 18px;
+      background: var(--ink-surface);
+      border: 1px solid var(--hair);
+      border-radius: 14px;
+      padding: 18px 20px 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+      backdrop-filter: blur(14px);
+      -webkit-backdrop-filter: blur(14px);
+    }
+    .flow-title {
+      font-size: 17px;
+      font-weight: 700;
+      color: var(--bone);
+      letter-spacing: -0.02em;
+    }
+    .flow-steps {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 12px;
+      position: relative;
+    }
+    .step-item {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
+      gap: 6px;
+    }
+    .step-bubble {
+      width: 46px;
+      height: 46px;
+      border-radius: 12px;
+      background: rgba(226, 185, 59, 0.12);
+      border: 1px solid var(--hair-amber);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--amber-hi);
+      box-shadow: 0 4px 14px rgba(226, 185, 59, 0.15);
+    }
+    .step-num {
+      font-size: 10px;
+      font-weight: 700;
+      color: var(--slate);
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      margin-top: 2px;
+    }
+    .step-name {
+      font-size: 13px;
+      font-weight: 700;
+      color: var(--bone);
+    }
+
+    /* 4 Pilares da Plataforma (Grid 2x2 Oficial develop_ze) */
+    .pillars-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px 16px;
+      border-top: 1px solid var(--hair);
+      padding-top: 14px;
+    }
+    .pillar-item {
+      display: flex;
+      align-items: flex-start;
+      gap: 11px;
+    }
+    .pillar-icon-box {
+      width: 36px;
+      height: 36px;
+      border-radius: 9px;
+      background: rgba(18, 22, 32, 0.95);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--amber-hi);
+      flex-shrink: 0;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.35);
+    }
+    .pillar-content {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+    }
+    .pillar-title {
+      font-size: 13px;
+      font-weight: 700;
+      color: var(--bone);
+      line-height: 1.25;
+    }
+    .pillar-desc {
+      font-size: 11.5px;
+      color: var(--slate);
+      line-height: 1.35;
+    }
+
+    /* 4. GOLDEN CALLOUT BANNER WITH QR CODE (LATÃO / OURO NOBRE) */
+    .gold-banner {
+      margin-top: 18px;
+      background: linear-gradient(135deg, #F3DC92 0%, #D4AC31 48%, #A88020 100%);
+      color: #0A0A0F;
+      border-radius: 14px;
+      padding: 16px 22px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 18px;
+      box-shadow: 0 12px 30px rgba(201, 162, 39, 0.28);
+    }
+    .gold-left {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      flex: 1;
+    }
+    .gold-title {
+      font-size: 17.5px;
+      font-weight: 800;
+      line-height: 1.25;
+      color: #0A0A0F;
+    }
+    .gold-desc {
+      font-size: 12.5px;
+      font-weight: 500;
+      color: #242218;
+      line-height: 1.35;
+    }
+    .gold-cta-line {
+      font-size: 11.5px;
+      font-weight: 700;
+      color: #383218;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      margin-top: 3px;
+    }
+    .gold-url-pill {
+      background: #0A0A0F;
+      color: #E2B93B;
+      padding: 2px 8px;
+      border-radius: 4px;
+      font-size: 10.5px;
+      font-weight: 700;
+      letter-spacing: 0.02em;
+    }
+    .gold-qr-box {
+      width: 78px;
+      height: 78px;
+      border-radius: 10px;
+      background: #0A0A0F;
+      padding: 5px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.35);
+    }
+    .gold-qr-img {
+      width: 100%;
+      height: 100%;
+      border-radius: 6px;
+      display: block;
+      background-color: #E2B93B;
+    }
+
+    /* 5. FOOTER */
+    .sheet-footer {
+      border-top: 1px solid var(--hair);
+      padding-top: 14px;
+      margin-top: 16px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 11.5px;
+      color: var(--slate);
+    }
+    .footer-right {
+      font-size: 11.5px;
+      color: var(--amber-hi);
+      font-weight: 600;
+    }
+
+    /* SCREEN ACTIONS BUTTONS (FLOAT ON SCREEN) */
+    .screen-actions {
+      position: fixed;
+      top: 16px;
+      right: 16px;
+      display: flex;
+      gap: 10px;
+      z-index: 9999;
+    }
+    .btn {
+      background: linear-gradient(135deg, #DCB434, #C9A227);
+      color: #000000;
+      font-family: 'Space Grotesk', sans-serif;
+      font-weight: 700;
+      font-size: 13px;
+      padding: 10px 18px;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      box-shadow: 0 6px 22px rgba(220, 180, 52, 0.4);
+      transition: all 0.2s ease;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      text-decoration: none;
+    }
+    .btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 28px rgba(220, 180, 52, 0.55);
+    }
+    .btn-secondary {
+      background: rgba(18, 20, 30, 0.85);
+      border: 1px solid var(--hair-strong);
+      color: var(--bone);
+      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.5);
+    }
+    .btn-secondary:hover {
+      background: rgba(28, 30, 44, 0.95);
+      border-color: var(--amber-hi);
+    }
+
+    @media print {
+      body {
+        background: transparent !important;
+        padding: 0 !important;
+      }
+      .sheet {
+        box-shadow: none !important;
+        border: none !important;
+        border-radius: 0 !important;
+        width: 210mm !important;
+        height: 297mm !important;
+        max-height: 297mm !important;
+        page-break-after: avoid;
+        page-break-inside: avoid;
+      }
+      .screen-actions {
+        display: none !important;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Botões de Ação na Tela -->
+  <div class="screen-actions">
+    <a href="one_page_fecap_detalhado.html" class="btn btn-secondary" title="Acessar versão detalhada anterior do One Page">
+      <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M4 6h16M4 12h16M4 18h10"/></svg>
+      Versão Detalhada
+    </a>
+    <button class="btn" onclick="window.print()">
+      <svg width="16" height="16" fill="currentColor" viewBox="0 0 16 16"><path d="M2.5 8a.5.5 0 1 0 0-1 .5.5 0 0 0 0 1z"/><path d="M5 1a2 2 0 0 0-2 2v2H2a2 2 0 0 0-2 2v3a2 2 0 0 0 2 2h1v1a2 2 0 0 0 2 2h6a2 2 0 0 0 2-2v-1h1a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-1V3a2 2 0 0 0-2-2H5zM4 3a1 1 0 0 1 1-1h6a1 1 0 0 1 1 1v2H4V3zm1 5a2 2 0 0 0-2 2v1H2a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1h12a1 1 0 0 1 1 1v3a1 1 0 0 1-1 1h-1v-1a2 2 0 0 0-2-2H5zm7 2v3a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1v-3a1 1 0 0 1 1-1h6a1 1 0 0 1 1 1z"/></svg>
+      Salvar em PDF
+    </button>
+  </div>
+
+  <div class="sheet">
+
+    <!-- Ambient Ambient Glow & Subtle Honeycomb Mask -->
+    <div class="sheet-ambient" aria-hidden="true">
+      <div class="sheet-glow-tr"></div>
+      <svg class="sheet-mesh" viewBox="0 0 794 1123" preserveAspectRatio="none" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <defs>
+          <pattern id="hex-grid-clean" width="56" height="97" patternUnits="userSpaceOnUse">
+            <path d="M28 0 L56 16.17 L56 48.5 L28 64.67 L0 48.5 L0 16.17 Z M28 48.5 L56 64.67 L56 97 L28 113.17 L0 97 L0 64.67 Z" fill="none" stroke="rgba(226, 185, 59, 0.08)" stroke-width="0.8" />
+          </pattern>
+          <radialGradient id="fade-mask" cx="80%" cy="12%" r="48%">
+            <stop offset="0%" stop-color="#fff" stop-opacity="0.85" />
+            <stop offset="60%" stop-color="#fff" stop-opacity="0.25" />
+            <stop offset="100%" stop-color="#fff" stop-opacity="0" />
+          </radialGradient>
+          <mask id="mask-ambient">
+            <rect width="100%" height="100%" fill="url(#fade-mask)" />
+          </mask>
+        </defs>
+        <rect width="100%" height="100%" fill="url(#hex-grid-clean)" mask="url(#mask-ambient)" />
+      </svg>
+    </div>
+
+    <!-- 1. HEADER & BRAND -->
+    <header>
+      <div class="top-meta">
+        <span class="badge-fecap">FECAP • STARTUP 2026</span>
+      </div>
+      <h1 class="hero-title font-heading">Q.I. <span>MATCH</span></h1>
+      <h2 class="hero-question font-heading">E se o talento certo encontrasse a empresa certa?</h2>
+      <p class="hero-tagline">
+        Recrutamento tecnológico com inteligência artificial explicável, evidências verificáveis e mais controle para o profissional.
+      </p>
+    </header>
+
+    <!-- 2. COMPARISON CARDS (HOJE VS COM Q.I. MATCH) -->
+    <section class="compare-grid">
+      <div class="compare-card compare-card--hoje">
+        <div class="compare-head compare-head--hoje font-heading">
+          <span class="compare-icon compare-icon--hoje">✕</span>
+          <span>Hoje</span>
+        </div>
+        <p class="compare-body">
+          Currículos em excesso, triagens demoradas e decisões com pouca transparência.
+        </p>
+      </div>
+
+      <div class="compare-card compare-card--qi">
+        <div class="compare-head compare-head--qi font-heading">
+          <span class="compare-icon compare-icon--qi">✦</span>
+          <span>Com Q.I. Match</span>
+        </div>
+        <p class="compare-body">
+          Talentos avaliados por evidências, conexões mais relevantes e decisões explicáveis.
+        </p>
+      </div>
+    </section>
+
+    <!-- 3. DO TALENTO À CONEXÃO -->
+    <section class="flow-section">
+      <h3 class="flow-title font-heading">Do talento à conexão</h3>
+
+      <!-- 3 Steps -->
+      <div class="flow-steps">
+        <div class="step-item">
+          <div class="step-bubble">
+            <!-- Microfone SVG -->
+            <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3Z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" x2="12" y1="19" y2="22"/></svg>
+          </div>
+          <span class="step-num">01</span>
+          <strong class="step-name font-heading">Entrevista</strong>
+        </div>
+
+        <div class="step-item">
+          <div class="step-bubble">
+            <!-- Cérebro / IA SVG -->
+            <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M9.5 2A2.5 2.5 0 0 1 12 4.5v15a2.5 2.5 0 0 1-4.96.44 2.5 2.5 0 0 1-2.96-3.08 3 3 0 0 1-.34-5.58 2.5 2.5 0 0 1 1.32-4.24 2.5 2.5 0 0 1 4.44-5.04Z"/><path d="M14.5 2A2.5 2.5 0 0 0 12 4.5v15a2.5 2.5 0 0 0 4.96.44 2.5 2.5 0 0 0 2.96-3.08 3 3 0 0 0 .34-5.58 2.5 2.5 0 0 0-1.32-4.24 2.5 2.5 0 0 0-4.44-5.04Z"/></svg>
+          </div>
+          <span class="step-num">02</span>
+          <strong class="step-name font-heading">Análise com IA</strong>
+        </div>
+
+        <div class="step-item">
+          <div class="step-bubble">
+            <!-- Aperto de mão / Conexão SVG -->
+            <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="m11 17 2 2a1 1 0 0 0 1.4 0l4.3-4.3a1 1 0 0 0 0-1.4l-2.3-2.3a1 1 0 0 0-1.4 0L13 13"/><path d="m7 13 4 4"/><path d="M21 7.5V6a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-1.5"/></svg>
+          </div>
+          <span class="step-num">03</span>
+          <strong class="step-name font-heading">Conexão</strong>
+        </div>
+      </div>
+
+      <!-- 4 Pilares da Plataforma (Grid 2x2 Oficial develop_ze) -->
+      <div class="pillars-grid">
+        <div class="pillar-item">
+          <div class="pillar-icon-box">
+            <!-- Setas inversão / recrutamento invertido -->
+            <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="m16 3 4 4-4 4"/><path d="M20 7H4"/><path d="m8 21-4-4 4-4"/><path d="M4 17h16"/></svg>
+          </div>
+          <div class="pillar-content">
+            <strong class="pillar-title font-heading">Recrutamento invertido</strong>
+            <p class="pillar-desc">As empresas procuram os profissionais, em vez de exigir que eles participem repetidamente de processos seletivos tradicionais.</p>
+          </div>
+        </div>
+
+        <div class="pillar-item">
+          <div class="pillar-icon-box">
+            <!-- Cérebro / IA Explicável -->
+            <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M9.5 2A2.5 2.5 0 0 1 12 4.5v15a2.5 2.5 0 0 1-4.96.44 2.5 2.5 0 0 1-2.96-3.08 3 3 0 0 1-.34-5.58 2.5 2.5 0 0 1 1.32-4.24 2.5 2.5 0 0 1 4.44-5.04Z"/><path d="M14.5 2A2.5 2.5 0 0 0 12 4.5v15a2.5 2.5 0 0 0 4.96.44 2.5 2.5 0 0 0 2.96-3.08 3 3 0 0 0 .34-5.58 2.5 2.5 0 0 0-1.32-4.24 2.5 2.5 0 0 0-4.44-5.04Z"/></svg>
+          </div>
+          <div class="pillar-content">
+            <strong class="pillar-title font-heading">Inteligência artificial explicável</strong>
+            <p class="pillar-desc">As avaliações apresentam critérios e justificativas que podem ser compreendidos e questionados.</p>
+          </div>
+        </div>
+
+        <div class="pillar-item">
+          <div class="pillar-icon-box">
+            <!-- Documento com checkmark / Evidências -->
+            <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><path d="m9 15 2 2 4-4"/></svg>
+          </div>
+          <div class="pillar-content">
+            <strong class="pillar-title font-heading">Evidências verificáveis</strong>
+            <p class="pillar-desc">As competências são relacionadas a trechos de entrevistas ou códigos, permitindo rastrear sua fundamentação.</p>
+          </div>
+        </div>
+
+        <div class="pillar-item">
+          <div class="pillar-icon-box">
+            <!-- Escudo com checkmark / Privacidade -->
+            <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="m9 12 2 2 4-4"/></svg>
+          </div>
+          <div class="pillar-content">
+            <strong class="pillar-title font-heading">Privacidade e controle</strong>
+            <p class="pillar-desc">O profissional mantém controle sobre a divulgação dos seus dados e pode solicitar revisão de avaliações.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 4. GOLDEN CALLOUT BANNER COM QR CODE REAL -->
+    <section class="gold-banner">
+      <div class="gold-left">
+        <h3 class="gold-title font-heading">Conheça o recrutamento sob outra perspectiva.</h3>
+        <p class="gold-desc">
+          Assista à demonstração da Q.I. Match no estande ou teste o protótipo ao vivo.
+        </p>
+        <div class="gold-cta-line">
+          <span>Aponte a câmera para o QR Code</span>
+          <span>•</span>
+          <span class="gold-url-pill">qi-match.vercel.app</span>
+        </div>
+      </div>
+
+      <div class="gold-qr-box">
+        <img src="qr-vercel.png" alt="QR Code Protótipo Q.I. Match" class="gold-qr-img" onerror="this.src='public/qr-vercel.png'" />
+      </div>
+    </section>
+
+    <!-- 5. FOOTER -->
+    <footer class="sheet-footer">
+      <span>Equipe Q.I. Match • FECAP</span>
+      <span class="footer-right font-heading">
+        Conectando talento e oportunidade.
+      </span>
+    </footer>
+
+  </div>
+
+</body>
+</html>

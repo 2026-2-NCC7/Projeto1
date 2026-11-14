@@ -5,6 +5,7 @@ import { SidebarNav } from './components/layout/SidebarNav';
 
 // Views
 import { LandingPageView } from './views/LandingPageView';
+import { TechnicalBancaView } from './views/TechnicalBancaView';
 import { PersonaSelectorView } from './views/PersonaSelectorView';
 import { CandidateOnboardingView } from './views/CandidateOnboardingView';
 import { CandidateProfileView } from './views/CandidateProfileView';
@@ -55,6 +56,10 @@ const MainLayout: React.FC = () => {
   const [showLoginPortal, setShowLoginPortal] = useState<boolean>(() => {
     const cleanHash = window.location.hash.replace(/^#\/?/, '').trim();
     return cleanHash === 'login' || isProtectedInternalRoute(cleanHash);
+  });
+  const [showTechnicalBanca, setShowTechnicalBanca] = useState<boolean>(() => {
+    const cleanHash = window.location.hash.replace(/^#\/?/, '').trim();
+    return cleanHash === 'banca-tecnica' || cleanHash === 'arquitetura';
   });
 
   const getDefaultTabForCurrentUser = (): string => {
@@ -110,11 +115,17 @@ const MainLayout: React.FC = () => {
       if (isProtectedInternalRoute(cleanHash)) {
         setRouteNotice('Acesso restrito: autentique-se para acessar esta rota interna.');
         setShowLoginPortal(true);
+        setShowTechnicalBanca(false);
         window.location.hash = '#/login';
       } else if (cleanHash === 'login') {
         setShowLoginPortal(true);
+        setShowTechnicalBanca(false);
+      } else if (cleanHash === 'banca-tecnica' || cleanHash === 'arquitetura') {
+        setShowLoginPortal(false);
+        setShowTechnicalBanca(true);
       } else {
         setShowLoginPortal(false);
+        setShowTechnicalBanca(false);
       }
       return;
     }
@@ -144,6 +155,15 @@ const MainLayout: React.FC = () => {
       if (!cleanHash) {
         if (!isAuthenticated) {
           setShowLoginPortal(false);
+          setShowTechnicalBanca(false);
+        }
+        return;
+      }
+
+      if (cleanHash === 'banca-tecnica' || cleanHash === 'arquitetura') {
+        if (!isAuthenticated) {
+          setShowLoginPortal(false);
+          setShowTechnicalBanca(true);
         }
         return;
       }
@@ -151,6 +171,7 @@ const MainLayout: React.FC = () => {
       if (cleanHash === 'login') {
         if (!isAuthenticated) {
           setShowLoginPortal(true);
+          setShowTechnicalBanca(false);
         }
         return;
       }
@@ -159,9 +180,11 @@ const MainLayout: React.FC = () => {
         if (isProtectedInternalRoute(cleanHash)) {
           setRouteNotice('Você precisa estar autenticado para acessar páginas internas.');
           setShowLoginPortal(true);
+          setShowTechnicalBanca(false);
           window.location.hash = '#/login';
         } else {
           setShowLoginPortal(false);
+          setShowTechnicalBanca(false);
         }
         return;
       }
@@ -185,13 +208,33 @@ const MainLayout: React.FC = () => {
   }, [isAuthenticated, session?.role, needsOnboarding, activePersona]);
 
   if (!isAuthenticated) {
+    if (showTechnicalBanca) {
+      return (
+        <TechnicalBancaView
+          onBackToMarketLanding={() => {
+            setShowTechnicalBanca(false);
+            window.history.replaceState(null, '', window.location.pathname + window.location.search);
+            window.scrollTo({ top: 0, behavior: 'auto' });
+          }}
+          onOpenPrototype={() => {
+            setShowTechnicalBanca(false);
+            setShowLoginPortal(true);
+            window.location.hash = '#/login';
+            window.scrollTo({ top: 0, behavior: 'auto' });
+          }}
+        />
+      );
+    }
+
     if (!showLoginPortal) {
       return (
         <LandingPageView
           onOpenPrototype={() => {
-            setRouteNotice('');
-            setShowLoginPortal(true);
-            window.location.hash = '#/login';
+            window.open('https://qi-match.vercel.app', '_blank', 'noopener,noreferrer');
+          }}
+          onOpenTechnicalBanca={() => {
+            setShowTechnicalBanca(true);
+            window.location.hash = '#/banca-tecnica';
             window.scrollTo({ top: 0, behavior: 'auto' });
           }}
         />

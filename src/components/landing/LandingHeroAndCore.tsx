@@ -17,6 +17,7 @@ interface LandingHeroAndCoreProps {
   onOpenDrawer: (drawerId: string) => void;
   onOpenPitchModal: () => void;
   onOpenPrototype: () => void;
+  onOpenTechnicalBanca?: () => void;
 }
 
 function renderIsometricDiagram(index: number) {
@@ -102,15 +103,13 @@ export const LandingHeroAndCore: React.FC<LandingHeroAndCoreProps> = ({
   onOpenDrawer,
   onOpenPitchModal,
   onOpenPrototype,
+  onOpenTechnicalBanca,
 }) => {
   const [isScrolled, setIsScrolled] = useState(false);
   const heroRef = useRef<HTMLElement | null>(null);
   const arcWrapRef = useRef<HTMLDivElement | null>(null);
   const arcCanvasRef = useRef<HTMLCanvasElement | null>(null);
   const terrainRef = useRef<HTMLDivElement | null>(null);
-  const chromeBtnRef = useRef<HTMLButtonElement | null>(null);
-  const chromeCanvasRef = useRef<HTMLCanvasElement | null>(null);
-  const chromeFaceRef = useRef<HTMLSpanElement | null>(null);
 
   // Section 03 Solution & Value Proposition state
   const lensStageRef = useRef<HTMLDivElement | null>(null);
@@ -121,7 +120,8 @@ export const LandingHeroAndCore: React.FC<LandingHeroAndCoreProps> = ({
 
   // Section 04 Commercial Binder, Market Gauge & Persona Reader state
   const [activePlanId, setActivePlanId] = useState(COMMERCIAL_PLANS[0].id);
-  const [activeScenarioId, setActiveScenarioId] = useState<string>('sam');
+  const [activeScenarioId, setActiveScenarioId] = useState<string>('som10');
+  const [showScenarioDetails, setShowScenarioDetails] = useState<boolean>(false);
   const [openPersona, setOpenPersona] = useState<PersonaVolume | null>(null);
 
   // Scroll listener for masthead
@@ -361,157 +361,6 @@ export const LandingHeroAndCore: React.FC<LandingHeroAndCoreProps> = ({
     };
   }, []);
 
-  // WebGL Liquid Chrome CTA Shader (with automatic CSS fallback)
-  useEffect(() => {
-    const btn = chromeBtnRef.current;
-    const canvas = chromeCanvasRef.current;
-    const face = chromeFaceRef.current;
-    if (!btn || !canvas || !face) return;
-
-    let gl: WebGLRenderingContext | null = null;
-    try {
-      gl = canvas.getContext('webgl', {
-        alpha: true,
-        antialias: false,
-        premultipliedAlpha: false,
-        powerPreference: 'low-power',
-      });
-    } catch {
-      gl = null;
-    }
-    if (!gl) return;
-
-    const compile = (type: number, src: string) => {
-      const sh = gl!.createShader(type);
-      if (!sh) return null;
-      gl!.shaderSource(sh, src);
-      gl!.compileShader(sh);
-      if (!gl!.getShaderParameter(sh, gl!.COMPILE_STATUS)) {
-        gl!.deleteShader(sh);
-        return null;
-      }
-      return sh;
-    };
-
-    const vs = compile(gl.VERTEX_SHADER, 'attribute vec2 a_position;void main(){gl_Position=vec4(a_position,0.,1.);}');
-    const fs = compile(
-      gl.FRAGMENT_SHADER,
-      `precision highp float;
-uniform vec2 u_res,u_half,u_pointer;uniform float u_time,u_hover,u_k;
-float hash(vec2 p){return fract(sin(dot(p,vec2(127.1,311.7)))*43758.5453);}
-float sdRound(vec2 p,vec2 b,float r){vec2 q=abs(p)-b+r;return min(max(q.x,q.y),0.)+length(max(q,0.))-r;}
-vec3 brass(float x){return mix(vec3(.79,.63,.15),vec3(1.,.92,.70),.5+.5*cos(6.28318*x));}
-void main(){
-  vec2 q=(gl_FragCoord.xy-.5*u_res)/u_k;
-  float aa=1./u_k,t=u_time;
-  float d=sdRound(q,u_half+vec2(6.,4.),u_half.y+4.);
-  float mask=1.-smoothstep(-aa,aa,d);float inside=smoothstep(-10.-aa,-8.+aa,d);
-  float a=atan(q.y/(u_half.y+2.),q.x/(u_half.x+2.));
-  float spin=a+t*(.40+u_hover*.3)+(u_pointer.x-.5)*2.4+u_hover*.4;
-  float wide=.5+.5*sin(a*2.-.4);
-  float flag=pow(max(0.,sin(spin*2.+.2)),8.);
-  float strip=pow(max(0.,cos(spin*3.-1.)),38.);
-  float rim=exp(-pow((d+1.6)/.9,2.));
-  float grain=(hash(floor(vec2(q.x*.7,q.y*4.)))-.5)*.024;
-  vec3 metal=vec3(.030,.030,.034)+vec3(.21,.21,.22)*wide+vec3(.40,.39,.37)*strip;
-  metal*=1.-flag*.75;metal+=rim*vec3(.55,.54,.51);
-  float spectral=pow(max(0.,cos(spin*3.-1.)),22.);
-  vec3 col=metal+brass(a*.5+t*.11)*spectral*.46+grain;
-  gl_FragColor=vec4(col,clamp(mask*inside,0.,1.));
-}`
-    );
-
-    if (!vs || !fs) return;
-    const prog = gl.createProgram();
-    if (!prog) return;
-    gl.attachShader(prog, vs);
-    gl.attachShader(prog, fs);
-    gl.linkProgram(prog);
-    if (!gl.getProgramParameter(prog, gl.LINK_STATUS)) return;
-
-    gl.useProgram(prog);
-    const buf = gl.createBuffer();
-    gl.bindBuffer(gl.ARRAY_BUFFER, buf);
-    gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([-1, -1, 1, -1, -1, 1, -1, 1, 1, -1, 1, 1]), gl.STATIC_DRAW);
-    const locPos = gl.getAttribLocation(prog, 'a_position');
-    gl.enableVertexAttribArray(locPos);
-    gl.vertexAttribPointer(locPos, 2, gl.FLOAT, false, 0, 0);
-    gl.enable(gl.BLEND);
-    gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA);
-
-    const uRes = gl.getUniformLocation(prog, 'u_res');
-    const uHalf = gl.getUniformLocation(prog, 'u_half');
-    const uPointer = gl.getUniformLocation(prog, 'u_pointer');
-    const uTime = gl.getUniformLocation(prog, 'u_time');
-    const uHover = gl.getUniformLocation(prog, 'u_hover');
-    const uK = gl.getUniformLocation(prog, 'u_k');
-
-    btn.classList.add('is-gl');
-
-    let kScale = 1;
-    let halfVec: [number, number] = [100, 83];
-    const state = { px: 0.5, hover: 0, eased: 0, t: 0, last: 0, raf: 0, seen: true };
-
-    const draw = () => {
-      gl!.clearColor(0, 0, 0, 0);
-      gl!.clear(gl!.COLOR_BUFFER_BIT);
-      gl!.uniform2f(uRes, canvas.width, canvas.height);
-      gl!.uniform2f(uHalf, halfVec[0], halfVec[1]);
-      gl!.uniform2f(uPointer, state.px, 0.5);
-      gl!.uniform1f(uTime, state.t);
-      gl!.uniform1f(uHover, state.eased);
-      gl!.uniform1f(uK, kScale);
-      gl!.drawArrays(gl!.TRIANGLES, 0, 6);
-    };
-
-    const resize = () => {
-      const dpr = Math.min(window.devicePixelRatio || 1, 2);
-      const cr = canvas.getBoundingClientRect();
-      const fr = face.getBoundingClientRect();
-      canvas.width = Math.max(1, Math.round(cr.width * dpr));
-      canvas.height = Math.max(1, Math.round(cr.height * dpr));
-      kScale = Math.max(0.1, (fr.height * dpr) / 166);
-      halfVec = [(fr.width * dpr) / 2 / kScale, 83];
-      gl!.viewport(0, 0, canvas.width, canvas.height);
-      draw();
-    };
-
-    const tick = (now: number) => {
-      state.raf = 0;
-      const dt = state.last ? Math.min(0.05, (now - state.last) / 1000) : 0.016;
-      state.last = now;
-      state.t += dt;
-      state.eased += 0.14 * (state.hover - state.eased);
-      draw();
-      if (state.seen) state.raf = requestAnimationFrame(tick);
-    };
-
-    const ro = new ResizeObserver(resize);
-    ro.observe(face);
-    const io = new IntersectionObserver(([entry]) => {
-      state.seen = entry.isIntersecting;
-      if (state.seen && !state.raf) state.raf = requestAnimationFrame(tick);
-      if (!state.seen && state.raf) {
-        cancelAnimationFrame(state.raf);
-        state.raf = 0;
-      }
-    });
-    io.observe(btn);
-
-    resize();
-    state.raf = requestAnimationFrame(tick);
-
-    return () => {
-      if (state.raf) cancelAnimationFrame(state.raf);
-      ro.disconnect();
-      io.disconnect();
-      gl?.deleteBuffer(buf);
-      gl?.deleteProgram(prog);
-      gl?.deleteShader(vs);
-      gl?.deleteShader(fs);
-    };
-  }, []);
-
   // Lens Graph ResizeObserver
   useEffect(() => {
     const el = lensStageRef.current;
@@ -573,8 +422,12 @@ void main(){
 
   const activeNode = SCORING_LENS_NODES[activeNodeIdx] || SCORING_LENS_NODES[1];
   const activePlan = COMMERCIAL_PLANS.find((p) => p.id === activePlanId) || COMMERCIAL_PLANS[0];
-  const activeScenario = MARKET_SCENARIOS.find((s) => s.id === activeScenarioId) || MARKET_SCENARIOS[1];
-  const needleDeg = -130 + (activeScenario.gaugePercent / 100) * 260;
+  const activeScenario = MARKET_SCENARIOS.find((s) => s.id === activeScenarioId) || MARKET_SCENARIOS[3];
+  const tamScenario = MARKET_SCENARIOS.find((s) => s.id === 'tam') || MARKET_SCENARIOS[0];
+  const samScenario = MARKET_SCENARIOS.find((s) => s.id === 'sam') || MARKET_SCENARIOS[1];
+  const somScenarios = MARKET_SCENARIOS.filter((s) => s.id.startsWith('som'));
+  const isSomActive = activeScenarioId.startsWith('som');
+  const currentSomScenario = MARKET_SCENARIOS.find((s) => s.id === (isSomActive ? activeScenarioId : 'som10')) || somScenarios[1];
 
   const renderGraphInner = (isZoomClone: boolean) => {
     const hub = SCORING_LENS_NODES[0];
@@ -661,7 +514,23 @@ void main(){
               ))}
             </nav>
 
-            <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
+              {onOpenTechnicalBanca && (
+                <button
+                  type="button"
+                  onClick={onOpenTechnicalBanca}
+                  className="qi-btn"
+                  style={{
+                    border: '1px solid var(--amber-hi)',
+                    color: 'var(--amber-hi)',
+                    background: 'rgba(201, 162, 39, 0.1)',
+                    fontWeight: 600,
+                  }}
+                  title="Abrir tela exclusiva de Arquitetura e Defesa Técnica"
+                >
+                  ⚡ Banca Técnica
+                </button>
+              )}
               <button type="button" className="qi-btn qi-btn--brass" onClick={onOpenPrototype}>
                 <span className="qi-roll">
                   <span>Testar Protótipo</span>
@@ -726,34 +595,7 @@ void main(){
               Mais do que analisar currículos, buscamos aproximar empresas e profissionais com maior compatibilidade.
             </div>
 
-            <div className="qi-hero-actions">
-              <button
-                ref={chromeBtnRef}
-                type="button"
-                className="qi-chrome-cta"
-                onClick={() => onScrollToSection('sec-demonstracao')}
-                onPointerMove={(e) => {
-                  if (!chromeFaceRef.current) return;
-                  const r = chromeFaceRef.current.getBoundingClientRect();
-                  chromeFaceRef.current.style.setProperty('--px', `${(((e.clientX - r.left) / r.width) * 100).toFixed(1)}%`);
-                }}
-              >
-                <canvas ref={chromeCanvasRef} className="qi-chrome-cta__metal" aria-hidden="true" />
-                <span ref={chromeFaceRef} className="qi-chrome-cta__face">
-                  <span style={{ color: 'var(--amber-hi)' }}>✦</span>
-                  <span>Explorar a plataforma</span>
-                </span>
-              </button>
-
-              <button type="button" className="qi-btn" onClick={onOpenPrototype}>
-                <span className="qi-roll">
-                  <span>Navegar no protótipo interativo →</span>
-                  <span aria-hidden="true">Testar perfis em demonstração →</span>
-                </span>
-              </button>
-            </div>
-
-            <p style={{ fontSize: 12.5, color: 'var(--slate)', margin: 0 }}>
+            <p style={{ fontSize: 12.5, color: 'var(--slate)', margin: '14px 0 0' }}>
               Use as setas{' '}
               <kbd style={{ padding: '2px 6px', border: '1px solid var(--hair-strong)', borderRadius: 4, color: 'var(--bone)' }}>←</kbd>{' '}
               <kbd style={{ padding: '2px 6px', border: '1px solid var(--hair-strong)', borderRadius: 4, color: 'var(--bone)' }}>→</kbd>{' '}
@@ -1117,16 +959,15 @@ void main(){
         <div className="qi-shell">
           <div className="qi-sect-head">
             <div className="qi-mark">
-              <span>Mercado e Modelo de Negócio</span>
+              <span>MODELO ANTECIPADO TRANSPARENTE • ZERO TAXA OCULTA</span>
             </div>
             <h2 className="qi-d2">
-              Existe um mercado para conectar melhor{' '}
-              <span style={{ color: 'var(--slate)' }}>empresas e profissionais.</span>
+              Planos Transparentes e Pré-pagos{' '}
+              <span style={{ color: 'var(--slate)' }}>para Empresas</span>
             </h2>
             <p className="qi-lede">
-              A Q.I. Match tem como público pagante empresas que contratam profissionais de tecnologia. A proposta
-              comercial prevê planos de assinatura e contratação avulsa, enquanto os profissionais poderão utilizar a
-              plataforma gratuitamente.
+              Contrate slots de vagas ativas com suporte a múltiplos perfis técnicos sem mensalidade abusiva.
+              Pague pelo slot em aberto, substitua ou pause conforme sua demanda de engenharia.
             </p>
           </div>
 
@@ -1136,7 +977,7 @@ void main(){
               <div>
                 <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 8, marginBottom: 14, flexWrap: 'wrap' }}>
                   <span style={{ fontSize: 12, textTransform: 'uppercase', letterSpacing: '0.08em', color: 'var(--amber-hi)', fontWeight: 600 }}>
-                    Planos Comerciais
+                    Planos Comerciais por Slots
                   </span>
                   <span style={{ fontSize: 12, color: 'var(--slate)' }}>
                     Clique nas abas para comparar modalidades
@@ -1158,7 +999,47 @@ void main(){
                   ))}
                 </div>
 
-                <div style={{ padding: '20px 22px', borderRadius: 14, background: 'rgba(0,0,0,0.42)', border: '1px solid var(--hair)' }}>
+                <div style={{
+                  padding: '22px 24px',
+                  borderRadius: 14,
+                  background: activePlan.isFeatured ? 'rgba(201, 162, 39, 0.08)' : 'rgba(0,0,0,0.42)',
+                  border: activePlan.isFeatured ? '1.5px solid var(--amber-hi)' : '1px solid var(--hair)',
+                  boxShadow: activePlan.isFeatured ? '0 0 24px rgba(226, 185, 59, 0.16)' : 'none',
+                }}>
+                  {/* Badges superiores do card */}
+                  {(activePlan.badge || activePlan.highlightTag) && (
+                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 12, flexWrap: 'wrap', gap: 6 }}>
+                      {activePlan.badge && (
+                        <span style={{
+                          fontSize: 10.5,
+                          fontWeight: 700,
+                          letterSpacing: '0.06em',
+                          textTransform: 'uppercase',
+                          padding: '4px 10px',
+                          borderRadius: 6,
+                          background: activePlan.isFeatured ? 'var(--amber-hi)' : 'rgba(255,255,255,0.1)',
+                          color: activePlan.isFeatured ? '#000' : 'var(--amber-hi)',
+                          border: activePlan.isFeatured ? 'none' : '1px solid rgba(226,185,59,0.3)',
+                        }}>
+                          {activePlan.badge}
+                        </span>
+                      )}
+                      {activePlan.highlightTag && (
+                        <span style={{
+                          fontSize: 11,
+                          fontWeight: 700,
+                          padding: '3px 8px',
+                          borderRadius: 4,
+                          background: 'rgba(226, 185, 59, 0.18)',
+                          color: 'var(--amber-hi)',
+                          border: '1px solid rgba(226, 185, 59, 0.4)',
+                        }}>
+                          {activePlan.highlightTag}
+                        </span>
+                      )}
+                    </div>
+                  )}
+
                   <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', flexWrap: 'wrap', gap: 10 }}>
                     <h3 className="qi-d3">{activePlan.title}</h3>
                     <div>
@@ -1169,6 +1050,12 @@ void main(){
                     </div>
                   </div>
 
+                  {activePlan.subPrice && (
+                    <p style={{ margin: '4px 0 10px', fontSize: 12, color: 'var(--amber-hi)', fontWeight: 600 }}>
+                      {activePlan.subPrice}
+                    </p>
+                  )}
+
                   <p style={{ margin: '10px 0 8px', fontSize: 13.5, color: 'var(--bone)' }}>
                     <strong>Público indicado:</strong> {activePlan.targetAudience}
                   </p>
@@ -1176,7 +1063,7 @@ void main(){
                     {activePlan.summary}
                   </p>
 
-                  <ul style={{ listStyle: 'none', padding: 0, margin: 0, display: 'flex', flexDirection: 'column', gap: 8 }}>
+                  <ul style={{ listStyle: 'none', padding: 0, margin: '0 0 16px', display: 'flex', flexDirection: 'column', gap: 8 }}>
                     {activePlan.features.map((feat, i) => (
                       <li key={i} style={{ display: 'flex', alignItems: 'flex-start', gap: 8, fontSize: 13.5, color: '#e4e4e9' }}>
                         <span style={{ color: 'var(--amber-hi)', fontWeight: 700 }}>✓</span>
@@ -1184,102 +1071,237 @@ void main(){
                       </li>
                     ))}
                   </ul>
+
+                  {/* Botão de Ação alinhado ao vídeo */}
+                  <button
+                    type="button"
+                    onClick={onOpenPrototype}
+                    className="qi-btn qi-btn--brass"
+                    style={{
+                      width: '100%',
+                      justifyContent: 'center',
+                      background: activePlan.isFeatured ? 'var(--amber-hi)' : undefined,
+                      color: activePlan.isFeatured ? '#000' : undefined,
+                      fontWeight: 700,
+                    }}
+                  >
+                    <span className="qi-roll">{activePlan.ctaText || 'Ativar Plano'}</span>
+                  </button>
                 </div>
               </div>
 
               <p style={{ margin: 0, fontSize: 12.5, color: 'var(--slate)' }}>{activePlan.note}</p>
             </div>
 
-            {/* Indicador Interativo de Cenários de Mercado */}
-            <div className="qi-surface qi-gauge-box">
+            {/* Funil Executivo de Mercado TAM / SAM / SOM */}
+            <div className="qi-surface qi-market-funnel-card">
               <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 8, flexWrap: 'wrap' }}>
-                <span className="qi-status-pill qi-status-pill--mvp-demo">
-                  Dimensionamento e Potencial de Mercado
-                </span>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                  <span className="qi-status-pill qi-status-pill--mvp-demo">
+                    Dimensionamento de Mercado
+                  </span>
+                  <span style={{ fontSize: 11.5, color: 'var(--slate)' }}>
+                    Funil TAM · SAM · SOM
+                  </span>
+                </div>
                 <button
                   type="button"
                   onClick={() => onOpenDrawer('drawer-mercado-metodologia')}
-                  style={{ background: 'none', border: 0, color: 'var(--amber-hi)', fontSize: 12.5, fontWeight: 600, cursor: 'pointer' }}
+                  style={{ background: 'none', border: 0, color: 'var(--amber-hi)', fontSize: 12.5, fontWeight: 600, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 4 }}
                 >
-                  Ver memória de cálculo →
+                  <span>Ver memória de cálculo</span>
+                  <span>→</span>
                 </button>
               </div>
 
-              <div className="qi-gauge-dial" aria-hidden="true">
-                <span className="qi-gauge-screw" style={{ top: 16, left: 16 }} />
-                <span className="qi-gauge-screw" style={{ top: 16, right: 16 }} />
-                <span className="qi-gauge-screw" style={{ bottom: 16, left: 16 }} />
-                <span className="qi-gauge-screw" style={{ bottom: 16, right: 16 }} />
+              {/* Camadas do Funil */}
+              <div className="qi-funnel-layers" role="region" aria-label="Funil de Mercado">
+                {/* Camada 1: TAM */}
+                <div
+                  role="button"
+                  tabIndex={0}
+                  onClick={() => {
+                    if (activeScenarioId === 'tam') {
+                      setShowScenarioDetails((prev) => !prev);
+                    } else {
+                      setActiveScenarioId('tam');
+                      setShowScenarioDetails(true);
+                    }
+                  }}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter' || e.key === ' ') {
+                      e.preventDefault();
+                      setActiveScenarioId('tam');
+                      setShowScenarioDetails(true);
+                    }
+                  }}
+                  className={`qi-funnel-tier ${activeScenarioId === 'tam' ? 'is-active' : ''}`}
+                >
+                  <div className="qi-funnel-tier-head">
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                      <span className="qi-funnel-tag qi-funnel-tag--tam">TAM</span>
+                      <div>
+                        <strong className="qi-funnel-title">Mercado Total Nacional</strong>
+                        <span className="qi-funnel-sub">Brasil · CNAE 6203-1/00 (Sebrae / Receita)</span>
+                      </div>
+                    </div>
+                    <div style={{ textAlign: 'right' }}>
+                      <strong className="qi-funnel-val">{tamScenario.annualValue}</strong>
+                      <span className="qi-funnel-sub">{tamScenario.companiesCount}</span>
+                    </div>
+                  </div>
+                  <div className="qi-funnel-bar-track">
+                    <div className="qi-funnel-bar-fill" style={{ width: '100%', background: 'linear-gradient(90deg, #8E6D16, #C9A227)' }} />
+                  </div>
+                </div>
 
-                <svg viewBox="0 0 200 200" style={{ position: 'absolute', inset: 8, width: 'calc(100% - 16px)', height: 'calc(100% - 16px)' }}>
-                  <circle
-                    cx="100"
-                    cy="100"
-                    r="78"
-                    fill="none"
-                    stroke="rgba(255,255,255,0.1)"
-                    strokeWidth="8"
-                    strokeDasharray="355 500"
-                    transform="rotate(140 100 100)"
-                    strokeLinecap="round"
-                  />
-                  <circle
-                    cx="100"
-                    cy="100"
-                    r="78"
-                    fill="none"
-                    stroke="#C9A227"
-                    strokeWidth="8"
-                    strokeDasharray={`${(3.55 * activeScenario.gaugePercent).toFixed(1)} 500`}
-                    transform="rotate(140 100 100)"
-                    strokeLinecap="round"
-                    style={{ transition: 'stroke-dasharray 0.7s cubic-bezier(0.22,1,0.36,1)' }}
-                  />
-                </svg>
+                {/* Camada 2: SAM */}
+                <div
+                  role="button"
+                  tabIndex={0}
+                  onClick={() => {
+                    if (activeScenarioId === 'sam') {
+                      setShowScenarioDetails((prev) => !prev);
+                    } else {
+                      setActiveScenarioId('sam');
+                      setShowScenarioDetails(true);
+                    }
+                  }}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter' || e.key === ' ') {
+                      e.preventDefault();
+                      setActiveScenarioId('sam');
+                      setShowScenarioDetails(true);
+                    }
+                  }}
+                  className={`qi-funnel-tier ${activeScenarioId === 'sam' ? 'is-active' : ''}`}
+                >
+                  <div className="qi-funnel-tier-head">
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                      <span className="qi-funnel-tag qi-funnel-tag--sam">SAM</span>
+                      <div>
+                        <strong className="qi-funnel-title">Mercado Regional Endereçável</strong>
+                        <span className="qi-funnel-sub">São Paulo Capital · Polo de Tecnologia</span>
+                      </div>
+                    </div>
+                    <div style={{ textAlign: 'right' }}>
+                      <strong className="qi-funnel-val">{samScenario.annualValue}</strong>
+                      <span className="qi-funnel-sub">{samScenario.companiesCount}</span>
+                    </div>
+                  </div>
+                  <div className="qi-funnel-bar-track">
+                    <div className="qi-funnel-bar-fill" style={{ width: '52%', background: 'linear-gradient(90deg, #A88620, #DCB434)' }} />
+                  </div>
+                </div>
 
-                <div className="qi-gauge-needle" style={{ '--needle-deg': `${needleDeg.toFixed(1)}deg` } as React.CSSProperties} />
-                <div className="qi-gauge-cap" />
+                {/* Camada 3: SOM com Seletor de Cenários */}
+                <div
+                  role="button"
+                  tabIndex={0}
+                  onClick={() => {
+                    if (isSomActive) {
+                      setShowScenarioDetails((prev) => !prev);
+                    } else {
+                      setActiveScenarioId('som10');
+                      setShowScenarioDetails(true);
+                    }
+                  }}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter' || e.key === ' ') {
+                      e.preventDefault();
+                      setActiveScenarioId('som10');
+                      setShowScenarioDetails(true);
+                    }
+                  }}
+                  className={`qi-funnel-tier ${isSomActive ? 'is-active' : ''}`}
+                >
+                  <div className="qi-funnel-tier-head">
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                      <span className="qi-funnel-tag qi-funnel-tag--som">SOM</span>
+                      <div>
+                        <strong className="qi-funnel-title">Metas de Validação Comercial</strong>
+                        <span className="qi-funnel-sub">Projeção no 1º ciclo anual (SP)</span>
+                      </div>
+                    </div>
+                    <div style={{ textAlign: 'right' }}>
+                      <strong className="qi-funnel-val" style={{ color: 'var(--amber-hi)' }}>
+                        {currentSomScenario.annualValue}
+                      </strong>
+                      <span className="qi-funnel-sub" style={{ color: 'var(--bone)', fontWeight: 500 }}>
+                        {currentSomScenario.companiesCount}
+                      </span>
+                    </div>
+                  </div>
 
-                <div style={{ position: 'absolute', bottom: 26, textAlign: 'center', zIndex: 5 }}>
-                  <strong style={{ display: 'block', fontSize: 17, color: 'var(--bone)', fontWeight: 700 }}>
-                    {activeScenario.annualValue}
-                  </strong>
-                  <span style={{ fontSize: 11, color: 'var(--amber-hi)' }}>{activeScenario.companiesCount}</span>
+                  {/* Seletor rápido de cenários SOM */}
+                  <div className="qi-som-pills" onClick={(e) => e.stopPropagation()}>
+                    {somScenarios.map((sc) => {
+                      const isSelected = activeScenarioId === sc.id;
+                      return (
+                        <button
+                          key={sc.id}
+                          type="button"
+                          onClick={() => {
+                            setActiveScenarioId(sc.id);
+                            setShowScenarioDetails(true);
+                          }}
+                          className={`qi-som-pill ${isSelected ? 'is-selected' : ''}`}
+                        >
+                          {sc.shortLabel.replace('Cenário ', '')}
+                        </button>
+                      );
+                    })}
+                  </div>
+
+                  <div className="qi-funnel-bar-track">
+                    <div
+                      className="qi-funnel-bar-fill"
+                      style={{
+                        width: activeScenarioId === 'som05' ? '18%' : activeScenarioId === 'som20' ? '46%' : '30%',
+                        background: 'linear-gradient(90deg, #DCB434, #FFE599)',
+                        boxShadow: '0 0 10px rgba(220,180,52,0.5)',
+                      }}
+                    />
+                  </div>
                 </div>
               </div>
 
-              <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6, justifyContent: 'center' }}>
-                {MARKET_SCENARIOS.map((sc) => (
+              {/* Rodapé: visualização simples e limpa, detalhes sob demanda */}
+              <div style={{ borderTop: '1px solid var(--hair)', paddingTop: 12 }}>
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 8 }}>
                   <button
-                    key={sc.id}
                     type="button"
-                    onClick={() => setActiveScenarioId(sc.id)}
-                    style={{
-                      padding: '6px 10px',
-                      borderRadius: 999,
-                      fontSize: 11.5,
-                      fontWeight: 600,
-                      cursor: 'pointer',
-                      border: activeScenario.id === sc.id ? '1px solid var(--amber-hi)' : '1px solid var(--hair)',
-                      background: activeScenario.id === sc.id ? 'rgba(201,162,39,0.16)' : 'rgba(255,255,255,0.03)',
-                      color: activeScenario.id === sc.id ? 'var(--bone)' : 'var(--slate)',
-                    }}
+                    onClick={() => setShowScenarioDetails((prev) => !prev)}
+                    className="qi-funnel-detail-btn"
                   >
-                    {sc.shortLabel}
+                    <span style={{ fontSize: 13, color: 'var(--amber-hi)' }}>
+                      {showScenarioDetails ? '▾' : '▸'}
+                    </span>
+                    <span style={{ fontSize: 12, color: showScenarioDetails ? 'var(--bone)' : 'var(--slate)', fontWeight: 500 }}>
+                      {showScenarioDetails ? 'Ocultar premissas e justificativa' : `Ver detalhes: ${activeScenario.shortLabel}`}
+                    </span>
                   </button>
-                ))}
-              </div>
 
-              <div style={{ textAlign: 'center' }}>
-                <strong style={{ display: 'block', color: 'var(--bone)', fontSize: 14 }}>
-                  {activeScenario.title}
-                </strong>
-                <p style={{ margin: '6px 0 0', fontSize: 13, color: 'var(--slate)', lineHeight: 1.5 }}>
-                  {activeScenario.description}
-                </p>
-                <p style={{ margin: '8px 0 0', fontSize: 11.5, color: 'var(--slate)', opacity: 0.85 }}>
-                  Cenários calculados sobre a base oficial da Receita Federal (CNAE 6203-1/00).
-                </p>
+                  <span style={{ fontSize: 11, color: 'var(--slate)', opacity: 0.75 }}>
+                    {showScenarioDetails ? 'Base oficial Receita Federal' : 'Clique para expandir premissas'}
+                  </span>
+                </div>
+
+                {showScenarioDetails && (
+                  <div className="qi-funnel-detail-pane">
+                    <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', gap: 8, marginBottom: 4 }}>
+                      <strong style={{ fontSize: 13, color: 'var(--bone)' }}>{activeScenario.title}</strong>
+                      <span style={{ fontSize: 11.5, color: 'var(--amber-hi)', fontWeight: 600 }}>{activeScenario.annualValue}</span>
+                    </div>
+                    <p style={{ margin: '4px 0 0', fontSize: 12.5, color: 'var(--slate)', lineHeight: 1.5 }}>
+                      {activeScenario.description}
+                    </p>
+                    <div style={{ marginTop: 8, display: 'flex', alignItems: 'center', gap: 12, flexWrap: 'wrap', fontSize: 11, color: 'var(--slate)', opacity: 0.85 }}>
+                      <span>✓ Ref: R$ 5.400/ano por empresa (R$ 450/mês · 1 Slot)</span>
+                      <span>✓ CNAE 6203-1/00 oficial</span>
+                    </div>
+                  </div>
+                )}
               </div>
             </div>
           </div>

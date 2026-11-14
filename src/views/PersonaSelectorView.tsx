@@ -562,30 +562,174 @@ export const PersonaSelectorView: React.FC<{
       </section>
 
       {/* PLANOS COMERCIAIS PARA EMPRESAS */}
-      <section id="para-empresas" className="py-12 max-w-[1320px] mx-auto px-4 sm:px-8">
-        <div className="bg-brandNavy text-white rounded-base p-6 sm:p-10 flex flex-col lg:flex-row items-start lg:items-center justify-between gap-6">
-          <div className="space-y-2 max-w-xl">
-            <h2 className="text-xl sm:text-2xl font-heading font-bold">
-              Recrutamento B2B sem mensalidade fixa obrigatória
-            </h2>
-            <p className="text-xs sm:text-sm text-brandNavySub leading-relaxed">
-              Publique sua vaga com Match Express, receba o 1º candidato confirmado gratuitamente e desbloqueie novos perfis apenas quando quiser (R$ {commercialConfig.singleUnlockPriceBrl} avulso ou pacote de 5 créditos por R$ {commercialConfig.package5PriceBrl}).
-            </p>
-          </div>
-          <div className="flex flex-wrap items-center gap-3 shrink-0">
+      <section id="para-empresas" className="py-14 max-w-[1320px] mx-auto px-4 sm:px-8 space-y-10">
+        <div className="text-center max-w-3xl mx-auto space-y-2">
+          <span className="inline-block text-[11px] font-bold uppercase tracking-widest text-[#E2B93B]">
+            MODELO ANTECIPADO TRANSPARENTE • ZERO TAXA OCULTA
+          </span>
+          <h2 className="text-2xl sm:text-3xl font-heading font-bold text-foreground">
+            Planos Transparentes e Pré-pagos para Empresas
+          </h2>
+          <p className="text-xs sm:text-sm text-muted-foreground leading-relaxed">
+            Contrate slots de vagas ativas com suporte a múltiplos perfis técnicos sem mensalidade abusiva.
+            Pague pelo slot em aberto, substitua ou pause conforme sua demanda de engenharia.
+          </p>
+        </div>
+
+        {/* Grid dos 3 Cards de Slots idêntico ao vídeo */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 items-stretch">
+          {/* Card 1: 1 Slot */}
+          <div className="bg-[#0b0d13] text-white p-7 rounded-xl border border-white/10 flex flex-col justify-between shadow-lg relative">
+            <div className="space-y-4">
+              <div className="flex items-center justify-between">
+                <h3 className="font-heading font-bold text-lg text-white">Plano 1 Slot</h3>
+                <span className="text-[10px] font-bold uppercase tracking-wider px-2.5 py-1 rounded bg-white/10 text-white/80 border border-white/10">
+                  PILOTO
+                </span>
+              </div>
+
+              <div>
+                <div className="flex items-baseline gap-1">
+                  <span className="text-3xl font-heading font-bold text-white">R$ 450</span>
+                  <span className="text-xs text-white/60">/mês</span>
+                </div>
+                <span className="text-[11px] text-[#E2B93B] font-medium block mt-1">
+                  Consumo de R$ 450 por slot ativo
+                </span>
+              </div>
+
+              <ul className="space-y-2.5 pt-2 text-xs text-white/80">
+                <li className="flex items-start gap-2">
+                  <span className="text-emerald-400 font-bold">✓</span>
+                  <span>1 vaga simultânea aberta</span>
+                </li>
+                <li className="flex items-start gap-2">
+                  <span className="text-emerald-400 font-bold">✓</span>
+                  <span>Triagem autorizada via IA</span>
+                </li>
+                <li className="flex items-start gap-2">
+                  <span className="text-emerald-400 font-bold">✓</span>
+                  <span>Acesso a critérios de corte e código</span>
+                </li>
+                <li className="flex items-start gap-2">
+                  <span className="text-emerald-400 font-bold">✓</span>
+                  <span>Cancelamento configurável no SLA</span>
+                </li>
+              </ul>
+            </div>
+
             <button
               type="button"
               onClick={() => openSignupModal('empresa')}
-              className="px-5 py-3 rounded-base bg-brandOrange hover:opacity-95 text-white text-xs sm:text-sm font-bold flex items-center gap-2 shadow-md"
+              className="mt-6 w-full py-3 px-4 rounded-lg bg-white/10 hover:bg-white/15 border border-white/15 text-xs font-bold text-white transition-all text-center"
             >
-              <Building2 className="w-4 h-4" /> Criar Conta Empresa
+              Ativar 1 Slot
             </button>
+          </div>
+
+          {/* Card 2: 3 Slots (Destaque Dourado) */}
+          <div className="bg-[#0b0d13] text-white p-7 rounded-xl border-2 border-[#E2B93B] flex flex-col justify-between shadow-2xl relative">
+            <div className="absolute -top-3.5 left-1/2 -translate-x-1/2 bg-[#E2B93B] text-black text-[10px] font-bold uppercase tracking-wider px-3.5 py-1 rounded-full shadow-md whitespace-nowrap">
+              MAIS ESCOLHIDO • ECONOMIA DE R$ 150
+            </div>
+
+            <div className="space-y-4 pt-1">
+              <div className="flex items-center justify-between">
+                <h3 className="font-heading font-bold text-lg text-[#E2B93B]">Plano 3 Slots</h3>
+                <span className="text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded bg-[#E2B93B]/20 text-[#E2B93B] border border-[#E2B93B]/40">
+                  R$ 400 / SLOT
+                </span>
+              </div>
+
+              <div>
+                <div className="flex items-baseline gap-1">
+                  <span className="text-3xl font-heading font-bold text-[#E2B93B]">R$ 1.200</span>
+                  <span className="text-xs text-white/60">/mês</span>
+                </div>
+                <span className="text-[11px] text-white/70 font-medium block mt-1">
+                  Economia de R$ 150 comparado ao avulso
+                </span>
+              </div>
+
+              <ul className="space-y-2.5 pt-2 text-xs text-white/90">
+                <li className="flex items-start gap-2">
+                  <span className="text-[#E2B93B] font-bold">✓</span>
+                  <span>3 vagas simultâneas ativas</span>
+                </li>
+                <li className="flex items-start gap-2">
+                  <span className="text-[#E2B93B] font-bold">✓</span>
+                  <span>Reposições de cancelamento em até 48h</span>
+                </li>
+                <li className="flex items-start gap-2">
+                  <span className="text-[#E2B93B] font-bold">✓</span>
+                  <span>Exportação de relatórios e logs auditáveis</span>
+                </li>
+                <li className="flex items-start gap-2">
+                  <span className="text-[#E2B93B] font-bold">✓</span>
+                  <span>Disponibilidade imediata de candidatos verificados</span>
+                </li>
+                <li className="flex items-start gap-2">
+                  <span className="text-[#E2B93B] font-bold">✓</span>
+                  <span>Canal direto com suporte no SLA de 4 horas</span>
+                </li>
+              </ul>
+            </div>
+
             <button
               type="button"
-              onClick={() => openDemoModal('empresa-orion')}
-              className="px-4 py-3 rounded-base bg-white/10 hover:bg-white/15 border border-white/20 text-white text-xs font-bold flex items-center gap-1.5"
+              onClick={() => openSignupModal('empresa')}
+              className="mt-6 w-full py-3 px-4 rounded-lg bg-[#E2B93B] hover:bg-[#c9a227] text-black text-xs font-bold transition-all shadow-md text-center"
             >
-              <PlayCircle className="w-4 h-4 text-brandOrange" /> Ver Demo Empresa
+              Contratar 3 Slots
+            </button>
+          </div>
+
+          {/* Card 3: 5 Slots */}
+          <div className="bg-[#0b0d13] text-white p-7 rounded-xl border border-white/10 flex flex-col justify-between shadow-lg relative">
+            <div className="space-y-4">
+              <div className="flex items-center justify-between">
+                <h3 className="font-heading font-bold text-lg text-white">Plano 5 Slots</h3>
+                <span className="text-[10px] font-bold uppercase tracking-wider px-2.5 py-1 rounded bg-white/10 text-white/80 border border-white/10">
+                  ESCALA
+                </span>
+              </div>
+
+              <div>
+                <div className="flex items-baseline gap-1">
+                  <span className="text-3xl font-heading font-bold text-white">R$ 2.200</span>
+                  <span className="text-xs text-white/60">/mês</span>
+                </div>
+                <span className="text-[11px] text-white/70 font-medium block mt-1">
+                  Economia de R$ 250 comparado ao avulso
+                </span>
+              </div>
+
+              <ul className="space-y-2.5 pt-2 text-xs text-white/80">
+                <li className="flex items-start gap-2">
+                  <span className="text-emerald-400 font-bold">✓</span>
+                  <span>5 vagas simultâneas com rotação</span>
+                </li>
+                <li className="flex items-start gap-2">
+                  <span className="text-emerald-400 font-bold">✓</span>
+                  <span>Suporte prioritário VIP com Tech Lead dedicado</span>
+                </li>
+                <li className="flex items-start gap-2">
+                  <span className="text-emerald-400 font-bold">✓</span>
+                  <span>Validação de integração ATS (Greenhouse, Lever)</span>
+                </li>
+                <li className="flex items-start gap-2">
+                  <span className="text-emerald-400 font-bold">✓</span>
+                  <span>Passe multi-track de novos fechamentos e CTOs</span>
+                </li>
+              </ul>
+            </div>
+
+            <button
+              type="button"
+              onClick={() => openSignupModal('empresa')}
+              className="mt-6 w-full py-3 px-4 rounded-lg bg-white/10 hover:bg-white/15 border border-white/15 text-xs font-bold text-white transition-all text-center"
+            >
+              Ativar 5 Slots Scaled
             </button>
           </div>
         </div>

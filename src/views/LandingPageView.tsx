@@ -18,6 +18,7 @@ import { InteractiveHoneycomb } from '../components/landing/InteractiveHoneycomb
 
 interface LandingPageViewProps {
   onOpenPrototype: () => void;
+  onOpenTechnicalBanca?: () => void;
 }
 
 const SECTION_IDS = [
@@ -35,7 +36,10 @@ const formatCurrencyBrl = (val: number) =>
 
 const clamp = (v: number, min: number, max: number) => (v < min ? min : v > max ? max : v);
 
-export const LandingPageView: React.FC<LandingPageViewProps> = ({ onOpenPrototype }) => {
+export const LandingPageView: React.FC<LandingPageViewProps> = ({
+  onOpenPrototype,
+  onOpenTechnicalBanca,
+}) => {
   const [activeSection, setActiveSection] = useState<string>('sec-abertura');
   const [activeDrawerId, setActiveDrawerId] = useState<string | null>(null);
   const [zoomScreenIdx, setZoomScreenIdx] = useState<number | null>(null);
@@ -146,6 +150,7 @@ export const LandingPageView: React.FC<LandingPageViewProps> = ({ onOpenPrototyp
         onOpenDrawer={(id) => setActiveDrawerId(id)}
         onOpenPitchModal={() => setShowPitchModal(true)}
         onOpenPrototype={onOpenPrototype}
+        onOpenTechnicalBanca={onOpenTechnicalBanca}
       />
 
       {/* =================================================================== */}

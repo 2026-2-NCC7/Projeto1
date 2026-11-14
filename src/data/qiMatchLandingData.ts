@@ -31,8 +31,13 @@ export interface CommercialPlanTab {
   code: string;
   tabLabel: string;
   title: string;
+  badge?: string;
+  highlightTag?: string;
   price: string;
   period: string;
+  subPrice?: string;
+  ctaText?: string;
+  isFeatured?: boolean;
   targetAudience: string;
   summary: string;
   features: string[];
@@ -231,7 +236,7 @@ export const VALUE_PROPOSITIONS: AudienceValueProp[] = [
       },
       {
         title: 'Economia e previsibilidade',
-        desc: 'Planos a partir de R$ 499/mês ou R$ 150 avulso por conexão autorizada, sem fidelidade forçada.',
+        desc: 'Planos a partir de R$ 450/mês por slot de vaga ativa sem fidelidade forçada ou cobrança abusiva.',
       },
     ],
     analgesicos: [
@@ -434,63 +439,81 @@ export const SCORING_LENS_NODES = [
 
 export const COMMERCIAL_PLANS: CommercialPlanTab[] = [
   {
-    id: 'starter',
+    id: 'slot1',
     code: '01',
-    tabLabel: 'Starter',
-    title: 'Plano Starter',
-    price: 'R$ 499',
-    period: '/mês · cenário proposto (R$ 5.988/ano)',
-    targetAudience: 'Startups e pequenas empresas de tecnologia com contratações recorrentes pontuais.',
+    tabLabel: '1 Slot',
+    title: 'Plano 1 Slot',
+    badge: 'PILOTO',
+    price: 'R$ 450',
+    period: '/mês',
+    subPrice: 'Consumo de R$ 450 por slot ativo',
+    ctaText: 'Ativar 1 Slot',
+    targetAudience: 'Startups, projetos pilotos e equipes com demanda pontual de contratação.',
     summary:
-      'Permite publicar vagas com faixa salarial transparente, visualizar perfis compatíveis anonimizados e realizar até 3 conexões autorizadas por mês.',
+      'Contrate slots de vagas ativas com suporte a múltiplos perfis técnicos sem mensalidade abusiva. Pague pelo slot em aberto, substitua ou pause conforme sua demanda de engenharia.',
     features: [
-      'Até 3 desbloqueios mensais mediante interesse mútuo confirmado',
-      'Acesso à busca prioritária (Match Express) para vagas urgentes',
-      'Síntese explicável de critérios técnicos e comportamentais',
+      '1 vaga simultânea aberta',
+      'Triagem autorizada via IA',
+      'Acesso a critérios de corte e código',
+      'Cancelamento configurável no SLA',
     ],
-    note: 'Plano com melhor custo-benefício para contratações contínuas de tecnologia.',
+    note: 'Modelo antecipado transparente com zero taxa oculta.',
   },
   {
-    id: 'scale',
+    id: 'slot3',
     code: '02',
-    tabLabel: 'Scale',
-    title: 'Plano Scale',
-    price: 'R$ 1.499',
-    period: '/mês · para equipes em expansão',
-    targetAudience: 'Empresas de software e áreas digitais com múltiplas posições abertas ao longo do ano.',
+    tabLabel: '3 Slots',
+    title: 'Plano 3 Slots',
+    badge: 'MAIS ESCOLHIDO • ECONOMIA DE R$ 150',
+    highlightTag: 'R$ 400 / SLOT',
+    price: 'R$ 1.200',
+    period: '/mês',
+    subPrice: 'Economia de R$ 150 comparado ao avulso',
+    ctaText: 'Contratar 3 Slots',
+    isFeatured: true,
+    targetAudience: 'Empresas em expansão contínua com múltiplos times de tecnologia.',
     summary:
-      'Amplia a franquia mensal de conexões autorizadas e permite que recrutadores e gestores técnicos avaliem candidatos em conjunto.',
+      'Pacote preferido por times de software: 3 vagas simultâneas ativas com custo reduzido de R$ 400 por slot e reposição ágil em até 48h.',
     features: [
-      'Até 15 desbloqueios mensais após confirmação das duas partes',
-      'Múltiplos avaliadores por vaga com histórico organizado',
-      'Pesos de compatibilidade personalizáveis por oportunidade',
+      '3 vagas simultâneas ativas',
+      'Reposições de cancelamento em até 48h',
+      'Exportação de relatórios e logs auditáveis',
+      'Disponibilidade imediata de candidatos verificados',
+      'Canal direto com suporte no SLA de 4 horas',
     ],
-    note: 'Ideal para empresas em fase de expansão com múltiplos times de engenharia.',
+    note: 'Mais escolhido pelas empresas de engenharia de software.',
   },
   {
-    id: 'avulso',
+    id: 'slot5',
     code: '03',
-    tabLabel: 'Avulso',
-    title: 'Contratação Avulsa',
-    price: 'R$ 150',
-    period: '/perfil confirmado · sem assinatura mensal',
-    targetAudience: 'Consultorias, pequenas empresas ou demandas esporádicas sem necessidade de plano fixo.',
+    tabLabel: '5 Slots',
+    title: 'Plano 5 Slots',
+    badge: 'ESCALA',
+    price: 'R$ 2.200',
+    period: '/mês',
+    subPrice: 'Economia de R$ 250 comparado ao avulso',
+    ctaText: 'Ativar 5 Slots Scaled',
+    targetAudience: 'Corporações, scale-ups e operações de alta demanda técnica.',
     summary:
-      'Modelo sob demanda em que a empresa paga apenas quando decide avançar com um profissional que também aceitou conversar.',
+      'Capacidade contínua de atração com suporte executivo VIP, Tech Lead dedicado e integração técnica homologada com ATS.',
     features: [
-      'Sem mensalidade obrigatória para demandas eventuais',
-      'Cobrança vinculada à confirmação real de interesse mútuo',
-      'Mesma proteção de identidade antes da autorização',
+      '5 vagas simultâneas com rotação',
+      'Suporte prioritário VIP com Tech Lead dedicado',
+      'Validação de integração ATS (Greenhouse, Lever)',
+      'Passe multi-track de novos fechamentos e CTOs',
     ],
-    note: 'Flexibilidade total sob demanda sem nenhum compromisso mensal fixo.',
+    note: 'Escala corporativa com atendimento prioritário e validação de ecossistema ATS.',
   },
   {
     id: 'profissional',
     code: '04',
     tabLabel: 'Profissional',
     title: 'Acesso do Profissional',
+    badge: '100% GRATUITO',
     price: 'Gratuito',
-    period: '100% gratuito para quem busca oportunidades',
+    period: 'para quem busca oportunidades',
+    subPrice: 'Gratuidade permanente para candidatos',
+    ctaText: 'Criar Perfil de Candidato',
     targetAudience: 'Desenvolvedores, engenheiros de dados, especialistas em nuvem, produto, qualidade e segurança.',
     summary:
       'O candidato mantém controle sobre sua visibilidade, revisa sua síntese antes de participar de vagas e só compartilha contato quando aprova a proposta.',
@@ -508,51 +531,51 @@ export const MARKET_SCENARIOS: MarketScenario[] = [
     id: 'tam',
     shortLabel: 'Mercado Nacional (TAM)',
     title: 'Brasil · Empresas de software sob encomenda',
-    annualValue: 'R$ 124,28 mi/ano',
+    annualValue: 'R$ 112,08 mi/ano',
     companiesCount: '20.755 estabelecimentos',
     gaugePercent: 94,
     description:
-      'Estimativa de potencial anual considerando empresas ativas no CNAE 6203-1/00 no Brasil (Sebrae / Receita Federal, 2026) multiplicadas pela assinatura anual de referência (R$ 5.988).',
+      'Estimativa de potencial anual considerando empresas ativas no CNAE 6203-1/00 no Brasil (Sebrae / Receita Federal, 2026) multiplicadas pela assinatura anual do plano de 1 slot de referência (R$ 450/mês = R$ 5.400/ano).',
   },
   {
     id: 'sam',
     shortLabel: 'Recorte Regional (SAM)',
     title: 'Cidade de São Paulo · Foco inicial de operação',
-    annualValue: 'R$ 13,14 mi/ano',
+    annualValue: 'R$ 11,85 mi/ano',
     companiesCount: '2.194 estabelecimentos',
     gaugePercent: 68,
     description:
-      'Recorte geográfico inicial na capital paulista, polo com alta concentração de empresas contratantes de tecnologia.',
+      'Recorte geográfico inicial na capital paulista, polo com alta concentração de empresas contratantes de tecnologia multiplicadas pela referência anual de R$ 5.400.',
   },
   {
     id: 'som05',
     shortLabel: 'Cenário 0,5% (Conservador)',
     title: 'Meta inicial conservadora em São Paulo',
-    annualValue: 'R$ 65.868/ano',
+    annualValue: 'R$ 59.400/ano',
     companiesCount: '11 empresas assinantes',
     gaugePercent: 24,
     description:
-      'Simulação de captação de 0,5% do recorte paulistano no plano inicial de referência.',
+      'Simulação de captação de 0,5% do recorte paulistano no plano inicial de referência (11 empresas × R$ 5.400/ano).',
   },
   {
     id: 'som10',
     shortLabel: 'Cenário 1,0% (Base)',
     title: 'Cenário-base de validação comercial',
-    annualValue: 'R$ 131.736/ano',
+    annualValue: 'R$ 118.800/ano',
     companiesCount: '22 empresas assinantes',
     gaugePercent: 42,
     description:
-      'Projeção intermediária equivalente a 22 empresas ativas no plano de entrada ao longo do primeiro ciclo anual.',
+      'Projeção intermediária equivalente a 22 empresas ativas no plano de entrada ao longo do primeiro ciclo anual (22 × R$ 5.400/ano).',
   },
   {
     id: 'som20',
     shortLabel: 'Cenário 2,0% (Expansão)',
     title: 'Cenário de tração inicial em São Paulo',
-    annualValue: 'R$ 263.472/ano',
+    annualValue: 'R$ 237.600/ano',
     companiesCount: '44 empresas assinantes',
     gaugePercent: 56,
     description:
-      'Estimativa de expansão para 2,0% das empresas do recorte local, ainda sem contar créditos avulsos adicionais.',
+      'Estimativa de expansão para 2,0% das empresas do recorte local (44 empresas × R$ 5.400/ano), ainda sem contar adesões aos planos de 3 e 5 slots.',
   },
 ];
 
@@ -579,7 +602,7 @@ export const PERSONA_VOLUMES: PersonaVolume[] = [
     rightPagePoints: [
       'Match Express com 1º candidato compatível desbloqueado gratuitamente para experimentar o serviço.',
       'Double Opt-In garantido: a empresa só consome créditos quando o profissional aceita formalmente conversar sobre a oportunidade.',
-      'Planos flexíveis: Starter (R$ 499/mês), Scale (R$ 1.499/mês) ou contratação avulsa (R$ 150/perfil liberado).',
+      'Planos transparentes e pré-pagos: 1 Slot (R$ 450/mês), 3 Slots (R$ 1.200/mês) ou 5 Slots (R$ 2.200/mês).',
     ],
     channels: [
       {
@@ -594,7 +617,7 @@ export const PERSONA_VOLUMES: PersonaVolume[] = [
       },
       {
         phase: '3. Compra',
-        channel: 'Assinatura digital direta (Starter/Scale) ou contratação avulsa sob demanda por PIX/Cartão.',
+        channel: 'Assinatura digital direta por slots (1, 3 ou 5 slots) sob demanda com modelo antecipado e transparente.',
         goal: 'Permitir adesão ágil sem burocracia contratual ou exigência de fidelidade mínima.',
       },
       {
@@ -1392,16 +1415,16 @@ export const DEEP_DIVE_DRAWERS: Record<string, DeepDiveItem> = {
     subtitle: 'Base pública oficial e projeções de penetração de mercado.',
     paragraphs: [
       'Para dimensionar o mercado endereçável com dados verificáveis, a plataforma mapeou o painel de empresas ativas do Sebrae / Receita Federal (2026) no código CNAE 6203-1/00 (Desenvolvimento e licenciamento de programas de computador não-customizáveis).',
-      'Multiplicando o universo nacional de 20.755 estabelecimentos pelo valor anual do plano Starter de referência (R$ 499/mês = R$ 5.988/ano), obtém-se o potencial de mercado nacional (TAM) de R$ 124,28 milhões/ano. No polo metropolitano de São Paulo (2.194 empresas), o potencial regional (SAM) corresponde a R$ 13,14 milhões/ano.',
+      'Multiplicando o universo nacional de 20.755 estabelecimentos pelo valor anual do Plano 1 Slot de referência (R$ 450/mês = R$ 5.400/ano), obtém-se o potencial de mercado nacional (TAM) de R$ 112,08 milhões/ano. No polo metropolitano de São Paulo (2.194 empresas), o potencial regional (SAM) corresponde a R$ 11,85 milhões/ano.',
     ],
     bullets: [
       {
         label: 'Cenários graduais de penetração (SOM)',
-        text: '0,5% (11 empresas) = R$ 65.868/ano · 1,0% (22 empresas) = R$ 131.736/ano · 2,0% (44 empresas) = R$ 263.472/ano.',
+        text: '0,5% (11 empresas) = R$ 59.400/ano · 1,0% (22 empresas) = R$ 118.800/ano · 2,0% (44 empresas) = R$ 237.600/ano.',
       },
       {
         label: 'Alavancas de expansão comercial',
-        text: 'Planos Scale corporativos (R$ 1.499/mês) e contratações avulsas sob demanda aceleram a receita além da base fixa.',
+        text: 'Planos de 3 Slots (R$ 1.200/mês) e 5 Slots corporativos (R$ 2.200/mês) aceleram a receita além da base inicial.',
       },
     ],
     disclaimer: 'Base de dados cadastral: Receita Federal / Sebrae (CNAE 6203-1/00, 2026).',
